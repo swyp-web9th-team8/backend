@@ -135,7 +135,6 @@ fabric.properties
 hs_err_pid*
 replay_pid*
 
-application.yml
 # Project exclude paths
 /.gradle/
 /build/
