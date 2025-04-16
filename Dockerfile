@@ -1,3 +1,15 @@
+# 📦 gradle-wrapper.jar 생성 스테이지
+FROM gradle:7.6-jdk17 AS wrapper-generator
+
+WORKDIR /app
+
+# wrapper 설정 복사 (gradle-wrapper.properties만 있으면 충분)
+COPY gradlew .
+COPY gradle/wrapper/gradle-wrapper.properties gradle/wrapper/
+
+# wrapper 실행해서 gradle-wrapper.jar 생성
+RUN gradle wrapper
+
 # 첫 번째 스테이지: 빌드 스테이지
 FROM eclipse-temurin:17 as builder
 
@@ -5,6 +17,8 @@ FROM eclipse-temurin:17 as builder
 WORKDIR /app
 
 # 소스 코드와 Gradle 래퍼 복사
+# gradle-wrapper.jar를 먼저 복사
+COPY --from=wrapper-generator /app/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar
 COPY gradlew .
 COPY gradle gradle
 COPY build.gradle .
