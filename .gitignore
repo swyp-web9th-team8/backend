@@ -139,3 +139,9 @@ application.yml
 # Project exclude paths
 /.gradle/
 /build/
+
+## 초기 클론된 파일 외 제외
+.idea
+.gradle
+gradlew
+gradlew.bat
