@@ -8,11 +8,14 @@ on:
       - 'Dockerfile'
     branches:
       - master
+<<<<<<< HEAD
 
 # 권한 추가
 permissions:
   contents: write
 
+=======
+>>>>>>> d754bda (init CI/CD)
 jobs:
   makeTagAndRelease:
     runs-on: ubuntu-latest
