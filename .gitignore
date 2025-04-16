@@ -138,3 +138,11 @@ replay_pid*
 # Project exclude paths
 /.gradle/
 /build/
+
+# IDE
+.idea
+# 그래들 캐시파일 불필요
+.gradle
+
+# 도커를 사용하므로 윈도우 빌드는 불필요
+gradlew.bat
