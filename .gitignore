@@ -140,9 +140,10 @@ application.yml
 /.gradle/
 /build/
 
-## 초기 클론된 파일 외 제외
+# IDE
 .idea
+# 그래들 캐시파일 불필요
 .gradle
-gradlew
+
+# 도커를 사용하므로 윈도우 빌드는 불필요
 gradlew.bat
-gradle
