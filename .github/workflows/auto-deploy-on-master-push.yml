@@ -8,6 +8,11 @@ on:
       - 'Dockerfile'
     branches:
       - master
+
+# 권한 추가
+permissions:
+  contents: write
+
 jobs:
   makeTagAndRelease:
     runs-on: ubuntu-latest
