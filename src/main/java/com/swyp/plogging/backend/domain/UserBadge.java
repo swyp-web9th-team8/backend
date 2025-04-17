@@ -1,14 +1,13 @@
 package com.swyp.plogging.backend.domain;
 
+import com.swyp.plogging.backend.domain.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserBadge {
+public class UserBadge extends BaseTimeEntity {
 
     @Id
     @GeneratedValue
@@ -22,6 +21,5 @@ public class UserBadge {
     @JoinColumn(name = "badge_id")
     private Badge badge;
 
-    private LocalDateTime acquiredAt;
     private String grantedReason;
 }

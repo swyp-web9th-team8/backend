@@ -1,14 +1,13 @@
 package com.swyp.plogging.backend.domain;
 
+import com.swyp.plogging.backend.domain.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Participation {
+public class Participation extends BaseTimeEntity {
 
     @Id
     @GeneratedValue
@@ -23,5 +22,4 @@ public class Participation {
     private Post post;
 
     private boolean joined;
-    private LocalDateTime joinedAt;
 }

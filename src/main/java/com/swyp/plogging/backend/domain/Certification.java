@@ -1,14 +1,13 @@
 package com.swyp.plogging.backend.domain;
 
+import com.swyp.plogging.backend.domain.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Certification {
+public class Certification extends BaseTimeEntity {
 
     @Id
     @GeneratedValue
@@ -16,8 +15,6 @@ public class Certification {
 
     @Column(nullable = false)
     private String imageUrl;
-
-    private LocalDateTime certifiedAt;
 
     @OneToOne
     @JoinColumn(name = "post_id")
