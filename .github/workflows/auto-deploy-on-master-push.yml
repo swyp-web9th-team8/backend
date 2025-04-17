@@ -84,9 +84,10 @@ jobs:
             docker stop swyp_web9th_team8_backend
             docker rm -f swyp_web9th_team8_backend
             docker pull ghcr.io/${{ env.OWNER_LC }}/backend:latest
-            docker run \
-            -d \
+            docker run --name swyp_web9th_team8_backend \
+            -e DB_URL=$DB_URL \
+            -e DB_USERNAME=$DB_USERNAME \
+            -e DB_PASSWORD=$DB_PASSWORD \
             -p 8080:8080 \
-            --name swyp_web9th_team8_backend \
-            ghcr.io/${{ env.OWNER_LC }}/backend:latest
+            -d ghcr.io/${{ env.OWNER_LC }}/backend:latest
             docker image prune -f
