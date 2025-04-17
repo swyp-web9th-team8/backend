@@ -86,6 +86,7 @@ jobs:
             docker rm -f swyp_web9th_team8_backend
             docker pull ghcr.io/${{ env.OWNER_LC }}/backend:latest
             docker run --name swyp_web9th_team8_backend \
+            --network app-network \
             -e DB_URL=$DB_URL \
             -e DB_USERNAME=$DB_USERNAME \
             -e DB_PASSWORD=$DB_PASSWORD \
