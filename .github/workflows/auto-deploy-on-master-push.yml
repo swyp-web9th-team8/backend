@@ -81,6 +81,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
+          key: ${{ secrets.PRIVATE_KEY }}
           script: |
             docker stop swyp_web9th_team8_backend
             docker rm -f swyp_web9th_team8_backend
