@@ -4,8 +4,11 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 import javax.sql.DataSource;
+import java.util.Properties;
 
 @Profile("test")
 @Configuration
@@ -24,5 +27,19 @@ public class TestConfiguration {
                 .username("sa")
                 .password("")
                 .build();
+    }
+
+    @Bean
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource){
+        LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
+        emf.setDataSource(dataSource);
+        emf.setPackagesToScan("com.swyp.plogging.backend"); // 엔티티 패키지 경로로 수정
+        emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+
+        Properties props = new Properties();
+        props.setProperty("hibernate.hbm2ddl.auto", "create");
+        props.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+        emf.setJpaProperties(props);
+        return emf;
     }
 }

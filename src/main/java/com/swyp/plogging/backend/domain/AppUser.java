@@ -10,7 +10,7 @@ import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends BaseEntity {
+public class AppUser extends BaseEntity {
 
     @Id
     @GeneratedValue

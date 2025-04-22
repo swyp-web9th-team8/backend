@@ -32,7 +32,7 @@ public class Post extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id")
-    private User writer;
+    private AppUser writer;
 
     @OneToMany(mappedBy = "post")
     private List<Participation> participations = new ArrayList<>();
