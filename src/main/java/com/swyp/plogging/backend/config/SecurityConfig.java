@@ -2,6 +2,7 @@ package com.swyp.plogging.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,5 +23,10 @@ public class SecurityConfig {
                     .defaultSuccessUrl("/home", true));
 
         return http.build();
+    }
+
+    @Bean
+    public AuditorAware<String> auditorAware() {
+        return new AuditorAwareImpl();
     }
 }
