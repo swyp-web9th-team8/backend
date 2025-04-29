@@ -40,7 +40,7 @@ COPY src src
 RUN ./gradlew build --no-daemon
 
 # 두 번째 스테이지: 실행 스테이지
-FROM eclipse-temurin:17
+FROM eclipse-temurin:17-jdk
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -49,4 +49,4 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # 실행할 JAR 파일 지정
-ENTRYPOINT ["sh", "-c", "java -Dspring.datasource.url=$DB_URL -Dspring.datasource.username=$DB_USERNAME -Dspring.datasource.password=$DB_PASSWORD -Dspring.security.oauth2.client.registration.google.client-id=$GOOGLE_CLIENT_ID -Dspring.security.oauth2.client.registration.google.client-secret=$GOOGLE_CLIENT_SECRET -jar app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
