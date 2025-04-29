@@ -1,6 +1,8 @@
 package com.swyp.plogging.backend.controller;
 
+import com.swyp.plogging.backend.controller.DTO.APIResponse;
 import com.swyp.plogging.backend.controller.DTO.CreatePostRequest;
+import com.swyp.plogging.backend.controller.DTO.PostDetailResponse;
 import com.swyp.plogging.backend.sevice.PostService;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -19,8 +21,18 @@ public class PostController {
     }
 
     @PostMapping("create")
-    public String createPost(@RequestBody CreatePostRequest request){
-        return "Successfully fetched the post details.";
+    public APIResponse<PostDetailResponse> createPost(@RequestBody CreatePostRequest request){
+        APIResponse<PostDetailResponse> APIResponse = new APIResponse<>();
+        try {
+            PostDetailResponse response = postService.createPost(request.getTitle(), request.getContent(),
+                    request.getMeetingTime(), request.getPlaceId(),
+                    request.getPlaceName(), request.getAddress(),
+                    request.getMaxParticipants(), request.getOpenChatUrl(), null);
+
+            return APIResponse.ok(response, "Successfully fetched the post details.");
+        }catch(Exception e){
+            return APIResponse.error(e.getMessage());
+        }
     }
 
     @PatchMapping("/{postId}/modify")

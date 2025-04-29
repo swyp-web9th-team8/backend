@@ -3,9 +3,11 @@ package com.swyp.plogging.backend.domain;
 import com.swyp.plogging.backend.domain.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Participation extends BaseTimeEntity {
 
