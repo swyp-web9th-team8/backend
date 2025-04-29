@@ -12,7 +12,7 @@ COPY gradle/wrapper/gradle-wrapper.properties gradle/wrapper/
 RUN gradle wrapper
 
 # 첫 번째 스테이지: 빌드 스테이지
-FROM eclipse-temurin:17 as builder
+FROM gradle:7.6-jdk17 AS builder
 
 # 작업 디렉토리 설정
 WORKDIR /app
