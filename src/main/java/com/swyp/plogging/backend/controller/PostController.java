@@ -1,6 +1,7 @@
 package com.swyp.plogging.backend.controller;
 
 import com.swyp.plogging.backend.controller.DTO.CreatePostRequest;
+import com.swyp.plogging.backend.sevice.PostService;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,12 @@ import java.awt.print.Pageable;
 @RestController
 @RequestMapping("/api/post")
 public class PostController {
+
+    private final PostService postService;
+
+    public PostController(PostService postService){
+        this.postService = postService;
+    }
 
     @PostMapping("create")
     public String createPost(@RequestBody CreatePostRequest request){
@@ -28,7 +35,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public String postdetail(@PathVariable(name = "postId")Long postId){
+    public String postDetail(@PathVariable(name = "postId")Long postId){
         return "Successfully fetched the post details.";
     }
 
