@@ -27,5 +27,5 @@ spring:
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
             token-uri: https://oauth2.googleapis.com/token
             user-info-uri: https://openidconnect.googleapis.com/v1/userinfo
-  app:
-    baseUrl: https://ploggo.co.kr
+app:
+  baseUrl: https://ploggo.co.kr
