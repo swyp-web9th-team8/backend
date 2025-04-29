@@ -40,13 +40,17 @@ COPY src src
 RUN ./gradlew build --no-daemon
 
 # 두 번째 스테이지: 실행 스테이지
-FROM eclipse-temurin:17-jdk
+#FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:17-jre-jammy
 
 # 작업 디렉토리 설정
 WORKDIR /app
 
 # 첫 번째 스테이지에서 빌드된 JAR 파일 복사
 COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Java 명령어 심볼릭 링크 추가
+RUN ln -sf "$JAVA_HOME/bin/java" /usr/bin/java
 
 # 실행할 JAR 파일 지정
 ENTRYPOINT ["java", "-jar", "app.jar"]
