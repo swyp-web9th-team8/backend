@@ -4,11 +4,14 @@ import com.swyp.plogging.backend.controller.DTO.PostDetailResponse;
 import com.swyp.plogging.backend.domain.Post;
 import com.swyp.plogging.backend.repository.PostRepository;
 import jakarta.annotation.Nullable;
+import lombok.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
 @Service
+@Transactional(readOnly = true)
 public class PostService {
     private final PostRepository postRepository;
 
@@ -17,11 +20,16 @@ public class PostService {
     }
 
 
+    @Transactional
     public PostDetailResponse createPost(String title, String content,
                                          LocalDateTime meetingTime, String placeId,
                                          String placeName, String address,
-                                         Integer maxParticipants, String openChatUrl,
+                                         @NonNull Integer maxParticipants, String openChatUrl,
                                          @Nullable Integer deadLine) {
+
+        if(maxParticipants <= 0){
+            throw new IllegalArgumentException("최대인원 설정이 잘못되었습니다.");
+        }
 
         Post post = Post.builder()
 //                .writer() // todo 로그인 구현 완료 후 작성자 수정
@@ -37,9 +45,25 @@ public class PostService {
                 .build();
 
         // null일 경우 30분전 세팅
-        post.createDeadLine(deadLine);
+        post.setUpDeadLine(deadLine);
         post = postRepository.save(post);
 
         return post.toDetailResponse();
+    }
+
+    @Transactional
+    public PostDetailResponse modifyPost(Long id, String title,
+                                         String content, LocalDateTime meetingTime,
+                                         String placeId, String placeName, String address,
+                                         Integer maxParticipants, String openChatUrl, Integer deadLine) {
+
+        Post post = findById(id);
+        post.modify(title, content, meetingTime, placeId, placeName, address, maxParticipants, openChatUrl, deadLine);
+
+        return post.toDetailResponse();
+    }
+
+    public Post findById(Long id){
+        return postRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("잘못된 PostId입니다."));
     }
 }

@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class CreatePostRequest {
+    private Long id;
     private String title;
     private String content;
     private String placeId;

@@ -46,7 +46,7 @@ public class Post extends BaseEntity {
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private Certification certification;
 
-    public void createDeadLine(Integer timeFromStart) {
+    public void setUpDeadLine(Integer timeFromStart) {
         if(timeFromStart == null){
             timeFromStart = 30;
         }
@@ -73,5 +73,51 @@ public class Post extends BaseEntity {
 //                        .collect(Collectors.toList())
 //        );
         return response;
+    }
+
+    public void modify(String title,
+                       String content,
+                       LocalDateTime meetingTime,
+                       String placeId,
+                       String placeName,
+                       String address,
+                       Integer maxParticipants,
+                       String openChatUrl,
+                       Integer deadLine) {
+        if(title != null && !this.title.equals(title)){
+            this.title = title;
+        }
+
+        if(content != null && !this.content.equals(content)){
+            this.content = content;
+        }
+
+        if(meetingTime != null && !this.meetingDt.equals(meetingTime)){
+            this.meetingDt = meetingTime;
+        }
+
+        if(placeId != null && !this.placeId.equals(placeId)){
+            this.placeId = placeId;
+        }
+
+        if(placeName != null && !this.placeName.equals(placeName)){
+            this.placeName = placeName;
+        }
+
+        if(address != null && !this.address.equals(address)){
+            this.address = address;
+        }
+
+        if(maxParticipants != null && maxParticipants > 0 && this.maxParticipants != maxParticipants){
+            this.maxParticipants = maxParticipants;
+        }
+
+        if(openChatUrl != null && !this.openChatUrl.equals(openChatUrl)){
+            this.openChatUrl = openChatUrl;
+        }
+
+        if(deadLine != null){
+            setUpDeadLine(deadLine);
+        }
     }
 }
