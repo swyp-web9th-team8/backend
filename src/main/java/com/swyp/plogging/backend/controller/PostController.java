@@ -1,14 +1,11 @@
 package com.swyp.plogging.backend.controller;
 
-import com.swyp.plogging.backend.controller.DTO.APIResponse;
-import com.swyp.plogging.backend.controller.DTO.CreatePostRequest;
-import com.swyp.plogging.backend.controller.DTO.PostDetailResponse;
+import com.swyp.plogging.backend.controller.DTO.*;
 import com.swyp.plogging.backend.sevice.PostService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-
-import java.awt.print.Pageable;
 
 @RestController
 @RequestMapping("/api/post")
@@ -80,10 +77,18 @@ public class PostController {
     }
 
     @GetMapping("/list")
-    public String getListOfPosts(@PageableDefault(size = 10, sort = "meetingTime",  direction = Sort.Direction.DESC)Pageable pageable,
-                                 @RequestParam(name = "recruitmentCompleted", defaultValue = "false", required = false) Boolean recruitmentCompleted,
-                                 @RequestParam(name = "completed", defaultValue = "false", required = false)Boolean completed){
-        return "Successfully fetched the list.";
+    public APIResponse<PostListResponse<PostInfoResponse>> getListOfPosts(@PageableDefault(size = 10, sort = "meetingTime",  direction = Sort.Direction.DESC)Pageable pageable,
+                                                                          @RequestParam(name = "recruitmentCompleted", defaultValue = "false", required = false) Boolean recruitmentCompleted,
+                                                                          @RequestParam(name = "completed", defaultValue = "false", required = false)Boolean completed){
+        APIResponse<PostListResponse<PostInfoResponse>> APIResponse =  new APIResponse<>();
+        try{
+            PostListResponse<PostInfoResponse> response = postService.getListOfPostInfo(pageable, recruitmentCompleted, completed);
+
+            return APIResponse.ok(response, "Successfully fetched the list.");
+        }catch(Exception e){
+            return APIResponse.error(e.getMessage());
+        }
+
     }
 
     @PostMapping("/{postId}/participate")
