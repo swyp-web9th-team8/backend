@@ -66,4 +66,15 @@ public class PostService {
     public Post findById(Long id){
         return postRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("잘못된 PostId입니다."));
     }
+
+    @Transactional
+    public void deletePost(Long postId) {
+        // todo 글의 주인 또는 관리자인지 확인 필요
+
+        postRepository.deleteById(postId);
+    }
+
+    public PostDetailResponse getPostDetails(Long postId) {
+        return findById(postId).toDetailResponse();
+    }
 }

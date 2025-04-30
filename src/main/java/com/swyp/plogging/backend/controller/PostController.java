@@ -3,7 +3,6 @@ package com.swyp.plogging.backend.controller;
 import com.swyp.plogging.backend.controller.DTO.APIResponse;
 import com.swyp.plogging.backend.controller.DTO.CreatePostRequest;
 import com.swyp.plogging.backend.controller.DTO.PostDetailResponse;
-import com.swyp.plogging.backend.domain.Post;
 import com.swyp.plogging.backend.sevice.PostService;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -37,26 +36,47 @@ public class PostController {
     }
 
     @PatchMapping("/{postId}/modify")
-    public String modifyPost(@PathVariable(name = "postId")Long postId,
+    public APIResponse<PostDetailResponse> modifyPost(@PathVariable(name = "postId")Long postId,
                              @RequestBody CreatePostRequest request){
-        PostDetailResponse response = postService.modifyPost(
-                request.getId(),
-                request.getTitle(), request.getContent(),
-                request.getMeetingTime(), request.getPlaceId(),
-                request.getPlaceName(), request.getAddress(),
-                request.getMaxParticipants(), request.getOpenChatUrl(), null
-        );
-        return "Successfully fetched the post details.";
+        APIResponse<PostDetailResponse> APIresponse = new APIResponse<>();
+        try {
+            PostDetailResponse response = postService.modifyPost(
+                    request.getId(),
+                    request.getTitle(), request.getContent(),
+                    request.getMeetingTime(), request.getPlaceId(),
+                    request.getPlaceName(), request.getAddress(),
+                    request.getMaxParticipants(), request.getOpenChatUrl(), null
+            );
+
+            return APIresponse.ok(response, "Successfully fetched the post details.");
+        }catch (Exception e){
+            return APIresponse.error(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{postId}/delete")
-    public String deletePost(@PathVariable(name = "postId")Long postId){
-        return "Successfully deleted the post.";
+    public APIResponse<Object> deletePost(@PathVariable(name = "postId")Long postId){
+        APIResponse<Object> APIResponse = new APIResponse<>();
+
+        try{
+            postService.deletePost(postId);
+
+            return APIResponse.ok(null, "Successfully deleted the post.");
+        }catch(Exception e){
+            return APIResponse.error(e.getMessage());
+        }
     }
 
     @GetMapping("/{postId}")
-    public String postDetail(@PathVariable(name = "postId")Long postId){
-        return "Successfully fetched the post details.";
+    public APIResponse<PostDetailResponse> postDetail(@PathVariable(name = "postId")Long postId){
+        APIResponse<PostDetailResponse> APIResponse = new APIResponse<>();
+
+        try{
+            PostDetailResponse response = postService.getPostDetails(postId);
+            return APIResponse.ok(response, "Successfully fetched the post details.");
+        }catch(Exception e){
+            return APIResponse.error(e.getMessage());
+        }
     }
 
     @GetMapping("/list")
