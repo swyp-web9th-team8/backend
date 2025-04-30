@@ -41,8 +41,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         postCondition.and(post.completed.eq(completed));
 
         // recruitmentCompleted 조건 추가
-        if (recruitmentCompleted) {
-            postCondition.and(post.deadLine.lt(LocalDateTime.now()));
+        if (!recruitmentCompleted) {
+            postCondition.and(post.deadLine.gt(LocalDateTime.now()));
             // 기본 쿼리에 조인과 그룹바이 적용
             query.leftJoin(participation).on(participation.post.eq(post))
                     .groupBy(post.id)
