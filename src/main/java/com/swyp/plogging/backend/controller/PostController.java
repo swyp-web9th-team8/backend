@@ -1,42 +1,94 @@
 package com.swyp.plogging.backend.controller;
 
-import com.swyp.plogging.backend.controller.DTO.CreatePostRequest;
+import com.swyp.plogging.backend.controller.DTO.*;
+import com.swyp.plogging.backend.sevice.PostService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-
-import java.awt.print.Pageable;
 
 @RestController
 @RequestMapping("/api/post")
 public class PostController {
 
+    private final PostService postService;
+
+    public PostController(PostService postService){
+        this.postService = postService;
+    }
+
     @PostMapping("create")
-    public String createPost(@RequestBody CreatePostRequest request){
-        return "Successfully fetched the post details.";
+    public APIResponse<PostDetailResponse> createPost(@RequestBody CreatePostRequest request){
+        APIResponse<PostDetailResponse> APIResponse = new APIResponse<>();
+        try {
+            PostDetailResponse response = postService.createPost(request.getTitle(), request.getContent(),
+                    request.getMeetingTime(), request.getPlaceId(),
+                    request.getPlaceName(), request.getAddress(),
+                    request.getMaxParticipants(), request.getOpenChatUrl(), null);
+
+            return APIResponse.ok(response, "Successfully fetched the post details.");
+        }catch(Exception e){
+            return APIResponse.error(e.getMessage());
+        }
     }
 
     @PatchMapping("/{postId}/modify")
-    public String modifyPost(@PathVariable(name = "postId")Long postId,
+    public APIResponse<PostDetailResponse> modifyPost(@PathVariable(name = "postId")Long postId,
                              @RequestBody CreatePostRequest request){
-        return "Successfully fetched the post details.";
+        APIResponse<PostDetailResponse> APIresponse = new APIResponse<>();
+        try {
+            PostDetailResponse response = postService.modifyPost(
+                    request.getId(),
+                    request.getTitle(), request.getContent(),
+                    request.getMeetingTime(), request.getPlaceId(),
+                    request.getPlaceName(), request.getAddress(),
+                    request.getMaxParticipants(), request.getOpenChatUrl(), null
+            );
+
+            return APIresponse.ok(response, "Successfully fetched the post details.");
+        }catch (Exception e){
+            return APIresponse.error(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{postId}/delete")
-    public String deletePost(@PathVariable(name = "postId")Long postId){
-        return "Successfully deleted the post.";
+    public APIResponse<Object> deletePost(@PathVariable(name = "postId")Long postId){
+        APIResponse<Object> APIResponse = new APIResponse<>();
+
+        try{
+            postService.deletePost(postId);
+
+            return APIResponse.ok(null, "Successfully deleted the post.");
+        }catch(Exception e){
+            return APIResponse.error(e.getMessage());
+        }
     }
 
     @GetMapping("/{postId}")
-    public String postdetail(@PathVariable(name = "postId")Long postId){
-        return "Successfully fetched the post details.";
+    public APIResponse<PostDetailResponse> postDetail(@PathVariable(name = "postId")Long postId){
+        APIResponse<PostDetailResponse> APIResponse = new APIResponse<>();
+
+        try{
+            PostDetailResponse response = postService.getPostDetails(postId);
+            return APIResponse.ok(response, "Successfully fetched the post details.");
+        }catch(Exception e){
+            return APIResponse.error(e.getMessage());
+        }
     }
 
     @GetMapping("/list")
-    public String getListOfPosts(@PageableDefault(size = 10, sort = "meetingTime",  direction = Sort.Direction.DESC)Pageable pageable,
-                                 @RequestParam(name = "recruitmentCompleted", defaultValue = "false", required = false) Boolean recruitmentCompleted,
-                                 @RequestParam(name = "completed", defaultValue = "false", required = false)Boolean completed){
-        return "Successfully fetched the list.";
+    public APIResponse<PostListResponse<PostInfoResponse>> getListOfPosts(@PageableDefault(size = 10, sort = "meetingTime",  direction = Sort.Direction.DESC)Pageable pageable,
+                                                                          @RequestParam(name = "recruitmentCompleted", defaultValue = "false", required = false) Boolean recruitmentCompleted,
+                                                                          @RequestParam(name = "completed", defaultValue = "false", required = false)Boolean completed){
+        APIResponse<PostListResponse<PostInfoResponse>> APIResponse =  new APIResponse<>();
+        try{
+            PostListResponse<PostInfoResponse> response = postService.getListOfPostInfo(pageable, recruitmentCompleted, completed);
+
+            return APIResponse.ok(response, "Successfully fetched the list.");
+        }catch(Exception e){
+            return APIResponse.error(e.getMessage());
+        }
+
     }
 
     @PostMapping("/{postId}/participate")

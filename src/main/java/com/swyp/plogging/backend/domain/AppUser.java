@@ -3,12 +3,14 @@ package com.swyp.plogging.backend.domain;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AppUser extends BaseEntity {
 
