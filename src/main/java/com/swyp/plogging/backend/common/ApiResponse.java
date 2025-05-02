@@ -1,4 +1,4 @@
-package com.swyp.plogging.backend.controller.DTO;
+package com.swyp.plogging.backend.common;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,19 +7,20 @@ import org.springframework.http.HttpStatusCode;
 
 @Getter
 @Setter
-public class APIResponse<T> {
+public class ApiResponse<T> {
+
     private HttpStatusCode statusCode;
     private String message;
     private T data;
 
-    public APIResponse<T> ok(T data, String message){
+    public ApiResponse<T> ok(T data, String message) {
         statusCode = HttpStatus.OK;
         this.message = message;
         this.data = data;
         return this;
     }
 
-    public APIResponse<T> error(String message) {
+    public ApiResponse<T> error(String message) {
         statusCode = HttpStatus.BAD_REQUEST;
         this.message = message;
         return this;

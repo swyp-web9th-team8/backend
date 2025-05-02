@@ -1,14 +1,14 @@
-package com.swyp.plogging.backend.controller.DTO;
-
-import lombok.Getter;
-import lombok.Setter;
+package com.swyp.plogging.backend.controller.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
 public class PostDetailResponse {
+
     private Long id;
     private String title;
     private String content;

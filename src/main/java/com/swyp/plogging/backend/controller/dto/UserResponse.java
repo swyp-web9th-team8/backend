@@ -1,22 +1,17 @@
-package com.swyp.plogging.backend.controller.DTO;
+package com.swyp.plogging.backend.controller.dto;
 
 import com.swyp.plogging.backend.domain.AppUser;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * {
- *   "id": 12345,
- *   "email": "user@gmail.com",
- *   "name": "홍길동",
- *   "profileImage": "https://lh3.googleusercontent.com/a/...",
- *   "provider": "google",
- *   "createdAt": "2023-01-01T00:00:00Z"
- * }
+ * { "id": 12345, "email": "user@gmail.com", "name": "홍길동", "profileImage": "https://lh3.googleusercontent.com/a/...", "provider": "google",
+ * "createdAt": "2023-01-01T00:00:00Z" }
  */
 @Getter
 @Setter
 public class UserResponse {
+
     private Long id;
     private String email;
     private String name;

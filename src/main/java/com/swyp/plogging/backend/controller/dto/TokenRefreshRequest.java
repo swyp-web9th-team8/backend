@@ -1,4 +1,4 @@
-package com.swyp.plogging.backend.controller.DTO;
+package com.swyp.plogging.backend.controller.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,5 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TokenRefreshRequest {
+
     private String refreshToken;
 }

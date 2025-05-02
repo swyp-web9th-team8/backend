@@ -1,14 +1,14 @@
-package com.swyp.plogging.backend.controller.DTO;
+package com.swyp.plogging.backend.controller.dto;
 
 import com.swyp.plogging.backend.domain.Post;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 public class PostInfoResponse {
+
     private Long id;
     private String title;
     private LocalDateTime meetingTime;
@@ -17,7 +17,7 @@ public class PostInfoResponse {
     private String address;
     private int participantCount;
 
-    public PostInfoResponse(Post post){
+    public PostInfoResponse(Post post) {
         this.id = post.getId();
         this.title = post.getTitle();
         this.meetingTime = post.getMeetingDt();

@@ -1,13 +1,26 @@
 package com.swyp.plogging.backend.domain;
 
-import com.swyp.plogging.backend.controller.DTO.PostDetailResponse;
+import com.swyp.plogging.backend.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
-
+import com.swyp.plogging.backend.user.domain.AppUser;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -47,7 +60,7 @@ public class Post extends BaseEntity {
     private Certification certification;
 
     public void setUpDeadLine(Integer timeFromStart) {
-        if(timeFromStart == null){
+        if (timeFromStart == null) {
             timeFromStart = 30;
         }
         deadLine = meetingDt.minusMinutes(timeFromStart);
@@ -76,47 +89,47 @@ public class Post extends BaseEntity {
     }
 
     public void modify(String title,
-                       String content,
-                       LocalDateTime meetingTime,
-                       String placeId,
-                       String placeName,
-                       String address,
-                       Integer maxParticipants,
-                       String openChatUrl,
-                       Integer deadLine) {
-        if(title != null && !this.title.equals(title)){
+        String content,
+        LocalDateTime meetingTime,
+        String placeId,
+        String placeName,
+        String address,
+        Integer maxParticipants,
+        String openChatUrl,
+        Integer deadLine) {
+        if (title != null && !this.title.equals(title)) {
             this.title = title;
         }
 
-        if(content != null && !this.content.equals(content)){
+        if (content != null && !this.content.equals(content)) {
             this.content = content;
         }
 
-        if(meetingTime != null && !this.meetingDt.equals(meetingTime)){
+        if (meetingTime != null && !this.meetingDt.equals(meetingTime)) {
             this.meetingDt = meetingTime;
         }
 
-        if(placeId != null && !this.placeId.equals(placeId)){
+        if (placeId != null && !this.placeId.equals(placeId)) {
             this.placeId = placeId;
         }
 
-        if(placeName != null && !this.placeName.equals(placeName)){
+        if (placeName != null && !this.placeName.equals(placeName)) {
             this.placeName = placeName;
         }
 
-        if(address != null && !this.address.equals(address)){
+        if (address != null && !this.address.equals(address)) {
             this.address = address;
         }
 
-        if(maxParticipants != null && maxParticipants > 0 && this.maxParticipants != maxParticipants){
+        if (maxParticipants != null && maxParticipants > 0 && this.maxParticipants != maxParticipants) {
             this.maxParticipants = maxParticipants;
         }
 
-        if(openChatUrl != null && !this.openChatUrl.equals(openChatUrl)){
+        if (openChatUrl != null && !this.openChatUrl.equals(openChatUrl)) {
             this.openChatUrl = openChatUrl;
         }
 
-        if(deadLine != null){
+        if (deadLine != null) {
             setUpDeadLine(deadLine);
         }
     }
