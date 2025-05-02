@@ -1,6 +1,6 @@
 package com.swyp.plogging.backend.controller.dto;
 
-import com.swyp.plogging.backend.domain.AppUser;
+import com.swyp.plogging.backend.user.domain.AppUser;
 import lombok.Getter;
 import lombok.Setter;
 
