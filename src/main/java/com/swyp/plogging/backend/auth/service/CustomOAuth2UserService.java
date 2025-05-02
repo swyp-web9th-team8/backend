@@ -1,8 +1,8 @@
-package com.swyp.plogging.backend.user.service;
+package com.swyp.plogging.backend.auth.service;
 
+import com.swyp.plogging.backend.auth.domain.CustomOAuth2User;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import com.swyp.plogging.backend.user.domain.AuthProvider;
-import com.swyp.plogging.backend.user.domain.CustomOAuth2User;
 import com.swyp.plogging.backend.user.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

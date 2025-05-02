@@ -1,4 +1,4 @@
-package com.swyp.plogging.backend.controller;
+package com.swyp.plogging.backend.auth.controller;
 
 import com.swyp.plogging.backend.controller.dto.TokenRefreshRequest;
 import org.springframework.web.bind.annotation.GetMapping;

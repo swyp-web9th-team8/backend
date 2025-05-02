@@ -1,6 +1,6 @@
 package com.swyp.plogging.backend.config;
 
-import com.swyp.plogging.backend.user.service.CustomOAuth2UserService;
+import com.swyp.plogging.backend.auth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,6 +1,6 @@
 package com.swyp.plogging.backend.controller;
 
-import com.swyp.plogging.backend.common.ApiResponse;
+import com.swyp.plogging.backend.common.dto.ApiResponse;
 import com.swyp.plogging.backend.controller.dto.CreatePostRequest;
 import com.swyp.plogging.backend.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.controller.dto.PostInfoResponse;

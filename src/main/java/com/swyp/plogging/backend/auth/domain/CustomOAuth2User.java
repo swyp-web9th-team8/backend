@@ -1,5 +1,6 @@
-package com.swyp.plogging.backend.user.domain;
+package com.swyp.plogging.backend.auth.domain;
 
+import com.swyp.plogging.backend.user.domain.AppUser;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;

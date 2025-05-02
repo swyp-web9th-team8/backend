@@ -1,9 +1,9 @@
 package com.swyp.plogging.backend.user.controller;
 
+import com.swyp.plogging.backend.auth.domain.CustomOAuth2User;
 import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.UserInfoUpdateRequest;
 import com.swyp.plogging.backend.user.domain.AppUser;
-import com.swyp.plogging.backend.user.domain.CustomOAuth2User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
