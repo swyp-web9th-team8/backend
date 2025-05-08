@@ -1,11 +1,11 @@
 package com.swyp.plogging.backend.user.controller;
 
-import com.swyp.plogging.backend.auth.domain.CustomOAuth2User;
+import com.swyp.plogging.backend.common.dto.ApiResponse;
+import com.swyp.plogging.backend.common.util.SecurityUtils;
 import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.UserInfoUpdateRequest;
-import com.swyp.plogging.backend.user.domain.AppUser;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.swyp.plogging.backend.user.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,16 +16,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UserController {
 
+    private final UserService userService;
+
     @GetMapping("/me")
-    public ResponseEntity<ProfileResponse> me(@AuthenticationPrincipal OAuth2User principal) {
-        if (principal instanceof CustomOAuth2User customOAuth2User) {
-            AppUser appUser = customOAuth2User.getAppUser();
-            return ResponseEntity.ok(ProfileResponse.of(appUser));
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ApiResponse<ProfileResponse> me(@AuthenticationPrincipal OAuth2User principal) {
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        ProfileResponse profile = userService.getProfile(currentUserId);
+
+        return ApiResponse.ok(profile, "Profile fetched successfully!");
     }
 
     @GetMapping("/{userId}/rankings")
