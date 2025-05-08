@@ -1,34 +1,28 @@
 package com.swyp.plogging.backend.user.controller.dto;
 
-import com.swyp.plogging.backend.user.domain.AppUser;
-import lombok.Getter;
-import lombok.Setter;
+import com.querydsl.core.annotations.QueryProjection;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class ProfileResponse {
 
     private Long id;
-    private String email;
     private String nickname;
+    private String email;
     private String region;
-    private boolean pushEnabled;
     private String profileImageUrl;
-    private int score;
-    private String authProvider;
-    private boolean registered;
+    private int writtenPostsCount;
+    private String lastBadge;
 
-    public static ProfileResponse of(AppUser user) {
-        ProfileResponse response = new ProfileResponse();
-        response.setId(user.getId());
-        response.setEmail(user.getEmail());
-        response.setNickname(user.getNickname());
-        response.setRegion(user.getRegion());
-        response.setPushEnabled(user.isPushEnabled());
-        response.setProfileImageUrl(user.getProfileImageUrl());
-        response.setScore(user.getScore());
-        response.setAuthProvider(user.getAuthProvider().name());
-        response.setRegistered(user.isRegistered());
-        return response;
+    @QueryProjection
+    public ProfileResponse(Long id, String nickname, String email, String region,
+        String profileImageUrl, int writtenPostsCount, String lastBadgeIconUrl) {
+        this.id = id;
+        this.nickname = nickname;
+        this.email = email;
+        this.region = region;
+        this.profileImageUrl = profileImageUrl;
+        this.writtenPostsCount = writtenPostsCount;
+        this.lastBadge = lastBadgeIconUrl;
     }
 }
