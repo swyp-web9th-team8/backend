@@ -13,16 +13,24 @@ public class ProfileResponse {
     private String profileImageUrl;
     private int writtenPostsCount;
     private String lastBadge;
+    private int participatedCount;
+    private int totalMeet;
 
     @QueryProjection
     public ProfileResponse(Long id, String nickname, String email, String region,
-        String profileImageUrl, int writtenPostsCount, String lastBadgeIconUrl) {
+        String profileImageUrl, int writtenPostsCount, String lastBadgeIconUrl, int participatedCount) {
         this.id = id;
         this.nickname = nickname;
         this.email = email;
         this.region = region;
         this.profileImageUrl = profileImageUrl;
-        this.writtenPostsCount = writtenPostsCount;
         this.lastBadge = lastBadgeIconUrl;
+        this.writtenPostsCount = writtenPostsCount;
+        this.participatedCount = participatedCount;
+        this.totalMeet = calculateTotalMeet(writtenPostsCount, participatedCount);
+    }
+
+    public int calculateTotalMeet(int writtenPostsCount, int participatedCount) {
+        return writtenPostsCount + participatedCount;
     }
 }
