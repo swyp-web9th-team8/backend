@@ -36,6 +36,9 @@ public class AppUser extends BaseEntity {
     @Column(nullable = false)
     private String region;
 
+    @Column
+    private String phoneNum;
+
     private boolean pushEnabled;
 
     @Enumerated(EnumType.STRING)
@@ -65,5 +68,27 @@ public class AppUser extends BaseEntity {
         user.registered = false;
 
         return user;
+    }
+
+    public void updateProfile(String nickname, String region, String profileImageUrl, String phoneNum, Boolean pushEnabled) {
+        if (nickname != null && !nickname.isEmpty()) {
+            this.nickname = nickname;
+        }
+
+        if (region != null && !region.isEmpty()) {
+            this.region = region;
+        }
+
+        if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
+            this.profileImageUrl = profileImageUrl;
+        }
+
+        if (phoneNum != null && !phoneNum.isEmpty()) {
+            this.phoneNum = phoneNum;
+        }
+
+        if (pushEnabled != null) {
+            this.pushEnabled = pushEnabled;  // pushEnabled는 기본값이 필요 없다면 null 체크를 생략할 수 있음
+        }
     }
 }

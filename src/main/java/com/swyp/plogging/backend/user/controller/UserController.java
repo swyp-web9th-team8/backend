@@ -2,8 +2,9 @@ package com.swyp.plogging.backend.user.controller;
 
 import com.swyp.plogging.backend.common.dto.ApiResponse;
 import com.swyp.plogging.backend.common.util.SecurityUtils;
+import com.swyp.plogging.backend.user.controller.dto.EditableProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
-import com.swyp.plogging.backend.user.controller.dto.UserInfoUpdateRequest;
+import com.swyp.plogging.backend.user.controller.dto.UpdateProfileRequest;
 import com.swyp.plogging.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,12 +23,28 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/me")
-    public ApiResponse<ProfileResponse> me(@AuthenticationPrincipal OAuth2User principal) {
+    @GetMapping("/profile")
+    public ApiResponse<ProfileResponse> getProfile(@AuthenticationPrincipal OAuth2User principal) {
         Long currentUserId = SecurityUtils.getUserId(principal);
         ProfileResponse profile = userService.getProfile(currentUserId);
 
         return ApiResponse.ok(profile, "Profile fetched successfully!");
+    }
+
+    @GetMapping("/profile-detail")
+    public ApiResponse<EditableProfileResponse> getEditableProfile(@AuthenticationPrincipal OAuth2User principal) {
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        EditableProfileResponse editableProfile = userService.getEditableProfile(currentUserId);
+
+        return ApiResponse.ok(editableProfile, "Editable Profile fetched successfully!");
+    }
+
+    @PatchMapping("/profile-detail")
+    public ApiResponse<Long> updateProfile(@RequestBody UpdateProfileRequest request, @AuthenticationPrincipal OAuth2User principal) {
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        userService.updateProfile(currentUserId, request);
+
+        return ApiResponse.ok(currentUserId, String.format("Profile updated successfully! User ID = %d", currentUserId));
     }
 
     @GetMapping("/{userId}/rankings")
@@ -35,11 +52,6 @@ public class UserController {
         return "Successfully retrieved rankings and badges.";
     }
 
-    @PatchMapping("/{userId}")
-    public String updateUserInfo(@PathVariable(name = "userId") Long userId,
-        @RequestBody UserInfoUpdateRequest request) {
-        return "User information updated success.";
-    }
 
     @GetMapping("/{userId}/participated-posts")
     public String fetchParticipatedPostsOfUser(@PathVariable(name = "userId") Long userId) {
