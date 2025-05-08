@@ -1,6 +1,7 @@
 package com.swyp.plogging.backend.domain;
 
 import com.swyp.plogging.backend.domain.base.BaseTimeEntity;
+import com.swyp.plogging.backend.post.domain.Post;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

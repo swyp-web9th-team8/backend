@@ -1,5 +1,6 @@
 package com.swyp.plogging.backend.domain;
 
+import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

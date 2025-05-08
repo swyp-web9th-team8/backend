@@ -1,22 +1,16 @@
 package com.swyp.plogging.backend.user.domain;
 
-import com.swyp.plogging.backend.domain.Participation;
-import com.swyp.plogging.backend.domain.Post;
 import com.swyp.plogging.backend.domain.UserBadge;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.List;
+import com.swyp.plogging.backend.post.domain.Participation;
+import com.swyp.plogging.backend.post.domain.Post;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity

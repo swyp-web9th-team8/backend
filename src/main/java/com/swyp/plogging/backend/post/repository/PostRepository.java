@@ -1,6 +1,6 @@
-package com.swyp.plogging.backend.repository;
+package com.swyp.plogging.backend.post.repository;
 
-import com.swyp.plogging.backend.domain.Post;
+import com.swyp.plogging.backend.post.domain.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

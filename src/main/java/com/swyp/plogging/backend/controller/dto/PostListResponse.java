@@ -1,12 +1,15 @@
 package com.swyp.plogging.backend.controller.dto;
 
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
+// todo ApiPaged... 생겨서 제거
 @Getter
 public class PostListResponse<T> {
 

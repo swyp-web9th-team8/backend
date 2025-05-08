@@ -1,4 +1,4 @@
-package com.swyp.plogging.backend.domain;
+package com.swyp.plogging.backend.post.domain;
 
 import com.swyp.plogging.backend.domain.base.BaseTimeEntity;
 import com.swyp.plogging.backend.user.domain.AppUser;
@@ -25,4 +25,12 @@ public class Participation extends BaseTimeEntity {
     private Post post;
 
     private boolean joined;
+
+    public static Participation newInstance(Post target, AppUser user){
+        Participation participation = new Participation();
+        participation.post = target;
+        participation.user = user;
+        participation.joined = true;
+        return participation;
+    }
 }

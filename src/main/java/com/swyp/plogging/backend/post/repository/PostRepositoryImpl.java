@@ -1,11 +1,11 @@
-package com.swyp.plogging.backend.repository;
+package com.swyp.plogging.backend.post.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.swyp.plogging.backend.domain.Post;
-import com.swyp.plogging.backend.domain.QParticipation;
-import com.swyp.plogging.backend.domain.QPost;
+import com.swyp.plogging.backend.post.domain.Post;
+import com.swyp.plogging.backend.post.domain.QParticipation;
+import com.swyp.plogging.backend.post.domain.QPost;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;

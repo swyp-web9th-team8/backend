@@ -1,13 +1,16 @@
 package com.swyp.plogging.backend.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,8 +27,8 @@ public class ApiPagedResponse<T> {
     private int totalPages;
     private long totalElements;
 
-    public ApiPagedResponse<T> ok(Page<T> page, String message) {
-        this.statusCode = HttpStatus.OK;
+    private ApiPagedResponse(HttpStatus httpStatus, Page<T> page, String message){
+        this.statusCode = httpStatus;
         this.message = message;
         this.content = page.getContent();
         this.page = page.getNumber();
@@ -33,15 +36,13 @@ public class ApiPagedResponse<T> {
         this.totalPages = page.getTotalPages();
         this.totalElements = page.getTotalElements();
         this.timestamp = LocalDateTime.now();
-
-        return this;
     }
 
-    public ApiPagedResponse<T> error(String message) {
-        this.statusCode = HttpStatus.BAD_REQUEST;
-        this.message = message;
-        this.timestamp = LocalDateTime.now();
+    public static <T> ApiPagedResponse<T> ok(Page<T> page, String message) {
+        return new ApiPagedResponse<>(HttpStatus.OK, page, message);
+    }
 
-        return this;
+    public static <T> ApiPagedResponse<T> error(String message) {
+        return new ApiPagedResponse<>(HttpStatus.BAD_REQUEST, new PageImpl<>(new ArrayList<>()), message);
     }
 }
