@@ -17,20 +17,22 @@ public class ApiResponse<T> {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
 
-    public ApiResponse<T> ok(T data, String message) {
-        statusCode = HttpStatus.OK;
+    private ApiResponse(HttpStatusCode statusCode, String message, T data) {
+        this.statusCode = statusCode;
         this.message = message;
         this.data = data;
         this.timestamp = LocalDateTime.now();
-
-        return this;
     }
 
-    public ApiResponse<T> error(String message) {
-        statusCode = HttpStatus.BAD_REQUEST;
-        this.message = message;
-        this.timestamp = LocalDateTime.now();
+    public static <T> ApiResponse<T> ok(T data, String message) {
+        return new ApiResponse<>(HttpStatus.OK, message, data);
+    }
 
-        return this;
+    public static <T> ApiResponse<T> error(String message, HttpStatus status) {
+        return new ApiResponse<>(status, message, null);
+    }
+
+    public static <T> ApiResponse<T> error(String message) {
+        return error(message, HttpStatus.BAD_REQUEST);
     }
 }
