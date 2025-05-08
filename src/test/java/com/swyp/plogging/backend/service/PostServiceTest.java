@@ -1,37 +1,28 @@
 package com.swyp.plogging.backend.service;
 
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.swyp.plogging.backend.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.controller.dto.PostInfoResponse;
-import com.swyp.plogging.backend.controller.dto.PostListResponse;
-import com.swyp.plogging.backend.domain.Post;
-import com.swyp.plogging.backend.repository.PostRepository;
-import com.swyp.plogging.backend.sevice.PostService;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
+import com.swyp.plogging.backend.post.domain.Post;
+import com.swyp.plogging.backend.post.repository.PostRepository;
+import com.swyp.plogging.backend.post.sevice.PostService;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
@@ -187,7 +178,7 @@ public class PostServiceTest {
             new PageImpl<>(givenList, pageable, givenList.size()));
 
         //when
-        PostListResponse<PostInfoResponse> dto = postService.getListOfPostInfo(pageable, recruitmentCompleted, completed);
+        Page<PostInfoResponse> dto = postService.getListOfPostInfo(pageable, recruitmentCompleted, completed);
 
         //then
         Assertions.assertEquals(dto.getNumber(), pageable.getPageNumber());

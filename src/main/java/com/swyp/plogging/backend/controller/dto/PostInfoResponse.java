@@ -1,6 +1,6 @@
 package com.swyp.plogging.backend.controller.dto;
 
-import com.swyp.plogging.backend.domain.Post;
+import com.swyp.plogging.backend.post.domain.Post;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,26 +1,15 @@
-package com.swyp.plogging.backend.domain;
+package com.swyp.plogging.backend.post.domain;
 
 import com.swyp.plogging.backend.controller.dto.PostDetailResponse;
+import com.swyp.plogging.backend.domain.Certification;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
 import com.swyp.plogging.backend.user.domain.AppUser;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -132,5 +121,25 @@ public class Post extends BaseEntity {
         if (deadLine != null) {
             setUpDeadLine(deadLine);
         }
+    }
+
+
+    public void addParticipation(Participation participation) {
+        this.participations.add(participation);
+    }
+
+    public Participation leave(AppUser user) {
+        for(Participation participation : participations){
+
+            // 테스트로 인하여 Id외 별도 검증 추가
+            if(participation.getUser().getId() != null && participation.getUser().getId().equals(user.getId())){
+                participations.remove(participation);
+                return participation;
+            }else if(participation.getUser().getEmail() != null && participation.getUser().getEmail().equals(user.getEmail())){
+                participations.remove(participation);
+                return participation;
+            }
+        }
+        return null;
     }
 }

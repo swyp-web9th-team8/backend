@@ -1,18 +1,20 @@
-package com.swyp.plogging.backend.sevice;
+package com.swyp.plogging.backend.post.sevice;
 
+import com.swyp.plogging.backend.common.exception.PostNotFoundException;
 import com.swyp.plogging.backend.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.controller.dto.PostInfoResponse;
-import com.swyp.plogging.backend.controller.dto.PostListResponse;
-import com.swyp.plogging.backend.domain.Post;
-import com.swyp.plogging.backend.repository.PostRepository;
+import com.swyp.plogging.backend.post.domain.Post;
+import com.swyp.plogging.backend.post.repository.PostRepository;
 import jakarta.annotation.Nullable;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -69,7 +71,7 @@ public class PostService {
     }
 
     public Post findById(Long id) {
-        return postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("잘못된 PostId입니다."));
+        return postRepository.findById(id).orElseThrow(PostNotFoundException::new);
     }
 
     @Transactional
@@ -83,11 +85,11 @@ public class PostService {
         return findById(postId).toDetailResponse();
     }
 
-    public PostListResponse<PostInfoResponse> getListOfPostInfo(Pageable pageable, Boolean recruitmentCompleted, Boolean completed) {
+    public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, Boolean recruitmentCompleted, Boolean completed) {
         // 데이터 DTO로 정제
         Page<Post> data = postRepository.findPostByCondition(pageable, recruitmentCompleted, completed);
         List<PostInfoResponse> content = data.getContent().stream().map(PostInfoResponse::new).toList();
 
-        return PostListResponse.of(content, data.getPageable(), data.getTotalElements());
+        return new PageImpl<>(content, data.getPageable(), data.getTotalElements());
     }
 }
