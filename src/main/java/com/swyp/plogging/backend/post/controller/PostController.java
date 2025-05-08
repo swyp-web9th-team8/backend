@@ -29,23 +29,21 @@ public class PostController {
 
     @PostMapping("create")
     public ApiResponse<PostDetailResponse> createPost(@RequestBody CreatePostRequest request) {
-        ApiResponse<PostDetailResponse> APIResponse = new ApiResponse<>();
         try {
             PostDetailResponse response = postService.createPost(request.getTitle(), request.getContent(),
                     request.getMeetingTime(), request.getPlaceId(),
                     request.getPlaceName(), request.getAddress(),
                     request.getMaxParticipants(), request.getOpenChatUrl(), null);
 
-            return APIResponse.ok(response, "Successfully fetched the post details.");
+            return ApiResponse.ok(response, "Successfully fetched the post details.");
         } catch (Exception e) {
-            return APIResponse.error(e.getMessage());
+            return ApiResponse.error(e.getMessage());
         }
     }
 
     @PatchMapping("/{postId}/modify")
     public ApiResponse<PostDetailResponse> modifyPost(@PathVariable(name = "postId") Long postId,
                                                       @RequestBody CreatePostRequest request) {
-        ApiResponse<PostDetailResponse> APIresponse = new ApiResponse<>();
         try {
             PostDetailResponse response = postService.modifyPost(
                     request.getId(),
@@ -55,34 +53,30 @@ public class PostController {
                     request.getMaxParticipants(), request.getOpenChatUrl(), null
             );
 
-            return APIresponse.ok(response, "Successfully fetched the post details.");
+            return ApiResponse.ok(response, "Successfully fetched the post details.");
         } catch (Exception e) {
-            return APIresponse.error(e.getMessage());
+            return ApiResponse.error(e.getMessage());
         }
     }
 
     @DeleteMapping("/{postId}/delete")
     public ApiResponse<Object> deletePost(@PathVariable(name = "postId") Long postId) {
-        ApiResponse<Object> APIResponse = new ApiResponse<>();
-
         try {
             postService.deletePost(postId);
 
-            return APIResponse.ok(null, "Successfully deleted the post.");
+            return ApiResponse.ok(null, "Successfully deleted the post.");
         } catch (Exception e) {
-            return APIResponse.error(e.getMessage());
+            return ApiResponse.error(e.getMessage());
         }
     }
 
     @GetMapping("/{postId}")
     public ApiResponse<PostDetailResponse> postDetail(@PathVariable(name = "postId") Long postId) {
-        ApiResponse<PostDetailResponse> APIResponse = new ApiResponse<>();
-
         try {
             PostDetailResponse response = postService.getPostDetails(postId);
-            return APIResponse.ok(response, "Successfully fetched the post details.");
+            return ApiResponse.ok(response, "Successfully fetched the post details.");
         } catch (Exception e) {
-            return APIResponse.error(e.getMessage());
+            return ApiResponse.error(e.getMessage());
         }
     }
 
@@ -91,13 +85,12 @@ public class PostController {
             @PageableDefault(size = 10, sort = "meetingTime", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(name = "recruitmentCompleted", defaultValue = "false", required = false) Boolean recruitmentCompleted,
             @RequestParam(name = "completed", defaultValue = "false", required = false) Boolean completed) {
-        ApiPagedResponse<PostInfoResponse> APIResponse = new ApiPagedResponse<>();
         try {
             Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, recruitmentCompleted, completed);
 
-            return APIResponse.ok(response, "Successfully fetched the list.");
+            return ApiPagedResponse.ok(response, "Successfully fetched the list.");
         } catch (Exception e) {
-            return APIResponse.error(e.getMessage());
+            return ApiPagedResponse.error(e.getMessage());
         }
 
     }
@@ -105,12 +98,11 @@ public class PostController {
     @PostMapping("/{postId}/participate")
     public ApiResponse<Object> participatePost(@PathVariable(name = "postId") Long postId,
                                                @AuthenticationPrincipal CustomOAuth2User user) {
-        ApiResponse<Object> APIResponse = new ApiResponse<>();
         try {
             participationService.participateToPost(postId, user.getAppUser());
-            return APIResponse.ok(null, "Successfully joined the group.");
+            return ApiResponse.ok(null, "Successfully joined the group.");
         } catch (Exception e) {
-            return APIResponse.error(e.getMessage());
+            return ApiResponse.error(e.getMessage());
         }
 
 
@@ -119,12 +111,11 @@ public class PostController {
     @PostMapping("/{postId}/leave")
     public ApiResponse<Object> leavePost(@PathVariable(name = "postId") Long postId,
                                          @AuthenticationPrincipal CustomOAuth2User user) {
-        ApiResponse<Object> APIResponse = new ApiResponse<>();
         try {
             participationService.leaveFromPost(postId, user.getAppUser());
-            return APIResponse.ok(null, "Successfully left the group.");
+            return ApiResponse.ok(null, "Successfully left the group.");
         } catch (Exception e) {
-            return APIResponse.error(e.getMessage());
+            return ApiResponse.error(e.getMessage());
         }
 
     }
