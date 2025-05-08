@@ -1,5 +1,6 @@
 package com.swyp.plogging.backend.service;
 
+import com.swyp.plogging.backend.common.exception.NotParticipatingPostException;
 import com.swyp.plogging.backend.post.domain.Participation;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.repository.ParticipationRepository;
@@ -17,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -35,8 +38,8 @@ public class ParticipationServiceTest {
 
 
     private static Post data;
-    private static Participation participation;
     private static AppUser user;
+    private static AppUser user2;
 
     private static final Logger log = LoggerFactory.getLogger(PostServiceTest.class);
 
@@ -52,11 +55,12 @@ public class ParticipationServiceTest {
                 .placeId("1")
                 .placeName("서울시청")
                 .address("서울특별시 중구 세종대로 126")
-                .maxParticipants(10)
+                .maxParticipants(2)
                 .openChatUrl("https://open.kakao.com/몰라")
                 .build();
         data.setUpDeadLine(null);
         user = AppUser.newInstance("user@user.com", "user1", "Soeul", AuthProvider.valueOf("GOOGLE"));
+        user2 = AppUser.newInstance("user2@user.com", "user2", "Seoul",AuthProvider.KAKAO);
     }
 
     @Test
@@ -75,6 +79,54 @@ public class ParticipationServiceTest {
         //then
         verify(participationRepository, times(1)).save(any(Participation.class));
         Assertions.assertEquals(1, data.getParticipations().size());
+        log.info(() -> testInfo.getDisplayName() + " 완료");
+    }
+
+    @Test
+    @DisplayName("모임 참여 기능 예외1 - 최대 참가자")
+    public void isMaxParticipantsOfPost(TestInfo testInfo) {
+        log.info(() -> testInfo.getDisplayName() + " 시작");
+
+        //given
+        Long postId = 1L;
+        Queue<Participation> queue = new LinkedList<>();
+        queue.add(Participation.newInstance(data, user));
+        queue.add(Participation.newInstance(data, user2));
+
+        when(postService.findById(postId)).thenReturn(data);
+        when(participationRepository.save(any(Participation.class))).thenReturn(queue.poll());
+        participationService.participateToPost(postId, user);
+        participationService.participateToPost(postId, user2);
+
+
+        //when
+        Exception e = Assertions.assertThrows(NotParticipatingPostException.class, ()->
+        participationService.participateToPost(postId, user2));
+
+        //then
+        verify(participationRepository, times(2)).save(any(Participation.class));
+        Assertions.assertEquals("해당 모임에 참석할 수 없습니다.", e.getMessage());
+        log.info(() -> testInfo.getDisplayName() + " 완료");
+    }
+
+    @Test
+    @DisplayName("모임 참여 기능 예외2 - 이미 참가한 참가자")
+    public void alreadyParticipatedToPost(TestInfo testInfo) {
+        log.info(() -> testInfo.getDisplayName() + " 시작");
+
+        //given
+        Long postId = 1L;
+        when(postService.findById(postId)).thenReturn(data);
+        when(participationRepository.save(any(Participation.class))).thenReturn(Participation.newInstance(data, user));
+        participationService.participateToPost(postId, user);
+
+        //when
+        Exception e = Assertions.assertThrows(NotParticipatingPostException.class, ()->
+                participationService.participateToPost(postId, user));
+
+        //then
+        verify(participationRepository, times(1)).save(any(Participation.class));
+        Assertions.assertEquals(user.getNickname() + " 님은 이미 참가중입니다.", e.getMessage());
         log.info(() -> testInfo.getDisplayName() + " 완료");
     }
 
@@ -112,7 +164,7 @@ public class ParticipationServiceTest {
                 IllegalArgumentException.class,
                 () ->
                         participationService
-                                .leaveFromPost(postId, AppUser.newInstance("user2@user.com", "user2", "Seoul",AuthProvider.KAKAO)));
+                                .leaveFromPost(postId, user2));
 
         //then
         Assertions.assertEquals("참가하지 않은 모임입니다.", e.getMessage());

@@ -1,5 +1,6 @@
 package com.swyp.plogging.backend.post.sevice;
 
+import com.swyp.plogging.backend.common.exception.NotParticipatingPostException;
 import com.swyp.plogging.backend.post.domain.Participation;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.repository.ParticipationRepository;
@@ -22,6 +23,16 @@ public class ParticipationService {
     public void participateToPost(Long postId, AppUser user) {
         Post target = postService.findById(postId);
         // todo 오너일 경우 제외
+
+        // 남은 자리 없음
+        if(target.isMax()){
+            throw new NotParticipatingPostException();
+        }
+
+        // 이미 참가중
+        if(target.isParticipating(user) != null){
+            throw new NotParticipatingPostException(user);
+        }
 
         // 참여 생성 및 Post 연결
         Participation participation = Participation.newInstance(target, user);

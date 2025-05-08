@@ -129,17 +129,28 @@ public class Post extends BaseEntity {
     }
 
     public Participation leave(AppUser user) {
-        for(Participation participation : participations){
+        Participation removed = isParticipating(user);
+        if(removed != null){
+            participations.remove(removed);
+            return removed;
+        }
+        return null;
+    }
 
-            // 테스트로 인하여 Id외 별도 검증 추가
+    public Participation isParticipating(AppUser user) {
+        for(Participation participation : participations){
             if(participation.getUser().getId() != null && participation.getUser().getId().equals(user.getId())){
-                participations.remove(participation);
                 return participation;
-            }else if(participation.getUser().getEmail() != null && participation.getUser().getEmail().equals(user.getEmail())){
-                participations.remove(participation);
+            }
+            if(participation.getUser().getEmail() != null && participation.getUser().getEmail().equals(user.getEmail())){
                 return participation;
             }
         }
         return null;
+    }
+
+
+    public boolean isMax() {
+        return participations.size() == maxParticipants;
     }
 }
