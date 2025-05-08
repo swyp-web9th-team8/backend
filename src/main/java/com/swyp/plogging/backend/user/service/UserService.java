@@ -1,6 +1,7 @@
 package com.swyp.plogging.backend.user.service;
 
 import com.swyp.plogging.backend.common.exception.UserNotFoundException;
+import com.swyp.plogging.backend.common.service.FileService;
 import com.swyp.plogging.backend.user.controller.dto.EditableProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.UpdateProfileRequest;
@@ -9,6 +10,7 @@ import com.swyp.plogging.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional(readOnly = true)
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final FileService fileService;
 
     public ProfileResponse getProfile(Long userId) {
         return userRepository.findProfileByUserId(userId);
@@ -35,7 +38,17 @@ public class UserService {
     @Transactional
     public void updateProfile(Long userId, UpdateProfileRequest request) {
         AppUser user = getUser(userId);
-        user.updateProfile(request.getNickname(), request.getRegion(), request.getProfileImageUrl(),
-            request.getPhoneNum(), request.getPushEnabled());
+        user.updateProfile(request.getNickname(), request.getRegion(), request.getPhoneNum(), request.getPushEnabled());
+    }
+
+    @Transactional
+    public String uploadProfileImage(Long userId, MultipartFile file) {
+        String filename = fileService.uploadImageFile(file);
+
+        AppUser user = getUser(userId);
+        String publicPath = "/images/" + filename;
+        user.updateProfileImageUrl(publicPath);
+
+        return publicPath;
     }
 }

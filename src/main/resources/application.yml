@@ -30,5 +30,13 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Seoul
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 app:
   baseUrl: https://ploggo.co.kr
+
+file:
+  upload-dir: /opt/ploggo/images
