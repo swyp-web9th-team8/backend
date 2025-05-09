@@ -1,11 +1,10 @@
 package com.swyp.plogging.backend.post.controller.dto;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import com.swyp.plogging.backend.controller.dto.UserResponse;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,7 +13,7 @@ public class PostDetailResponse {
     private Long id;
     private String title;
     private String content;
-    private UserResponse writer;
+    private NicknameAndImageResponse writer;
     private String placeId;
     private String placeName;
     private String address;
@@ -22,5 +21,5 @@ public class PostDetailResponse {
     private String openChatUrl;
     private int maxParticipants;
     private LocalDateTime deadLine;
-    private List<UserResponse> participants;
+    private List<NicknameAndImageResponse> participants;
 }

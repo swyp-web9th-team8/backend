@@ -2,6 +2,7 @@ package com.swyp.plogging.backend.post.domain;
 
 import com.swyp.plogging.backend.controller.dto.UserResponse;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
+import com.swyp.plogging.backend.post.controller.dto.NicknameAndImageResponse;
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.persistence.*;
@@ -64,7 +65,7 @@ public class Post extends BaseEntity {
         response.setPlaceName(placeName);
         response.setAddress(address);
         response.setMaxParticipants(maxParticipants);
-        response.setWriter(new UserResponse(writer));
+        response.setWriter(new NicknameAndImageResponse(writer));
         response.setMeetingTime(meetingDt);
         response.setDeadLine(deadLine);
         response.setOpenChatUrl(openChatUrl);
