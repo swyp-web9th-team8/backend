@@ -70,21 +70,27 @@ public class AppUser extends BaseEntity {
         }
     }
 
-    public void updateProfile(String nickname, String region, String phoneNum, Boolean pushEnabled) {
+    public void updateNickname(String nickname) {
         if (nickname != null && !nickname.isEmpty()) {
             this.nickname = nickname;
         }
+    }
 
+    public void updateRegion(String region) {
         if (region != null && !region.isEmpty()) {
             this.region = region;
         }
+    }
 
+    public void updatePhoneNum(String phoneNum) {
         if (phoneNum != null && !phoneNum.isEmpty()) {
             this.phoneNum = phoneNum;
         }
+    }
 
+    public void updatePushEnabled(Boolean pushEnabled) {
         if (pushEnabled != null) {
-            this.pushEnabled = pushEnabled;  // pushEnabled는 기본값이 필요 없다면 null 체크를 생략할 수 있음
+            this.pushEnabled = pushEnabled;
         }
     }
 }

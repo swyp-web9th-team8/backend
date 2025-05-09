@@ -1,10 +1,15 @@
 package com.swyp.plogging.backend.user.service;
 
+import com.swyp.plogging.backend.common.exception.UnsupportedUpdateRequestException;
 import com.swyp.plogging.backend.common.exception.UserNotFoundException;
 import com.swyp.plogging.backend.common.service.FileService;
 import com.swyp.plogging.backend.user.controller.dto.EditableProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
+import com.swyp.plogging.backend.user.controller.dto.UpdateNicknameRequest;
+import com.swyp.plogging.backend.user.controller.dto.UpdatePhoneNumRequest;
 import com.swyp.plogging.backend.user.controller.dto.UpdateProfileRequest;
+import com.swyp.plogging.backend.user.controller.dto.UpdatePushEnabledRequest;
+import com.swyp.plogging.backend.user.controller.dto.UpdateRegionRequest;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import com.swyp.plogging.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +31,6 @@ public class UserService {
 
     public EditableProfileResponse getEditableProfile(Long userId) {
         AppUser appUser = getUser(userId);
-
         return EditableProfileResponse.of(appUser);
     }
 
@@ -38,12 +42,23 @@ public class UserService {
     @Transactional
     public void updateProfile(Long userId, UpdateProfileRequest request) {
         AppUser user = getUser(userId);
-        user.updateProfile(request.getNickname(), request.getRegion(), request.getPhoneNum(), request.getPushEnabled());
+
+        if (request instanceof UpdateNicknameRequest nicknameRequest) {
+            user.updateNickname(nicknameRequest.getNickname());
+        } else if (request instanceof UpdateRegionRequest regionRequest) {
+            user.updateRegion(regionRequest.getRegion());
+        } else if (request instanceof UpdatePhoneNumRequest phoneRequest) {
+            user.updatePhoneNum(phoneRequest.getPhoneNum());
+        } else if (request instanceof UpdatePushEnabledRequest pushRequest) {
+            user.updatePushEnabled(pushRequest.getPushEnabled());
+        } else {
+            throw new UnsupportedUpdateRequestException();
+        }
     }
 
     @Transactional
     public String uploadProfileImage(Long userId, MultipartFile file) {
-        String filename = fileService.uploadImageFile(file);
+        String filename = fileService.uploadImageAndGetFileName(file);
 
         AppUser user = getUser(userId);
         String publicPath = "/images/" + filename;
