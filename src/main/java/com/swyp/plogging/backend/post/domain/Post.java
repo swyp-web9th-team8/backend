@@ -1,11 +1,7 @@
 package com.swyp.plogging.backend.post.domain;
 
-import com.swyp.plogging.backend.controller.dto.UserResponse;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
-<<<<<<< HEAD
 import com.swyp.plogging.backend.post.controller.dto.NicknameAndImageResponse;
-=======
->>>>>>> master
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.persistence.*;
@@ -14,6 +10,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -72,23 +69,23 @@ public class Post extends BaseEntity {
         response.setMeetingTime(meetingDt);
         response.setDeadLine(deadLine);
         response.setOpenChatUrl(openChatUrl);
-        //        response.setParticipants(
-//                participations.stream()
-//                        .map(participation -> new UserResponse(participation.getUser()))
-//                        .collect(Collectors.toList())
-//        );
+        response.setParticipants(
+                participations.stream()
+                        .map(participation -> new NicknameAndImageResponse(participation.getUser()))
+                        .collect(Collectors.toList())
+        );
         return response;
     }
 
     public void modify(String title,
-        String content,
-        LocalDateTime meetingTime,
-        String placeId,
-        String placeName,
-        String address,
-        Integer maxParticipants,
-        String openChatUrl,
-        Integer deadLine) {
+                       String content,
+                       LocalDateTime meetingTime,
+                       String placeId,
+                       String placeName,
+                       String address,
+                       Integer maxParticipants,
+                       String openChatUrl,
+                       Integer deadLine) {
         if (title != null && !this.title.equals(title)) {
             this.title = title;
         }
@@ -133,7 +130,7 @@ public class Post extends BaseEntity {
 
     public Participation leave(AppUser user) {
         Participation removed = isParticipating(user);
-        if(removed != null){
+        if (removed != null) {
             participations.remove(removed);
             return removed;
         }
@@ -141,11 +138,11 @@ public class Post extends BaseEntity {
     }
 
     public Participation isParticipating(AppUser user) {
-        for(Participation participation : participations){
-            if(participation.getUser().getId() != null && participation.getUser().getId().equals(user.getId())){
+        for (Participation participation : participations) {
+            if (participation.getUser().getId() != null && participation.getUser().getId().equals(user.getId())) {
                 return participation;
             }
-            if(participation.getUser().getEmail() != null && participation.getUser().getEmail().equals(user.getEmail())){
+            if (participation.getUser().getEmail() != null && participation.getUser().getEmail().equals(user.getEmail())) {
                 return participation;
             }
         }
@@ -158,7 +155,7 @@ public class Post extends BaseEntity {
     }
 
     public boolean isWriter(AppUser user) {
-        if(writer.getId() != null && writer.getId().equals(user.getId())){
+        if (writer.getId() != null && writer.getId().equals(user.getId())) {
             return true;
         }
         if (writer.getEmail() != null && writer.getEmail().equals(user.getEmail())) {
