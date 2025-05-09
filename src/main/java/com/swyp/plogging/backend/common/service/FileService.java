@@ -22,10 +22,10 @@ public class FileService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    public String uploadImageFile(MultipartFile file) {
+    public String uploadImageAndGetFileName(MultipartFile file) {
         validateFile(file);
 
-        String original = file.getOriginalFilename();
+        String original = getOriginal(file);
         String extension = StringUtils.getFilenameExtension(original);
         String filename = UUID.randomUUID() + "." + extension;
 
@@ -46,9 +46,22 @@ public class FileService {
         }
     }
 
+    private static String getOriginal(MultipartFile file) {
+        String original = file.getOriginalFilename();
+        if (!StringUtils.hasText(original)) {
+            throw new FileUploadException("Filename is invalid");
+        }
+
+        return original;
+    }
+
     private void validateFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new FileUploadException("File is empty.");
+        }
+
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new FileUploadException("File too large");
+            throw new FileUploadException("File too large.");
         }
 
         String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());

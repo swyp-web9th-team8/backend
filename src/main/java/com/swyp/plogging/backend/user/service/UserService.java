@@ -43,7 +43,7 @@ public class UserService {
 
     @Transactional
     public String uploadProfileImage(Long userId, MultipartFile file) {
-        String filename = fileService.uploadImageFile(file);
+        String filename = fileService.uploadImageAndGetFileName(file);
 
         AppUser user = getUser(userId);
         String publicPath = "/images/" + filename;
