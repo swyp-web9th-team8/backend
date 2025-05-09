@@ -1,7 +1,10 @@
 package com.swyp.plogging.backend.user.controller;
 
+import com.swyp.plogging.backend.common.dto.ApiPagedResponse;
 import com.swyp.plogging.backend.common.dto.ApiResponse;
 import com.swyp.plogging.backend.common.util.SecurityUtils;
+import com.swyp.plogging.backend.participation.dto.ParticipatedPostResponse;
+import com.swyp.plogging.backend.participation.service.ParticipationService;
 import com.swyp.plogging.backend.user.controller.dto.EditableProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.UpdateNicknameRequest;
@@ -9,10 +12,12 @@ import com.swyp.plogging.backend.user.controller.dto.UpdatePhoneNumRequest;
 import com.swyp.plogging.backend.user.controller.dto.UpdateRegionRequest;
 import com.swyp.plogging.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
     private final UserService userService;
+    private final ParticipationService participationService;
 
     @GetMapping("/profile")
     public ApiResponse<ProfileResponse> getProfile(@AuthenticationPrincipal OAuth2User principal) {
@@ -72,19 +78,17 @@ public class UserController {
         return ApiResponse.ok(currentUserId, String.format("Profile phonNumber updated successfully! User ID = %d", currentUserId));
     }
 
-    @GetMapping("/{userId}/rankings")
-    public String fetchRankingOfUser(@PathVariable(name = "userId") Long userId) {
-        return "Successfully retrieved rankings and badges.";
+    @GetMapping("/participated-posts")
+    public ApiPagedResponse<ParticipatedPostResponse> fetchParticipatedPostsOfUser(@AuthenticationPrincipal OAuth2User principal,
+        @PageableDefault Pageable pageable) {
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        Page<ParticipatedPostResponse> participatedPosts = participationService.getParticipatedPosts(currentUserId, pageable);
+
+        return ApiPagedResponse.ok(participatedPosts, "Participated posts fetched successfully!");
     }
 
-
-    @GetMapping("/{userId}/participated-posts")
-    public String fetchParticipatedPostsOfUser(@PathVariable(name = "userId") Long userId) {
-        return "Successfully retrieved participated events.";
-    }
-
-    @GetMapping("/{userId}/created-posts")
-    public String fetchCreatedPsotsOfUser(@PathVariable(name = "userId") Long userId) {
+    @GetMapping("/created-posts")
+    public String fetchCreatedPsotsOfUser(@AuthenticationPrincipal OAuth2User principal) {
         return "Successfully retrieved created events.";
     }
 }

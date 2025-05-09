@@ -2,6 +2,7 @@ package com.swyp.plogging.backend.domain;
 
 import com.swyp.plogging.backend.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
+import com.swyp.plogging.backend.participation.domain.Participation;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

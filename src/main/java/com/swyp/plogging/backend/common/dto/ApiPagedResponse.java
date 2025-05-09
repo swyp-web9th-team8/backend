@@ -2,6 +2,7 @@ package com.swyp.plogging.backend.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,24 +25,35 @@ public class ApiPagedResponse<T> {
     private int totalPages;
     private long totalElements;
 
-    public ApiPagedResponse<T> ok(Page<T> page, String message) {
-        this.statusCode = HttpStatus.OK;
+    private ApiPagedResponse(HttpStatusCode statusCode, String message, List<T> content, int page, int size, int totalPages,
+        long totalElements) {
+        this.statusCode = statusCode;
         this.message = message;
-        this.content = page.getContent();
-        this.page = page.getNumber();
-        this.size = page.getSize();
-        this.totalPages = page.getTotalPages();
-        this.totalElements = page.getTotalElements();
+        this.content = content;
+        this.page = page;
+        this.size = size;
+        this.totalPages = totalPages;
+        this.totalElements = totalElements;
         this.timestamp = LocalDateTime.now();
-
-        return this;
     }
 
-    public ApiPagedResponse<T> error(String message) {
-        this.statusCode = HttpStatus.BAD_REQUEST;
-        this.message = message;
-        this.timestamp = LocalDateTime.now();
+    public static <T> ApiPagedResponse<T> ok(Page<T> page, String message) {
+        return new ApiPagedResponse<>(
+            HttpStatus.OK,
+            message,
+            page.getContent(),
+            page.getNumber(),
+            page.getSize(),
+            page.getTotalPages(),
+            page.getTotalElements()
+        );
+    }
 
-        return this;
+    public static <T> ApiPagedResponse<T> error(String message) {
+        return error(message, HttpStatus.BAD_REQUEST);
+    }
+
+    public static <T> ApiPagedResponse<T> error(String message, HttpStatus status) {
+        return new ApiPagedResponse<>(status, message, Collections.emptyList(), 0, 0, 0, 0);
     }
 }
