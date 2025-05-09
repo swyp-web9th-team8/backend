@@ -1,10 +1,12 @@
 package com.swyp.plogging.backend.post.sevice;
 
 import com.swyp.plogging.backend.common.exception.PostNotFoundException;
-import com.swyp.plogging.backend.controller.dto.PostDetailResponse;
-import com.swyp.plogging.backend.controller.dto.PostInfoResponse;
+import com.swyp.plogging.backend.common.exception.UnauthorizedUserException;
+import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
+import com.swyp.plogging.backend.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.repository.PostRepository;
+import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
@@ -28,18 +30,18 @@ public class PostService {
 
 
     @Transactional
-    public PostDetailResponse createPost(String title, String content,
-        LocalDateTime meetingTime, String placeId,
-        String placeName, String address,
-        @NonNull Integer maxParticipants, String openChatUrl,
-        @Nullable Integer deadLine) {
+    public PostDetailResponse createPost(AppUser user, String title, String content,
+                                         LocalDateTime meetingTime, String placeId,
+                                         String placeName, String address,
+                                         @NonNull Integer maxParticipants, String openChatUrl,
+                                         @Nullable Integer deadLine) {
 
         if (maxParticipants <= 0) {
             throw new IllegalArgumentException("최대인원 설정이 잘못되었습니다.");
         }
 
         Post post = Post.builder()
-//                .writer() // todo 로그인 구현 완료 후 작성자 수정
+            .writer(user)
             .title(title)
             .content(content)
             .meetingDt(meetingTime)
@@ -59,12 +61,13 @@ public class PostService {
     }
 
     @Transactional
-    public PostDetailResponse modifyPost(Long id, String title,
+    public PostDetailResponse modifyPost(AppUser user, Long id, String title,
         String content, LocalDateTime meetingTime,
         String placeId, String placeName, String address,
         Integer maxParticipants, String openChatUrl, Integer deadLine) {
 
         Post post = findById(id);
+        post.isWriter(user);
         post.modify(title, content, meetingTime, placeId, placeName, address, maxParticipants, openChatUrl, deadLine);
 
         return post.toDetailResponse();
@@ -75,10 +78,15 @@ public class PostService {
     }
 
     @Transactional
-    public void deletePost(Long postId) {
-        // todo 글의 주인 또는 관리자인지 확인 필요
+    public void deletePost(Long postId, AppUser user) {
+        Post post = findById(postId);
 
-        postRepository.deleteById(postId);
+        // 작성자인지 확인
+        if(!post.isWriter(user)){
+            throw new UnauthorizedUserException("작성자가 아닙니다.");
+        }
+
+        postRepository.delete(post);
     }
 
     public PostDetailResponse getPostDetails(Long postId) {

@@ -45,10 +45,11 @@ public class ParticipationServiceTest {
 
     @BeforeEach
     public void createData() {
+        user = AppUser.newInstance("user@user.com", "user1", "Soeul", AuthProvider.valueOf("GOOGLE"));
+        user2 = AppUser.newInstance("user2@user.com", "user2", "Seoul",AuthProvider.KAKAO);
         data = Post.builder()
                 .id(1L)
-                // todo 로그인 구현 후 수정 필요
-//                .writer()
+                .writer(user)
                 .title("생성 시험")
                 .content("생성 시험 내용")
                 .meetingDt(LocalDateTime.parse("2025-04-29T10:40:32"))
@@ -59,8 +60,6 @@ public class ParticipationServiceTest {
                 .openChatUrl("https://open.kakao.com/몰라")
                 .build();
         data.setUpDeadLine(null);
-        user = AppUser.newInstance("user@user.com", "user1", "Soeul", AuthProvider.valueOf("GOOGLE"));
-        user2 = AppUser.newInstance("user2@user.com", "user2", "Seoul",AuthProvider.KAKAO);
     }
 
     @Test
@@ -74,7 +73,7 @@ public class ParticipationServiceTest {
 
 
         //when
-        participationService.participateToPost(postId, user);
+        participationService.participateToPost(postId, user2);
 
         //then
         verify(participationRepository, times(1)).save(any(Participation.class));
@@ -90,18 +89,20 @@ public class ParticipationServiceTest {
         //given
         Long postId = 1L;
         Queue<Participation> queue = new LinkedList<>();
-        queue.add(Participation.newInstance(data, user));
         queue.add(Participation.newInstance(data, user2));
+        queue.add(Participation.newInstance(data, AppUser.newInstance("1","1","1",AuthProvider.GOOGLE)));
+
 
         when(postService.findById(postId)).thenReturn(data);
         when(participationRepository.save(any(Participation.class))).thenReturn(queue.poll());
-        participationService.participateToPost(postId, user);
+
         participationService.participateToPost(postId, user2);
+        participationService.participateToPost(postId, AppUser.newInstance("1","1","1",AuthProvider.GOOGLE));
 
 
         //when
         Exception e = Assertions.assertThrows(NotParticipatingPostException.class, ()->
-        participationService.participateToPost(postId, user2));
+        participationService.participateToPost(postId, AppUser.newInstance("2","2","2",AuthProvider.GOOGLE)));
 
         //then
         verify(participationRepository, times(2)).save(any(Participation.class));
@@ -117,16 +118,16 @@ public class ParticipationServiceTest {
         //given
         Long postId = 1L;
         when(postService.findById(postId)).thenReturn(data);
-        when(participationRepository.save(any(Participation.class))).thenReturn(Participation.newInstance(data, user));
-        participationService.participateToPost(postId, user);
+        when(participationRepository.save(any(Participation.class))).thenReturn(Participation.newInstance(data, user2));
+        participationService.participateToPost(postId, user2);
 
         //when
         Exception e = Assertions.assertThrows(NotParticipatingPostException.class, ()->
-                participationService.participateToPost(postId, user));
+                participationService.participateToPost(postId, user2));
 
         //then
         verify(participationRepository, times(1)).save(any(Participation.class));
-        Assertions.assertEquals(user.getNickname() + " 님은 이미 참가중입니다.", e.getMessage());
+        Assertions.assertEquals(user2.getNickname() + " 님은 이미 참가중입니다.", e.getMessage());
         log.info(() -> testInfo.getDisplayName() + " 완료");
     }
 
@@ -137,11 +138,11 @@ public class ParticipationServiceTest {
 
         //given
         Long postId = 1L;
-        data.addParticipation(Participation.newInstance(data, user));
+        data.addParticipation(Participation.newInstance(data, user2));
         when(postService.findById(postId)).thenReturn(data);
 
         //when
-        participationService.leaveFromPost(postId, user);
+        participationService.leaveFromPost(postId, user2);
 
         //then
         verify(participationRepository, times(1)).delete(any(Participation.class));

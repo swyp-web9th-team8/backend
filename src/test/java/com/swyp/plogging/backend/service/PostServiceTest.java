@@ -1,11 +1,13 @@
 package com.swyp.plogging.backend.service;
 
 
-import com.swyp.plogging.backend.controller.dto.PostDetailResponse;
-import com.swyp.plogging.backend.controller.dto.PostInfoResponse;
+import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
+import com.swyp.plogging.backend.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.repository.PostRepository;
 import com.swyp.plogging.backend.post.sevice.PostService;
+import com.swyp.plogging.backend.user.domain.AppUser;
+import com.swyp.plogging.backend.user.domain.AuthProvider;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.logging.Logger;
@@ -35,15 +37,16 @@ public class PostServiceTest {
     PostRepository postRepository;
 
     private static Post data;
+    private static AppUser user;
 
     private static final Logger log = LoggerFactory.getLogger(PostServiceTest.class);
 
     @BeforeEach
     public void createData() {
+        user = AppUser.newInstance("user@user.com", "user", "Seoul", AuthProvider.GOOGLE);
         data = Post.builder()
             .id(1L)
-            // todo 로그인 구현 후 수정 필요
-//                .writer()
+            .writer(user)
             .title("생성 시험")
             .content("생성 시험 내용")
             .meetingDt(LocalDateTime.parse("2025-04-29T10:40:32"))
@@ -65,7 +68,7 @@ public class PostServiceTest {
         when(postRepository.save(any(Post.class))).thenReturn(expected);
 
         //when
-        PostDetailResponse dto = postService.createPost(
+        PostDetailResponse dto = postService.createPost(user,
             "생성 시험",
             "생성 시험 내용",
             LocalDateTime.parse("2025-04-29T10:40:32"),
@@ -91,7 +94,7 @@ public class PostServiceTest {
         when(postRepository.findById(1L)).thenReturn(Optional.of(given));
 
         //when
-        PostDetailResponse dto = postService.modifyPost(
+        PostDetailResponse dto = postService.modifyPost(user,
             1L,
             "생성 시험2",
             "생성 시험 내용2",
@@ -117,11 +120,9 @@ public class PostServiceTest {
         log.info(() -> testInfo.getDisplayName() + " 시작");
         //given
         Post given = data;
-        // todo 로그인 구현 후 작성자 확인 필요
-        // when(postService.validateWriter()).thenReturn(true);
 
         //when
-        postService.deletePost(1L);
+        postService.deletePost(1L, user);
 
         //verify
         verify(postRepository, times(1)).deleteById(1L);
@@ -158,8 +159,7 @@ public class PostServiceTest {
         for (int i = 0; i < 20; i++) {
             Post post = Post.builder()
                 .id((long) i)
-                // todo 로그인 구현 후 수정 필요
-//                .writer()
+                .writer(user)
                 .title("생성 시험" + i)
                 .content("생성 시험 내용" + i)
                 .meetingDt(LocalDateTime.now().minusMinutes(100 - i))

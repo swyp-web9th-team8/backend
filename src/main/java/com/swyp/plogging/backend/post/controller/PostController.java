@@ -1,36 +1,38 @@
 package com.swyp.plogging.backend.post.controller;
 
-import com.swyp.plogging.backend.auth.domain.CustomOAuth2User;
 import com.swyp.plogging.backend.common.dto.ApiPagedResponse;
 import com.swyp.plogging.backend.common.dto.ApiResponse;
-import com.swyp.plogging.backend.controller.dto.CreatePostRequest;
-import com.swyp.plogging.backend.controller.dto.PostDetailResponse;
-import com.swyp.plogging.backend.controller.dto.PostInfoResponse;
+import com.swyp.plogging.backend.common.util.SecurityUtils;
+import com.swyp.plogging.backend.post.controller.dto.CreatePostRequest;
+import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
+import com.swyp.plogging.backend.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.sevice.ParticipationService;
 import com.swyp.plogging.backend.post.sevice.PostService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/post")
 public class PostController {
 
     private final PostService postService;
     private final ParticipationService participationService;
 
-    public PostController(PostService postService, ParticipationService participationService) {
-        this.postService = postService;
-        this.participationService = participationService;
-    }
-
     @PostMapping("create")
-    public ApiResponse<PostDetailResponse> createPost(@RequestBody CreatePostRequest request) {
+    public ApiResponse<PostDetailResponse> createPost(@RequestBody CreatePostRequest request,
+                                                      @AuthenticationPrincipal OAuth2User user) {
+        // 회원 확인용
+        SecurityUtils.getUserOrThrow(user);
+
         try {
-            PostDetailResponse response = postService.createPost(request.getTitle(), request.getContent(),
+            PostDetailResponse response = postService.createPost(SecurityUtils.getUserOrThrow(user), request.getTitle(), request.getContent(),
                     request.getMeetingTime(), request.getPlaceId(),
                     request.getPlaceName(), request.getAddress(),
                     request.getMaxParticipants(), request.getOpenChatUrl(), null);
@@ -43,10 +45,15 @@ public class PostController {
 
     @PatchMapping("/{postId}/modify")
     public ApiResponse<PostDetailResponse> modifyPost(@PathVariable(name = "postId") Long postId,
-                                                      @RequestBody CreatePostRequest request) {
+                                                      @RequestBody CreatePostRequest request,
+                                                      @AuthenticationPrincipal OAuth2User user) {
+        if(!postId.equals(request.getId())){
+            throw new IllegalArgumentException("요청한 모임이 다릅니다.");
+        }
+
         try {
-            PostDetailResponse response = postService.modifyPost(
-                    request.getId(),
+            PostDetailResponse response = postService.modifyPost(SecurityUtils.getUserOrThrow(user),
+                    postId,
                     request.getTitle(), request.getContent(),
                     request.getMeetingTime(), request.getPlaceId(),
                     request.getPlaceName(), request.getAddress(),
@@ -60,9 +67,10 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}/delete")
-    public ApiResponse<Object> deletePost(@PathVariable(name = "postId") Long postId) {
+    public ApiResponse<Object> deletePost(@PathVariable(name = "postId") Long postId,
+                                          @AuthenticationPrincipal OAuth2User user) {
         try {
-            postService.deletePost(postId);
+            postService.deletePost(postId, SecurityUtils.getUserOrThrow(user));
 
             return ApiResponse.ok(null, "Successfully deleted the post.");
         } catch (Exception e) {
@@ -97,9 +105,9 @@ public class PostController {
 
     @PostMapping("/{postId}/participate")
     public ApiResponse<Object> participatePost(@PathVariable(name = "postId") Long postId,
-                                               @AuthenticationPrincipal CustomOAuth2User user) {
+                                               @AuthenticationPrincipal OAuth2User user) {
         try {
-            participationService.participateToPost(postId, user.getAppUser());
+            participationService.participateToPost(postId,  SecurityUtils.getUserOrThrow(user));
             return ApiResponse.ok(null, "Successfully joined the group.");
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());
@@ -110,9 +118,9 @@ public class PostController {
 
     @PostMapping("/{postId}/leave")
     public ApiResponse<Object> leavePost(@PathVariable(name = "postId") Long postId,
-                                         @AuthenticationPrincipal CustomOAuth2User user) {
+                                         @AuthenticationPrincipal OAuth2User user) {
         try {
-            participationService.leaveFromPost(postId, user.getAppUser());
+            participationService.leaveFromPost(postId, SecurityUtils.getUserOrThrow(user));
             return ApiResponse.ok(null, "Successfully left the group.");
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());
