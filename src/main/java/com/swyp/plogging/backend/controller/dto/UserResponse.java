@@ -25,6 +25,5 @@ public class UserResponse {
         this.name = writer.getNickname();
         this.profileImage = writer.getProfileImageUrl();
         this.provider = writer.getAuthProvider().toString();
-        this.createdAt = writer.getCreatedDt().toString();
     }
 }
