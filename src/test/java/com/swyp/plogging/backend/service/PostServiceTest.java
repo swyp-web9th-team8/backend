@@ -120,12 +120,13 @@ public class PostServiceTest {
         log.info(() -> testInfo.getDisplayName() + " 시작");
         //given
         Post given = data;
+        when(postRepository.findById(1L)).thenReturn(Optional.of(given));
 
         //when
         postService.deletePost(1L, user);
 
         //verify
-        verify(postRepository, times(1)).deleteById(1L);
+        verify(postRepository, times(1)).delete(given);
         log.info(() -> testInfo.getDisplayName() + " 완료");
     }
 

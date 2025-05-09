@@ -14,7 +14,7 @@ public class PostDetailResponse {
     private Long id;
     private String title;
     private String content;
-    private UserResponse writer;
+    private NicknameAndImageResponse writer;
     private String placeId;
     private String placeName;
     private String address;
@@ -22,5 +22,5 @@ public class PostDetailResponse {
     private String openChatUrl;
     private int maxParticipants;
     private LocalDateTime deadLine;
-    private List<UserResponse> participants;
+    private List<NicknameAndImageResponse> participants;
 }
