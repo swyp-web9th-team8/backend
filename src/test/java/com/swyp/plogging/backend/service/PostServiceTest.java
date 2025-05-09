@@ -1,8 +1,8 @@
 package com.swyp.plogging.backend.service;
 
 
-import com.swyp.plogging.backend.controller.dto.PostDetailResponse;
-import com.swyp.plogging.backend.controller.dto.PostInfoResponse;
+import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
+import com.swyp.plogging.backend.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.repository.PostRepository;
 import com.swyp.plogging.backend.post.sevice.PostService;

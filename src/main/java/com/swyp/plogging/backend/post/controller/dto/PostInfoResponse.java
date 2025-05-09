@@ -1,4 +1,4 @@
-package com.swyp.plogging.backend.controller.dto;
+package com.swyp.plogging.backend.post.controller.dto;
 
 import com.swyp.plogging.backend.post.domain.Post;
 import java.time.LocalDateTime;

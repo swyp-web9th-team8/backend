@@ -1,4 +1,4 @@
-package com.swyp.plogging.backend.domain;
+package com.swyp.plogging.backend.post.domain;
 
 import com.swyp.plogging.backend.domain.base.BaseTimeEntity;
 import com.swyp.plogging.backend.post.domain.Post;
