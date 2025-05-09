@@ -1,7 +1,8 @@
 package com.swyp.plogging.backend.post.domain;
 
-import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
+import com.swyp.plogging.backend.controller.dto.UserResponse;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
+import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.persistence.*;
 import lombok.*;
@@ -63,8 +64,7 @@ public class Post extends BaseEntity {
         response.setPlaceName(placeName);
         response.setAddress(address);
         response.setMaxParticipants(maxParticipants);
-        // todo 로그인 구현 후 수정 필요
-        //        response.setWriter(new UserResponse(writer));
+        response.setWriter(new UserResponse(writer));
         response.setMeetingTime(meetingDt);
         response.setDeadLine(deadLine);
         response.setOpenChatUrl(openChatUrl);
@@ -151,5 +151,15 @@ public class Post extends BaseEntity {
 
     public boolean isMax() {
         return participations.size() == maxParticipants;
+    }
+
+    public boolean isWriter(AppUser user) {
+        if(writer.getId() != null && writer.getId().equals(user.getId())){
+            return true;
+        }
+        if (writer.getEmail() != null && writer.getEmail().equals(user.getEmail())) {
+            return true;
+        }
+        return false;
     }
 }

@@ -22,7 +22,11 @@ public class ParticipationService {
     @Transactional
     public void participateToPost(Long postId, AppUser user) {
         Post target = postService.findById(postId);
-        // todo 오너일 경우 제외
+
+        // 작성자 제외
+        if(target.isWriter(user)){
+            throw new NotParticipatingPostException(user);
+        }
 
         // 남은 자리 없음
         if(target.isMax()){
@@ -44,7 +48,10 @@ public class ParticipationService {
     @Transactional
     public void leaveFromPost(Long postId, AppUser user) {
         Post target = postService.findById(postId);
-        // todo except owner
+
+        if(target.isWriter(user)){
+            throw NotParticipatingPostException.isWriter();
+        }
 
         Participation participation = target.leave(user);
         // 잘못된 접근 제외

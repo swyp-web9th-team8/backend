@@ -45,10 +45,11 @@ public class ParticipationServiceTest {
 
     @BeforeEach
     public void createData() {
+        user = AppUser.newInstance("user@user.com", "user1", "Soeul", AuthProvider.valueOf("GOOGLE"));
+        user2 = AppUser.newInstance("user2@user.com", "user2", "Seoul",AuthProvider.KAKAO);
         data = Post.builder()
                 .id(1L)
-                // todo 로그인 구현 후 수정 필요
-//                .writer()
+                .writer(user)
                 .title("생성 시험")
                 .content("생성 시험 내용")
                 .meetingDt(LocalDateTime.parse("2025-04-29T10:40:32"))
@@ -59,8 +60,6 @@ public class ParticipationServiceTest {
                 .openChatUrl("https://open.kakao.com/몰라")
                 .build();
         data.setUpDeadLine(null);
-        user = AppUser.newInstance("user@user.com", "user1", "Soeul", AuthProvider.valueOf("GOOGLE"));
-        user2 = AppUser.newInstance("user2@user.com", "user2", "Seoul",AuthProvider.KAKAO);
     }
 
     @Test
