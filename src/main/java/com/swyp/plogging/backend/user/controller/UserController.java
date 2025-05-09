@@ -4,6 +4,9 @@ import com.swyp.plogging.backend.common.dto.ApiResponse;
 import com.swyp.plogging.backend.common.util.SecurityUtils;
 import com.swyp.plogging.backend.user.controller.dto.EditableProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
+import com.swyp.plogging.backend.user.controller.dto.UpdateNicknameRequest;
+import com.swyp.plogging.backend.user.controller.dto.UpdatePhoneNumRequest;
+import com.swyp.plogging.backend.user.controller.dto.UpdateRegionRequest;
 import com.swyp.plogging.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,6 +14,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,32 +47,30 @@ public class UserController {
     public ApiResponse<String> uploadProfileImage(@AuthenticationPrincipal OAuth2User principal, @RequestParam("file") MultipartFile file) {
         Long currentUserId = SecurityUtils.getUserId(principal);
         String url = userService.uploadProfileImage(currentUserId, file);
+
         return ApiResponse.ok(url, "Profile image updated successfully!");
     }
-//
-//    @PatchMapping("/nickname")
-//    public ApiResponse<Long> updateNickname(@RequestBody UpdateProfileRequest request, @AuthenticationPrincipal OAuth2User principal) {
-//        Long currentUserId = SecurityUtils.getUserId(principal);
-//        userService.updateProfile(currentUserId, request);
-//
-//        return ApiResponse.ok(currentUserId, String.format("Profile updated successfully! User ID = %d", currentUserId));
-//    }
-//
-//    @PatchMapping("/region")
-//    public ApiResponse<Long> updateRegion(@RequestBody UpdateProfileRequest request, @AuthenticationPrincipal OAuth2User principal) {
-//        Long currentUserId = SecurityUtils.getUserId(principal);
-//        userService.updateProfile(currentUserId, request);
-//
-//        return ApiResponse.ok(currentUserId, String.format("Profile updated successfully! User ID = %d", currentUserId));
-//    }
-//
-//    @PatchMapping("/phone-number")
-//    public ApiResponse<Long> updatePhoneNumber(@RequestBody UpdateProfileRequest request, @AuthenticationPrincipal OAuth2User principal) {
-//        Long currentUserId = SecurityUtils.getUserId(principal);
-//        userService.updateProfile(currentUserId, request);
-//
-//        return ApiResponse.ok(currentUserId, String.format("Profile updated successfully! User ID = %d", currentUserId));
-//    }
+
+    @PostMapping("/nickname")
+    public ApiResponse<Long> updateNickname(@RequestBody UpdateNicknameRequest request, @AuthenticationPrincipal OAuth2User principal) {
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        userService.updateProfile(currentUserId, request);
+        return ApiResponse.ok(currentUserId, String.format("Profile nickname updated successfully! User ID = %d", currentUserId));
+    }
+
+    @PostMapping("/region")
+    public ApiResponse<Long> updateRegion(@RequestBody UpdateRegionRequest request, @AuthenticationPrincipal OAuth2User principal) {
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        userService.updateProfile(currentUserId, request);
+        return ApiResponse.ok(currentUserId, String.format("Profile region updated successfully! User ID = %d", currentUserId));
+    }
+
+    @PostMapping("/phone-number")
+    public ApiResponse<Long> updatePhoneNumber(@RequestBody UpdatePhoneNumRequest request, @AuthenticationPrincipal OAuth2User principal) {
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        userService.updateProfile(currentUserId, request);
+        return ApiResponse.ok(currentUserId, String.format("Profile phonNumber updated successfully! User ID = %d", currentUserId));
+    }
 
     @GetMapping("/{userId}/rankings")
     public String fetchRankingOfUser(@PathVariable(name = "userId") Long userId) {
