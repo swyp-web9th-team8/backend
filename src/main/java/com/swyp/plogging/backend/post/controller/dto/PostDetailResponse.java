@@ -1,10 +1,11 @@
 package com.swyp.plogging.backend.post.controller.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.swyp.plogging.backend.controller.dto.UserResponse;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
