@@ -3,7 +3,7 @@ package com.swyp.plogging.backend.user.controller;
 import com.swyp.plogging.backend.common.dto.ApiPagedResponse;
 import com.swyp.plogging.backend.common.dto.ApiResponse;
 import com.swyp.plogging.backend.common.util.SecurityUtils;
-import com.swyp.plogging.backend.participation.dto.ParticipatedPostResponse;
+import com.swyp.plogging.backend.participation.dto.MyPostResponse;
 import com.swyp.plogging.backend.participation.service.ParticipationService;
 import com.swyp.plogging.backend.user.controller.dto.EditableProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
@@ -79,16 +79,20 @@ public class UserController {
     }
 
     @GetMapping("/participated-posts")
-    public ApiPagedResponse<ParticipatedPostResponse> fetchParticipatedPostsOfUser(@AuthenticationPrincipal OAuth2User principal,
+    public ApiPagedResponse<MyPostResponse> fetchParticipatedPostsOfUser(@AuthenticationPrincipal OAuth2User principal,
         @PageableDefault Pageable pageable) {
         Long currentUserId = SecurityUtils.getUserId(principal);
-        Page<ParticipatedPostResponse> participatedPosts = participationService.getParticipatedPosts(currentUserId, pageable);
+        Page<MyPostResponse> participatedPosts = participationService.getParticipatedPosts(currentUserId, pageable);
 
         return ApiPagedResponse.ok(participatedPosts, "Participated posts fetched successfully!");
     }
 
     @GetMapping("/created-posts")
-    public String fetchCreatedPsotsOfUser(@AuthenticationPrincipal OAuth2User principal) {
-        return "Successfully retrieved created events.";
+    public ApiPagedResponse<MyPostResponse> fetchCreatedPsotsOfUser(@AuthenticationPrincipal OAuth2User principal,
+        @PageableDefault Pageable pageable) {
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        Page<MyPostResponse> createdPosts = participationService.getCreatedPosts(currentUserId, pageable);
+
+        return ApiPagedResponse.ok(createdPosts, "Created posts fetched successfully!");
     }
 }

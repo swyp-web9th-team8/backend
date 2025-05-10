@@ -2,7 +2,7 @@ package com.swyp.plogging.backend.participation.service;
 
 import com.swyp.plogging.backend.common.exception.NotParticipatingPostException;
 import com.swyp.plogging.backend.participation.domain.Participation;
-import com.swyp.plogging.backend.participation.dto.ParticipatedPostResponse;
+import com.swyp.plogging.backend.participation.dto.MyPostResponse;
 import com.swyp.plogging.backend.participation.repository.ParticipationRepository;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.sevice.PostService;
@@ -20,11 +20,6 @@ public class ParticipationService {
 
     private final ParticipationRepository participationRepository;
     private final PostService postService;
-
-    @Transactional
-    public Page<ParticipatedPostResponse> getParticipatedPosts(Long userId, Pageable pageable) {
-        return participationRepository.findParticipatedPostsByUserId(userId, pageable);
-    }
 
     @Transactional
     public void participateToPost(Long postId, AppUser user) {
@@ -68,5 +63,13 @@ public class ParticipationService {
 
         // 참가목록 제거
         participationRepository.delete(participation);
+    }
+
+    public Page<MyPostResponse> getParticipatedPosts(Long userId, Pageable pageable) {
+        return participationRepository.findParticipatedPostsByUserId(userId, pageable);
+    }
+
+    public Page<MyPostResponse> getCreatedPosts(Long userId, Pageable pageable) {
+        return participationRepository.findCreatedPostsByUserId(userId, pageable);
     }
 }

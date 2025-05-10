@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public class ParticipatedPostResponse {
+public class MyPostResponse {
 
     private final Long id;
     private final String title;
@@ -14,7 +14,7 @@ public class ParticipatedPostResponse {
     private final boolean completed;
 
     @QueryProjection
-    public ParticipatedPostResponse(Long id, String title, String placeName, LocalDateTime meetingDt, boolean completed) {
+    public MyPostResponse(Long id, String title, String placeName, LocalDateTime meetingDt, boolean completed) {
         this.id = id;
         this.title = title;
         this.placeName = placeName;
