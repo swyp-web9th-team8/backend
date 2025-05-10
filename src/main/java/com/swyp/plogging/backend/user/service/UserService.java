@@ -38,7 +38,7 @@ public class UserService {
 
     public EditableProfileResponse getEditableProfile(Long userId) {
         AppUser appUser = getUser(userId);
-        return EditableProfileResponse.of(appUser);
+        return EditableProfileResponse.from(appUser);
     }
 
     private AppUser getUser(Long userId) {
@@ -78,7 +78,7 @@ public class UserService {
         AppUser user = getUser(userId);
         List<UserBadge> userBadges = userBadgeRepository.findByUser(user);
         List<UserBadgeResponse> userBadgeResponses = userBadges.stream()
-            .map(UserBadgeResponse::of)
+            .map(UserBadgeResponse::from)
             .collect(Collectors.toList());
 
         UserBadge latestUserBadge = userBadgeRepository.findTopByUserIdOrderByGrantedAtDesc(userId)

@@ -11,7 +11,7 @@ public class EditableProfileResponse {
     private String phoneNum;
     private String profileImageUrl;
 
-    public static EditableProfileResponse of(AppUser appUser) {
+    public static EditableProfileResponse from(AppUser appUser) {
         EditableProfileResponse vo = new EditableProfileResponse();
         vo.setId(appUser.getId());
         vo.setNickname(appUser.getNickname());

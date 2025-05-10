@@ -14,7 +14,7 @@ public class UserBadgeResponse {
     private String activeBadgeIconDir;
     private String inactiveBadgeIconDir;
 
-    public static UserBadgeResponse of(UserBadge userBadge) {
+    public static UserBadgeResponse from(UserBadge userBadge) {
         UserBadgeResponse vo = new UserBadgeResponse();
         vo.setBadgeName(userBadge.getBadge().getName());
         vo.setGrantedReason(userBadge.getGrantedReason());
