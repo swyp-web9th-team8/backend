@@ -12,7 +12,7 @@ public class ProfileResponse {
     private String region;
     private String profileImageUrl;
     private int writtenPostsCount;
-    private String lastBadge;
+    private String lastBadgeIconUrl;
     private int participatedCount;
     private int totalMeet;
 
@@ -24,7 +24,7 @@ public class ProfileResponse {
         this.email = email;
         this.region = region;
         this.profileImageUrl = profileImageUrl;
-        this.lastBadge = lastBadgeIconUrl;
+        this.lastBadgeIconUrl = lastBadgeIconUrl;
         this.writtenPostsCount = writtenPostsCount;
         this.participatedCount = participatedCount;
         this.totalMeet = calculateTotalMeet(writtenPostsCount, participatedCount);

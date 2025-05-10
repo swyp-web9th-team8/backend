@@ -40,3 +40,4 @@ app:
 
 file:
   upload-dir: /opt/ploggo/images
+  badge-icon-dir: /opt/ploggo/badge-icons

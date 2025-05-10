@@ -9,10 +9,16 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
+    @Value("${file.badge-icon-dir}")
+    private String badgeIconDir;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
             .addResourceHandler("/images/**")
             .addResourceLocations("file:" + uploadDir + "/");
+
+        registry.addResourceHandler("/badges/icons/**")
+            .addResourceLocations("file:" + badgeIconDir + "/");
     }
 }

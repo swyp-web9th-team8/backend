@@ -3,6 +3,7 @@ package com.swyp.plogging.backend.post.domain;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
 import com.swyp.plogging.backend.post.controller.dto.NicknameAndImageResponse;
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
+import com.swyp.plogging.backend.participation.domain.Participation;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.persistence.*;
 import lombok.*;
