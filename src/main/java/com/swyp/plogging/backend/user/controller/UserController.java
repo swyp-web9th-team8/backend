@@ -10,6 +10,7 @@ import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.UpdateNicknameRequest;
 import com.swyp.plogging.backend.user.controller.dto.UpdatePhoneNumRequest;
 import com.swyp.plogging.backend.user.controller.dto.UpdateRegionRequest;
+import com.swyp.plogging.backend.user.controller.dto.UserBadgesResponse;
 import com.swyp.plogging.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -94,5 +95,13 @@ public class UserController {
         Page<MyPostResponse> createdPosts = participationService.getCreatedPosts(currentUserId, pageable);
 
         return ApiPagedResponse.ok(createdPosts, "Created posts fetched successfully!");
+    }
+
+    @GetMapping("/badges")
+    public ApiResponse<UserBadgesResponse> getUserBadges(@AuthenticationPrincipal OAuth2User principal) {
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        UserBadgesResponse userBadges = userService.getUserBadges(currentUserId);
+
+        return ApiResponse.ok(userBadges, "User badges fetched successfully!");
     }
 }

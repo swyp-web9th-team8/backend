@@ -10,8 +10,14 @@ import com.swyp.plogging.backend.user.controller.dto.UpdatePhoneNumRequest;
 import com.swyp.plogging.backend.user.controller.dto.UpdateProfileRequest;
 import com.swyp.plogging.backend.user.controller.dto.UpdatePushEnabledRequest;
 import com.swyp.plogging.backend.user.controller.dto.UpdateRegionRequest;
+import com.swyp.plogging.backend.user.controller.dto.UserBadgeResponse;
+import com.swyp.plogging.backend.user.controller.dto.UserBadgesResponse;
 import com.swyp.plogging.backend.user.domain.AppUser;
+import com.swyp.plogging.backend.user.domain.UserBadge;
+import com.swyp.plogging.backend.user.repository.UserBadgeRepository;
 import com.swyp.plogging.backend.user.repository.UserRepository;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +30,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final FileService fileService;
+    private final UserBadgeRepository userBadgeRepository;
 
     public ProfileResponse getProfile(Long userId) {
         return userRepository.findProfileByUserId(userId);
@@ -65,5 +72,38 @@ public class UserService {
         user.updateProfileImageUrl(publicPath);
 
         return publicPath;
+    }
+
+    public UserBadgesResponse getUserBadges(Long userId) {
+        AppUser user = getUser(userId);
+        List<UserBadge> userBadges = userBadgeRepository.findByUser(user);
+        List<UserBadgeResponse> userBadgeResponses = userBadges.stream()
+            .map(UserBadgeResponse::of)
+            .collect(Collectors.toList());
+
+        UserBadge latestUserBadge = userBadgeRepository.findTopByUserIdOrderByGrantedAtDesc(userId)
+            .orElse(null);
+        int remainingActionsForNextBadge = calculateRemainingActionsForNextBadge(user, latestUserBadge);
+
+        return new UserBadgesResponse(remainingActionsForNextBadge, userBadgeResponses);
+    }
+
+    // 다음 뱃지까지 남은 수 (게이지 바 빈 곳 수) 계산
+    private int calculateRemainingActionsForNextBadge(AppUser user, UserBadge latestUserBadge) {
+        int highestBadgeRequiredActivities = 40;
+        int necessaryActivitiesForNextBadge = 10;
+        int totalMeeting = user.getTotalMeeting();
+
+        if (latestUserBadge == null) {
+            return totalMeeting - necessaryActivitiesForNextBadge;
+        }
+
+        int latestBadgeRequiredActivities = latestUserBadge.getBadge().getRequiredActivitiesForBadge();
+        int nextBadgeNum = latestBadgeRequiredActivities + necessaryActivitiesForNextBadge;
+        if (nextBadgeNum >= highestBadgeRequiredActivities) {
+            return 0;
+        }
+
+        return nextBadgeNum - totalMeeting;
     }
 }

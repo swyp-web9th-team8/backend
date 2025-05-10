@@ -4,12 +4,12 @@ import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.swyp.plogging.backend.domain.QBadge;
-import com.swyp.plogging.backend.domain.QUserBadge;
-import com.swyp.plogging.backend.post.domain.QPost;
 import com.swyp.plogging.backend.participation.domain.QParticipation;
+import com.swyp.plogging.backend.post.domain.QPost;
 import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.QProfileResponse;
 import com.swyp.plogging.backend.user.domain.QAppUser;
+import com.swyp.plogging.backend.user.domain.QUserBadge;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

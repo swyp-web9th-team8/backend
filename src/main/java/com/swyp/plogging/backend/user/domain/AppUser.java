@@ -1,6 +1,5 @@
 package com.swyp.plogging.backend.user.domain;
 
-import com.swyp.plogging.backend.domain.UserBadge;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
 import com.swyp.plogging.backend.participation.domain.Participation;
 import com.swyp.plogging.backend.post.domain.Post;
@@ -98,5 +97,9 @@ public class AppUser extends BaseEntity {
         if (pushEnabled != null) {
             this.pushEnabled = pushEnabled;
         }
+    }
+
+    public int getTotalMeeting() {
+        return writtenPosts.size() + participations.size();
     }
 }
