@@ -11,7 +11,7 @@ import com.swyp.plogging.backend.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.controller.dto.PostListResponse;
 import com.swyp.plogging.backend.domain.Post;
 import com.swyp.plogging.backend.repository.PostRepository;
-import com.swyp.plogging.backend.sevice.PostService;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

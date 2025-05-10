@@ -17,6 +17,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Entity
@@ -35,6 +36,10 @@ public class AppUser extends BaseEntity {
 
     @Column(nullable = false)
     private String region;
+
+    @Setter
+    @Column
+    private String gender; // 성별 필드
 
     private boolean pushEnabled;
 
@@ -81,4 +86,5 @@ public class AppUser extends BaseEntity {
     public void completeRegistration() {
         this.registered = true;
     }
+
 }

@@ -43,5 +43,8 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Seoul
+  vworld:
+    api:
+      key: ${VWORLD_API_KEY}
 app:
   baseUrl: https://ploggo.co.kr

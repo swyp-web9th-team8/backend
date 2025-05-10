@@ -1,6 +1,9 @@
 package com.swyp.plogging.backend.auth.controller;
 
+import com.swyp.plogging.backend.auth.controller.dto.SignupRequest;
 import com.swyp.plogging.backend.auth.domain.CustomOAuth2User;
+import com.swyp.plogging.backend.auth.service.AuthService;
+import com.swyp.plogging.backend.common.exception.CustomException;
 import com.swyp.plogging.backend.controller.dto.TokenRefreshRequest;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import com.swyp.plogging.backend.user.repository.AppUserRepository;
@@ -8,6 +11,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +31,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AppUserRepository appUserRepository;
+    private final AuthService authService;
 
     // 현재 인증된 사용자 정보 반환
     @GetMapping("/me")
@@ -54,7 +59,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> completeRegistration(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-            @RequestBody Map<String, String> request) {
+            @Valid @RequestBody SignupRequest request) {
 
         if (customOAuth2User == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -62,10 +67,20 @@ public class AuthController {
         }
 
         AppUser user = customOAuth2User.getAppUser();
-        String nickname = request.get("nickname");
-        String region = request.get("region");
 
-        user.update(nickname, region, null);
+        // 닉네임 중복 확인
+        if (appUserRepository.findByNickname(request.getNickname()).isPresent() &&
+                !user.getNickname().equals(request.getNickname())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("success", false, "error", "이미 사용중인 닉네임입니다."));
+        }
+
+        // 사용자 정보 업데이트
+        user.update(request.getNickname(), request.getRegion(), request.getProfileImageUrl());
+
+        // 성별 정보 설정 (gender 필드 추가 필요)
+        user.setGender(request.getGender());
+
         user.completeRegistration();
         appUserRepository.save(user);
 
@@ -115,4 +130,5 @@ public class AuthController {
                 "token", "dummy_new_token"
         ));
     }
+
 }

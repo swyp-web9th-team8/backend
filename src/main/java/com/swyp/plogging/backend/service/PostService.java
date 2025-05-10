@@ -1,4 +1,4 @@
-package com.swyp.plogging.backend.sevice;
+package com.swyp.plogging.backend.service;
 
 import com.swyp.plogging.backend.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.controller.dto.PostInfoResponse;

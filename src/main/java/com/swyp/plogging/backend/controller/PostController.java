@@ -5,7 +5,7 @@ import com.swyp.plogging.backend.controller.dto.CreatePostRequest;
 import com.swyp.plogging.backend.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.controller.dto.PostListResponse;
-import com.swyp.plogging.backend.sevice.PostService;
+import com.swyp.plogging.backend.service.PostService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
