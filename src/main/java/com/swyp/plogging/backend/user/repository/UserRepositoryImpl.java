@@ -3,7 +3,7 @@ package com.swyp.plogging.backend.user.repository;
 import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.swyp.plogging.backend.domain.QBadge;
+import com.swyp.plogging.backend.badge.domain.QBadge;
 import com.swyp.plogging.backend.participation.domain.QParticipation;
 import com.swyp.plogging.backend.post.domain.QPost;
 import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
@@ -39,13 +39,13 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 
         return queryFactory
             .select(new QProfileResponse(appUser.id, appUser.nickname, appUser.email, appUser.region, appUser.profileImageUrl,
-                post.count().intValue(), badge.iconUrl, participatedCount))
+                post.count().intValue(), badge.activeBadgeIconDir, participatedCount))
             .from(appUser)
             .leftJoin(post).on(post.writer.eq(appUser))
             .leftJoin(userBadge).on(userBadge.id.eq(latestUserBadgeId))
             .leftJoin(userBadge.badge, badge)
             .where(appUser.id.eq(userId))
-            .groupBy(appUser.id, badge.iconUrl)
+            .groupBy(appUser.id, badge.activeBadgeIconDir)
             .fetchOne();
     }
 }

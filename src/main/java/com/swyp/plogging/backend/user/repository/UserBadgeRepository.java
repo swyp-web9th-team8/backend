@@ -12,5 +12,5 @@ public interface UserBadgeRepository extends JpaRepository<UserBadge, Long> {
 
     List<UserBadge> findByUser(AppUser user);
 
-    Optional<UserBadge> findTopByUserIdOrderByGrantedAtDesc(Long userId);
+    Optional<UserBadge> findTopByUserIdOrderByCreatedDtDesc(Long userId);
 }

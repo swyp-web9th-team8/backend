@@ -81,7 +81,7 @@ public class UserService {
             .map(UserBadgeResponse::from)
             .collect(Collectors.toList());
 
-        UserBadge latestUserBadge = userBadgeRepository.findTopByUserIdOrderByGrantedAtDesc(userId)
+        UserBadge latestUserBadge = userBadgeRepository.findTopByUserIdOrderByCreatedDtDesc(userId)
             .orElse(null);
         int remainingActionsForNextBadge = calculateRemainingActionsForNextBadge(user, latestUserBadge);
 
