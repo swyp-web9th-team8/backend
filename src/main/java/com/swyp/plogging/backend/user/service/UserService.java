@@ -3,6 +3,8 @@ package com.swyp.plogging.backend.user.service;
 import com.swyp.plogging.backend.common.exception.UnsupportedUpdateRequestException;
 import com.swyp.plogging.backend.common.exception.UserNotFoundException;
 import com.swyp.plogging.backend.common.service.FileService;
+import com.swyp.plogging.backend.common.util.DateUtils;
+import com.swyp.plogging.backend.rank.controller.dto.RankingResponse;
 import com.swyp.plogging.backend.user.controller.dto.EditableProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.UpdateNicknameRequest;
@@ -16,6 +18,8 @@ import com.swyp.plogging.backend.user.domain.AppUser;
 import com.swyp.plogging.backend.user.domain.UserBadge;
 import com.swyp.plogging.backend.user.repository.UserBadgeRepository;
 import com.swyp.plogging.backend.user.repository.UserRepository;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -105,5 +109,26 @@ public class UserService {
         }
 
         return nextBadgeNum - totalMeeting;
+    }
+
+    public List<RankingResponse> getWeeklyRankings() {
+        LocalDateTime startOfCurrentWeek = DateUtils.getStartOfCurrentWeek();
+        List<RankingResponse> rankingResponses = userRepository.findWeeklyRanking(startOfCurrentWeek);
+        assignRanks(rankingResponses);
+
+        return rankingResponses;
+    }
+
+    private static void assignRanks
+        (List<RankingResponse> rankingResponses) {
+        rankingResponses.sort(Comparator.comparingInt(RankingResponse::getTotalMeet).reversed());
+
+        for (int i = 0; i < rankingResponses.size(); i++) {
+            rankingResponses.get(i).setRank(i + 1);
+        }
+    }
+
+    public List<RankingResponse> getAllTimeRankings() {
+        return userRepository.findAllTimeRankings();
     }
 }
