@@ -2,6 +2,8 @@ package com.swyp.plogging.backend.post.sevice;
 
 import com.swyp.plogging.backend.common.exception.PostNotFoundException;
 import com.swyp.plogging.backend.common.exception.UnauthorizedUserException;
+import com.swyp.plogging.backend.common.service.LocationService;
+import com.swyp.plogging.backend.post.controller.dto.CreatePostRequest;
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.domain.Post;
@@ -9,6 +11,8 @@ import com.swyp.plogging.backend.post.repository.PostRepository;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,18 +21,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PostService {
 
     private final PostRepository postRepository;
+    private final LocationService locationService;
 
-    public PostService(PostRepository postRepository) {
-        this.postRepository = postRepository;
-    }
-
-
+    /**
+     * 기존 모임 생성 메서드
+     */
     @Transactional
     public PostDetailResponse createPost(AppUser user, String title, String content,
                                          LocalDateTime meetingTime, String placeId,
@@ -41,17 +47,17 @@ public class PostService {
         }
 
         Post post = Post.builder()
-            .writer(user)
-            .title(title)
-            .content(content)
-            .meetingDt(meetingTime)
-            .placeId(placeId)
-            .placeName(placeName)
-            .address(address)
-            .completed(false)
-            .maxParticipants(maxParticipants)
-            .openChatUrl(openChatUrl)
-            .build();
+                .writer(user)
+                .title(title)
+                .content(content)
+                .meetingDt(meetingTime)
+                .placeId(placeId)
+                .placeName(placeName)
+                .address(address)
+                .completed(false)
+                .maxParticipants(maxParticipants)
+                .openChatUrl(openChatUrl)
+                .build();
 
         // null일 경우 30분전 세팅
         post.setUpDeadLine(deadLine);
@@ -60,17 +66,153 @@ public class PostService {
         return post.toDetailResponse();
     }
 
+    /**
+     * 위치 정보를 포함한 모임 생성 메서드
+     */
     @Transactional
-    public PostDetailResponse modifyPost(AppUser user, Long id, String title,
-        String content, LocalDateTime meetingTime,
-        String placeId, String placeName, String address,
-        Integer maxParticipants, String openChatUrl, Integer deadLine) {
+    public PostDetailResponse createPost(AppUser user, String title, String content,
+                                         LocalDateTime meetingTime, String placeId,
+                                         String placeName, String address,
+                                         Double latitude, Double longitude,
+                                         @NonNull Integer maxParticipants, String openChatUrl,
+                                         @Nullable Integer deadLine) {
 
-        Post post = findById(id);
-        post.isWriter(user);
-        post.modify(title, content, meetingTime, placeId, placeName, address, maxParticipants, openChatUrl, deadLine);
+        if (maxParticipants <= 0) {
+            throw new IllegalArgumentException("최대인원 설정이 잘못되었습니다.");
+        }
+
+        // 좌표는 있는데 주소가 없는 경우, 역지오코딩으로 주소 조회
+        if (latitude != null && longitude != null && (address == null || address.isEmpty())) {
+            Map<String, Object> addressInfo = locationService.reverseGeocode(longitude, latitude);
+            address = (String) addressInfo.get("fullAddress");
+        }
+
+        // PostGIS Point 객체 생성
+        Point location = locationService.createPoint(longitude, latitude);
+
+        Post post = Post.builder()
+                .writer(user)
+                .title(title)
+                .content(content)
+                .meetingDt(meetingTime)
+                .placeId(placeId)
+                .placeName(placeName)
+                .address(address)
+                .latitude(latitude)
+                .longitude(longitude)
+                .location(location)
+                .completed(false)
+                .maxParticipants(maxParticipants)
+                .openChatUrl(openChatUrl)
+                .build();
+
+        // null일 경우 30분전 세팅
+        post.setUpDeadLine(deadLine);
+        post = postRepository.save(post);
 
         return post.toDetailResponse();
+    }
+
+    /**
+     * CreatePostRequest DTO를 사용하는 모임 생성 메서드
+     */
+    @Transactional
+    public PostDetailResponse createPost(CreatePostRequest request, AppUser user) {
+        return createPost(
+                user,
+                request.getTitle(),
+                request.getContent(),
+                request.getMeetingTime(),
+                request.getPlaceId(),
+                request.getPlaceName(),
+                request.getAddress(),
+                request.getLatitude(),
+                request.getLongitude(),
+                request.getMaxParticipants(),
+                request.getOpenChatUrl(),
+                30 // 기본값으로 30분 전 설정
+        );
+    }
+
+    /**
+     * 기존 모임 수정 메서드
+     */
+    @Transactional
+    public PostDetailResponse modifyPost(AppUser user, Long id, String title,
+                                         String content, LocalDateTime meetingTime,
+                                         String placeId, String placeName, String address,
+                                         Integer maxParticipants, String openChatUrl, Integer deadLine) {
+
+        Post post = findById(id);
+
+        // 작성자 확인
+        if (!post.isWriter(user)) {
+            throw new UnauthorizedUserException("작성자가 아닙니다.");
+        }
+
+        post.modify(
+                title, content, meetingTime,
+                placeId, placeName, address,
+                null, null, // 위치 정보는 변경하지 않음
+                maxParticipants, openChatUrl, deadLine
+        );
+
+        return post.toDetailResponse();
+    }
+
+    /**
+     * 위치 정보를 포함한 모임 수정 메서드
+     */
+    @Transactional
+    public PostDetailResponse modifyPost(AppUser user, Long id, String title,
+                                         String content, LocalDateTime meetingTime,
+                                         String placeId, String placeName, String address,
+                                         Double latitude, Double longitude,
+                                         Integer maxParticipants, String openChatUrl, Integer deadLine) {
+
+        Post post = findById(id);
+
+        // 작성자 확인
+        if (!post.isWriter(user)) {
+            throw new UnauthorizedUserException("작성자가 아닙니다.");
+        }
+
+        // 좌표는 있는데 주소가 없는 경우, 역지오코딩으로 주소 조회
+        if (latitude != null && longitude != null && (address == null || address.isEmpty())) {
+            Map<String, Object> addressInfo = locationService.reverseGeocode(longitude, latitude);
+            address = (String) addressInfo.get("fullAddress");
+        }
+
+        post.modify(
+                title, content, meetingTime,
+                placeId, placeName, address,
+                latitude, longitude,
+                maxParticipants, openChatUrl, deadLine
+        );
+
+        return post.toDetailResponse();
+    }
+
+    /**
+     * CreatePostRequest DTO를 사용하는 모임 수정 메서드
+     */
+    @Transactional
+    public PostDetailResponse modifyPost(AppUser user, Long id, CreatePostRequest request) {
+        return modifyPost(
+                user,
+                id,
+                request.getTitle(),
+                request.getContent(),
+                request.getMeetingTime(),
+                request.getPlaceId(),
+                request.getPlaceName(),
+                request.getAddress(),
+                request.getLatitude(),
+                request.getLongitude(),
+                request.getMaxParticipants(),
+                request.getOpenChatUrl(),
+                30 // 기본값으로 30분 전 설정
+        );
     }
 
     public Post findById(Long id) {
@@ -99,5 +241,17 @@ public class PostService {
         List<PostInfoResponse> content = data.getContent().stream().map(PostInfoResponse::new).toList();
 
         return new PageImpl<>(content, data.getPageable(), data.getTotalElements());
+    }
+
+    /**
+     * 주변 모임 검색 메서드
+     */
+    public Page<PostInfoResponse> findNearbyPosts(Double latitude, Double longitude, Double radiusKm, Pageable pageable) {
+        Page<Post> posts = postRepository.findNearbyPosts(latitude, longitude, radiusKm, pageable);
+        List<PostInfoResponse> content = posts.getContent().stream()
+                .map(PostInfoResponse::new)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(content, pageable, posts.getTotalElements());
     }
 }

@@ -23,4 +23,8 @@ public class PostDetailResponse {
     private int maxParticipants;
     private LocalDateTime deadLine;
     private List<NicknameAndImageResponse> participants;
+
+    // 위치 정보 추가
+    private Double latitude;
+    private Double longitude;
 }

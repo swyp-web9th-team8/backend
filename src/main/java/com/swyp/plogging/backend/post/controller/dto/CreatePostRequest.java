@@ -17,4 +17,8 @@ public class CreatePostRequest {
     private LocalDateTime meetingTime;
     private String openChatUrl;
     private int maxParticipants;
+
+    // 위치 정보 추가
+    private Double latitude;
+    private Double longitude;
 }

@@ -8,18 +8,21 @@ import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.domain.QPost;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.time.LocalDateTime;
-import java.util.List;
+import jakarta.persistence.Query;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 public class PostRepositoryImpl implements PostRepositoryCustom {
 
     @PersistenceContext
     private EntityManager em;
 
+    // 기존 메서드 유지
     @Override
     public Page<Post> findPostByCondition(Pageable pageable, Boolean recruitmentCompleted, Boolean completed) {
         QPost post = QPost.post;
@@ -44,13 +47,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
             postCondition.and(post.deadLine.gt(LocalDateTime.now()));
             // 기본 쿼리에 조인과 그룹바이 적용
             query.leftJoin(participation).on(participation.post.eq(post))
-                .groupBy(post.id)
-                .having(participation.count().lt(post.maxParticipants));
+                    .groupBy(post.id)
+                    .having(participation.count().lt(post.maxParticipants));
 
             // 카운트 쿼리에 조인과 그룹바이 적용
             countQuery.leftJoin(participation).on(participation.post.eq(post))
-                .groupBy(post.id)
-                .having(participation.count().lt(post.maxParticipants));
+                    .groupBy(post.id)
+                    .having(participation.count().lt(post.maxParticipants));
         }
 
         // 조건 적용
@@ -73,11 +76,61 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
         // pageable 적용
         query.offset(pageable.getOffset())
-            .limit(pageable.getPageSize());
+                .limit(pageable.getPageSize());
 
         List<Post> result = query.fetch();
         long totalCount = countQuery.fetch().size();
 
         return new PageImpl<>(result, pageable, totalCount);
+    }
+
+    // 수정: PostGIS를 활용한 위치 기반 검색 메서드 - 네이티브 SQL 쿼리 사용
+    @Override
+    public Page<Post> findNearbyPosts(Double latitude, Double longitude, Double radiusKm, Pageable pageable) {
+        // 네이티브 SQL 쿼리 사용
+        String sql = "SELECT * FROM post p " +
+                "WHERE p.completed = false " +
+                "AND p.latitude IS NOT NULL AND p.longitude IS NOT NULL " +
+                "AND ST_DWithin(" +
+                "  ST_SetSRID(ST_MakePoint(p.longitude, p.latitude), 4326)::geography, " +
+                "  ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography, " +
+                "  :radius" +
+                ") = true " +
+                "ORDER BY ST_Distance(" +
+                "  ST_SetSRID(ST_MakePoint(p.longitude, p.latitude), 4326)::geography, " +
+                "  ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography" +
+                ")";
+
+        // 네이티브 쿼리 실행
+        Query query = em.createNativeQuery(sql, Post.class);
+        query.setParameter("latitude", latitude);
+        query.setParameter("longitude", longitude);
+        query.setParameter("radius", radiusKm * 1000); // km -> m 변환
+
+        // 페이징 적용
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+
+        @SuppressWarnings("unchecked")
+        List<Post> results = query.getResultList();
+
+        // 전체 개수 조회를 위한 네이티브 쿼리
+        String countSql = "SELECT COUNT(*) FROM post p " +
+                "WHERE p.completed = false " +
+                "AND p.latitude IS NOT NULL AND p.longitude IS NOT NULL " +
+                "AND ST_DWithin(" +
+                "  ST_SetSRID(ST_MakePoint(p.longitude, p.latitude), 4326)::geography, " +
+                "  ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography, " +
+                "  :radius" +
+                ") = true";
+
+        Query countQuery = em.createNativeQuery(countSql);
+        countQuery.setParameter("latitude", latitude);
+        countQuery.setParameter("longitude", longitude);
+        countQuery.setParameter("radius", radiusKm * 1000); // km -> m 변환
+
+        Number count = (Number) countQuery.getSingleResult();
+
+        return new PageImpl<>(results, pageable, count.longValue());
     }
 }

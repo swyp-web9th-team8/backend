@@ -5,25 +5,18 @@ import com.swyp.plogging.backend.participation.domain.Participation;
 import com.swyp.plogging.backend.post.controller.dto.NicknameAndImageResponse;
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.user.domain.AppUser;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Point;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -38,12 +31,24 @@ public class Post extends BaseEntity {
 
     @Column(nullable = false)
     private String title;
+
     @Column(nullable = false, length = 1000)
     private String content;
 
     private String placeId;
     private String placeName;
     private String address;
+
+    // 위치 정보 추가
+    @Column
+    private Double latitude;
+
+    @Column
+    private Double longitude;
+
+    // PostGIS 공간 데이터 타입 추가
+    @Column(columnDefinition = "geometry(Point,4326)")
+    private Point location;
 
     private LocalDateTime meetingDt;
     private LocalDateTime deadLine;
@@ -57,6 +62,7 @@ public class Post extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "post")
     private List<Participation> participations = new ArrayList<>();
+
     private int maxParticipants;
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -69,6 +75,7 @@ public class Post extends BaseEntity {
         deadLine = meetingDt.minusMinutes(timeFromStart);
     }
 
+    // 위치 정보를 포함한 PostDetailResponse 변환 메서드
     public PostDetailResponse toDetailResponse() {
         PostDetailResponse response = new PostDetailResponse();
         response.setId(id);
@@ -77,28 +84,34 @@ public class Post extends BaseEntity {
         response.setPlaceId(placeId);
         response.setPlaceName(placeName);
         response.setAddress(address);
+        response.setLatitude(latitude);
+        response.setLongitude(longitude);
         response.setMaxParticipants(maxParticipants);
         response.setWriter(new NicknameAndImageResponse(writer));
         response.setMeetingTime(meetingDt);
         response.setDeadLine(deadLine);
         response.setOpenChatUrl(openChatUrl);
         response.setParticipants(
-            participations.stream()
-                .map(participation -> new NicknameAndImageResponse(participation.getUser()))
-                .collect(Collectors.toList())
+                participations.stream()
+                        .map(participation -> new NicknameAndImageResponse(participation.getUser()))
+                        .collect(Collectors.toList())
         );
         return response;
     }
 
+    // 위치 정보를 포함한 modify 메서드
     public void modify(String title,
-        String content,
-        LocalDateTime meetingTime,
-        String placeId,
-        String placeName,
-        String address,
-        Integer maxParticipants,
-        String openChatUrl,
-        Integer deadLine) {
+                       String content,
+                       LocalDateTime meetingTime,
+                       String placeId,
+                       String placeName,
+                       String address,
+                       Double latitude,
+                       Double longitude,
+                       Integer maxParticipants,
+                       String openChatUrl,
+                       Integer deadLine) {
+
         if (title != null && !this.title.equals(title)) {
             this.title = title;
         }
@@ -123,6 +136,15 @@ public class Post extends BaseEntity {
             this.address = address;
         }
 
+        // 위치 정보 업데이트
+        if (latitude != null) {
+            this.latitude = latitude;
+        }
+
+        if (longitude != null) {
+            this.longitude = longitude;
+        }
+
         if (maxParticipants != null && maxParticipants > 0 && this.maxParticipants != maxParticipants) {
             this.maxParticipants = maxParticipants;
         }
@@ -134,9 +156,32 @@ public class Post extends BaseEntity {
         if (deadLine != null) {
             setUpDeadLine(deadLine);
         }
+
+        // Point 객체 업데이트 (latitude와 longitude가 모두 있는 경우)
+        if (this.latitude != null && this.longitude != null) {
+            this.location = createPoint(this.longitude, this.latitude);
+        }
     }
 
+    // Point 객체 생성 유틸리티 메서드
+    private Point createPoint(Double longitude, Double latitude) {
+        if (longitude == null || latitude == null) {
+            return null;
+        }
 
+        try {
+            // WKT(Well-Known Text) 형식으로 Point 생성
+            String pointWKT = String.format("POINT(%f %f)", longitude, latitude);
+            org.locationtech.jts.io.WKTReader wktReader = new org.locationtech.jts.io.WKTReader();
+            Point point = (Point) wktReader.read(pointWKT);
+            point.setSRID(4326); // WGS84 좌표계
+            return point;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // 나머지 메서드는 그대로 유지
     public void addParticipation(Participation participation) {
         this.participations.add(participation);
     }
@@ -161,7 +206,6 @@ public class Post extends BaseEntity {
         }
         return null;
     }
-
 
     public boolean isMax() {
         return participations.size() == maxParticipants;

@@ -5,7 +5,7 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
     hibernate:
       ddl-auto: update
       show-sql: true
@@ -50,6 +50,16 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 5MB
+
+# 네이버 설정 추가
+naver:
+  map:
+    client-id: ${NAVER_MAP_CLIENT_ID}
+    client-secret: ${NAVER_MAP_CLIENT_SECRET}
+  search:
+    client-id: ${NAVER_SEARCH_CLIENT_ID}
+    client-secret: ${NAVER_SEARCH_CLIENT_SECRET}
+
 app:
   baseUrl: https://ploggo.co.kr
 
