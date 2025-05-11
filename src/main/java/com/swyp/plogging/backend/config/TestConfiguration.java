@@ -2,6 +2,7 @@ package com.swyp.plogging.backend.config;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.logging.logback.LogbackLoggingSystem;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -47,5 +48,13 @@ public class TestConfiguration {
     @PostConstruct
     public void setSystemProperty(){
         System.setProperty("vworld.api.key", "2BA2A9B6-0003-3CEF-9AEF-0702B4A9E22C");
+    }
+
+    @Bean
+    public LogbackLoggingSystem loggingSystem() {
+        // 로그 레벨 및 파일 경로 설정
+        System.setProperty("logging.file.name", "logs/test.log");
+        System.setProperty("logging.level.root", "INFO");
+        return new LogbackLoggingSystem(getClass().getClassLoader());
     }
 }
