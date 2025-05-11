@@ -93,13 +93,3 @@ jobs:
             -p 8080:8080 \
             -d ghcr.io/${{ env.OWNER_LC }}/backend:latest
             docker image prune -f
-
-      - name: Make logs directory
-        run: mkdir -p logs
-      - name: Upload Spring Boot logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: spring-test-logs
-          path: logs/test.log
-
