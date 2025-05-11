@@ -50,8 +50,8 @@ public class ParticipationServiceTest {
 
     @BeforeEach
     public void createData() {
-        user = AppUser.newInstance("user@user.com", "user1", "Soeul", AuthProvider.valueOf("GOOGLE"));
-        user2 = AppUser.newInstance("user2@user.com", "user2", "Seoul", AuthProvider.KAKAO);
+        user = AppUser.newInstance("user@user.com", "user1", "Soeul", AuthProvider.valueOf("GOOGLE"), null);
+        user2 = AppUser.newInstance("user2@user.com", "user2", "Seoul", AuthProvider.KAKAO, null);
         data = Post.builder()
             .id(1L)
             .writer(user)
@@ -94,17 +94,17 @@ public class ParticipationServiceTest {
         Long postId = 1L;
         Queue<Participation> queue = new LinkedList<>();
         queue.add(Participation.newInstance(data, user2));
-        queue.add(Participation.newInstance(data, AppUser.newInstance("1", "1", "1", AuthProvider.GOOGLE)));
+        queue.add(Participation.newInstance(data, AppUser.newInstance("1", "1", "1", AuthProvider.GOOGLE, null)));
 
         when(postService.findById(postId)).thenReturn(data);
         when(participationRepository.save(any(Participation.class))).thenReturn(queue.poll());
 
         participationService.participateToPost(postId, user2);
-        participationService.participateToPost(postId, AppUser.newInstance("1", "1", "1", AuthProvider.GOOGLE));
+        participationService.participateToPost(postId, AppUser.newInstance("1", "1", "1", AuthProvider.GOOGLE, null));
 
         //when
         Exception e = Assertions.assertThrows(NotParticipatingPostException.class, () ->
-            participationService.participateToPost(postId, AppUser.newInstance("2", "2", "2", AuthProvider.GOOGLE)));
+            participationService.participateToPost(postId, AppUser.newInstance("2", "2", "2", AuthProvider.GOOGLE, null)));
 
         //then
         verify(participationRepository, times(2)).save(any(Participation.class));
