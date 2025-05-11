@@ -45,8 +45,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: docker buildx 설치
         uses: docker/setup-buildx-action@v2
-      - name: Make logs directory
-        run: mkdir -p logs
       - name: 레지스트리 로그인
         uses: docker/login-action@v2
         with:
@@ -95,11 +93,4 @@ jobs:
             -p 8080:8080 \
             -d ghcr.io/${{ env.OWNER_LC }}/backend:latest
             docker image prune -f
-
-      - name: Upload Spring Boot logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: spring-test-logs
-          path: logs/test.log
 
