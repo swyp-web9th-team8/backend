@@ -16,6 +16,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Entity
@@ -38,6 +39,10 @@ public class AppUser extends BaseEntity {
     @Column
     private String phoneNum;
 
+    @Setter
+    @Column
+    private String gender; // 성별 필드
+
     private boolean pushEnabled;
 
     @Enumerated(EnumType.STRING)
@@ -58,12 +63,13 @@ public class AppUser extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserBadge> userBadges = new ArrayList<>();
 
-    public static AppUser newInstance(String email, String nickname, String region, AuthProvider authProvider) {
+    public static AppUser newInstance(String email, String nickname, String region, AuthProvider authProvider, String profileImageUrl) {
         AppUser user = new AppUser();
         user.email = email;
         user.nickname = nickname;
         user.region = region;
         user.authProvider = authProvider;
+        user.profileImageUrl = profileImageUrl;
         user.registered = false;
 
         return user;
@@ -101,5 +107,19 @@ public class AppUser extends BaseEntity {
 
     public int getTotalMeeting() {
         return writtenPosts.size() + participations.size();
+    }
+
+    // 사용자 정보 업데이트 메서드 추가
+    public void update(String nickname, String region, String profileImageUrl) {
+        this.nickname = nickname;
+        this.region = region;
+        if (profileImageUrl != null) {
+            this.profileImageUrl = profileImageUrl;
+        }
+    }
+
+    // 등록 완료 메서드
+    public void completeRegistration() {
+        this.registered = true;
     }
 }
