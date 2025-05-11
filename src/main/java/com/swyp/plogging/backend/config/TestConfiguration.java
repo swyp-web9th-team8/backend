@@ -1,5 +1,6 @@
 package com.swyp.plogging.backend.config;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,5 +42,10 @@ public class TestConfiguration {
         props.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         emf.setJpaProperties(props);
         return emf;
+    }
+
+    @PostConstruct
+    public void setSystemProperty(){
+        System.setProperty("vworld.api.key", "2BA2A9B6-0003-3CEF-9AEF-0702B4A9E22C");
     }
 }
