@@ -55,6 +55,11 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+
+	// 로그 파일 설정 (테스트 시에만 적용)
+	systemProperty "logging.file.name", "logs/test.log"
+	systemProperty "logging.level.root", "INFO"
+	systemProperty "spring.profiles.active", "test"
 }
 
 def querydslDir = "build/generated/querydsl"
