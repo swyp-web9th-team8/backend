@@ -37,6 +37,7 @@ public class CertificationService {
         Certification certification = getOrNewByPost(myPost);
 
         String imageUrl = fileService.uploadImageAndGetFileName(file);
+        imageUrl = "/images/" + imageUrl;
         certification.addImageUrl(imageUrl);
 
         return imageUrl;
@@ -69,8 +70,8 @@ public class CertificationService {
         }
 
         List<String> urls = myPost.getCertification().getImageUrls();
-        if(!urls.isEmpty()){
-            //todo 이미지 지우기
+        for(String url : urls){
+            fileService.deleteSavedFileWithPath(url);
         }
 
         repository.delete(myPost.getCertification());
