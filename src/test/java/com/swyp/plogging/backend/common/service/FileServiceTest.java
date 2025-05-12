@@ -1,25 +1,22 @@
 package com.swyp.plogging.backend.common.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
+import com.swyp.plogging.backend.common.exception.FileDeleteException;
 import com.swyp.plogging.backend.common.exception.FileUploadException;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(properties = {
     "file.upload-dir=${java.io.tmpdir}/ploggo-service-uploads"
@@ -130,5 +127,37 @@ class FileServiceTest {
         assertThatThrownBy(() -> fileService.uploadImageAndGetFileName(file))
             .isInstanceOf(FileUploadException.class)
             .hasMessage("Unsupported file type. Only JPG, JPEG, PNG are allowed.");
+    }
+
+    @Test
+    void deleteFileWithPath_성공() throws Exception {
+        // 파일 생성
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "profileImage.png",
+                MediaType.IMAGE_PNG_VALUE,
+                "testFileData".getBytes()
+        );
+
+        String fileName = fileService.uploadImageAndGetFileName(file);
+
+
+        // 삭제
+        String imageUrl = "/images/"+fileName;
+        fileService.deleteSavedFileWithUrl(imageUrl);
+
+        Path deleted = uploadDir.resolve(fileName);
+
+        assertThat(Files.exists(deleted)).isFalse();
+    }
+
+    @Test
+    void deleteFileWithPath_없는파일() throws Exception {
+        String fileName = "profileImage.png";
+
+        // 삭제
+        String imageUrl = "/images/"+fileName;
+        assertThatThrownBy(() -> fileService.deleteSavedFileWithUrl(imageUrl))
+                .isInstanceOf(FileDeleteException.class);
     }
 }

@@ -1,17 +1,21 @@
 package com.swyp.plogging.backend.common.service;
 
 import com.swyp.plogging.backend.common.domain.ImageExtension;
+import com.swyp.plogging.backend.common.exception.FileDeleteException;
 import com.swyp.plogging.backend.common.exception.FileUploadException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -67,6 +71,30 @@ public class FileService {
         String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
         if (extension == null || !ImageExtension.isAllowed(extension)) {
             throw new FileUploadException("Unsupported file type. Only JPG, JPEG, PNG are allowed.");
+        }
+    }
+
+    @Transactional
+    public void deleteSavedFileWithUrl(String filePath) {
+        String filename = filePath.replace("/images/", "");
+        try{
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+            Path target = uploadPath.resolve(filename).normalize();
+
+            if(!target.startsWith(uploadPath)){
+                throw new FileUploadException("Invalid file path");
+            }
+
+            File file = target.toFile();
+            if(file.exists()){
+                if(!file.delete()){
+                    throw new FileDeleteException("Fail to delete file: "+filePath);
+                }
+            }else {
+                throw new FileDeleteException();
+            }
+        }catch(Exception e){
+            throw new FileDeleteException();
         }
     }
 }

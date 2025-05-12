@@ -1,5 +1,7 @@
 package com.swyp.plogging.backend.post.controller;
 
+import com.swyp.plogging.backend.certificate.dto.CertificationRequest;
+import com.swyp.plogging.backend.certificate.service.CertificationService;
 import com.swyp.plogging.backend.common.dto.ApiPagedResponse;
 import com.swyp.plogging.backend.common.dto.ApiResponse;
 import com.swyp.plogging.backend.common.util.SecurityUtils;
@@ -8,7 +10,6 @@ import com.swyp.plogging.backend.post.controller.dto.CreatePostRequest;
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.sevice.PostService;
-import com.swyp.plogging.backend.user.domain.AppUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,8 +19,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -29,6 +29,7 @@ public class PostController {
 
     private final PostService postService;
     private final ParticipationService participationService;
+    private final CertificationService certificateService;
 
     // 기존 API 엔드포인트 유지
     @PostMapping("create")
@@ -167,4 +168,41 @@ public class PostController {
             return ApiResponse.error(e.getMessage());
         }
     }
+
+    @PostMapping("/{postId}/certificate")
+    public ApiResponse<Object> certificatePost(@PathVariable(name = "postId") Long postId,
+                                               @AuthenticationPrincipal OAuth2User user,
+                                               @RequestBody CertificationRequest request){
+        try {
+            PostInfoResponse response = certificateService.certificate(postId, SecurityUtils.getUserOrThrow(user), request.getUserIds());
+            return ApiResponse.ok(null, "Successfully certificate the post.");
+        } catch (Exception e) {
+            return ApiResponse.error(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{postId}/certificate")
+    public ApiResponse<Object> cancelCertificationOfPost(@PathVariable(name = "postId") Long postId,
+                                               @AuthenticationPrincipal OAuth2User user){
+        try {
+            certificateService.cancelCertificate(postId, SecurityUtils.getUserOrThrow(user));
+            return ApiResponse.ok(null, "Successfully cancel certification.");
+        } catch (Exception e) {
+            return ApiResponse.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{postId}/image")
+    public ApiResponse<String> uploadImageToPost(@PathVariable(name = "postId") Long postId,
+                                                 @AuthenticationPrincipal OAuth2User user,
+                                                 @RequestParam("file")MultipartFile file){
+        try {
+            String imageUrl = certificateService.uploadImageToPost(postId, SecurityUtils.getUserOrThrow(user), file);
+            return ApiResponse.ok(imageUrl, "Successfully upload the image to post.");
+        } catch (Exception e) {
+            return ApiResponse.error(e.getMessage());
+        }
+    }
+
+
 }
