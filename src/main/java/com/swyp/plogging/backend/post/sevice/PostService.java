@@ -238,7 +238,14 @@ public class PostService {
     public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, Boolean recruitmentCompleted, Boolean completed) {
         // 데이터 DTO로 정제
         Page<Post> data = postRepository.findPostByCondition(pageable, recruitmentCompleted, completed);
-        List<PostInfoResponse> content = data.getContent().stream().map(PostInfoResponse::new).toList();
+        List<PostInfoResponse> content;
+        // 완료 여부에 따른 응답 분리
+        if(completed){
+            content = data.getContent().stream().map(post -> new PostInfoResponse(post, post.getCertification())).toList();
+        }
+        else{
+            content = data.getContent().stream().map(PostInfoResponse::new).toList();
+        }
 
         return new PageImpl<>(content, data.getPageable(), data.getTotalElements());
     }
