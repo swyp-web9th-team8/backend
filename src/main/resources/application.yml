@@ -66,3 +66,19 @@ app:
 file:
   upload-dir: /opt/ploggo/images
   badge-icon-dir: /opt/ploggo/badge-icons
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    operations-sorter: alpha
+    oauth:
+      client-id: ${KAKAO_CLIENT_ID}  # 카카오 클라이언트 ID
+      use-pkce-with-authorization-code-grant: true
+      additional-query-string-params:
+        client_id: ${KAKAO_CLIENT_ID}
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  paths-to-match: /api/**
