@@ -75,7 +75,7 @@ public class FileService {
     }
 
     @Transactional
-    public void deleteSavedFileWithPath(String filePath) {
+    public void deleteSavedFileWithUrl(String filePath) {
         String filename = filePath.replace("/images/", "");
         try{
             Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();

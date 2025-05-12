@@ -47,6 +47,10 @@ public class TestConfiguration {
     @PostConstruct
     public void setSystemProperty(){
         System.setProperty("vworld.api.key", "2BA2A9B6-0003-3CEF-9AEF-0702B4A9E22C");
+        System.setProperty("naver.map.client-id", "Dummy-test-id");
+        System.setProperty("naver.map.client-secret", "Dummy-test-secret");
+        System.setProperty("naver.search.client-id", "Dummy-test-id");
+        System.setProperty("naver.search.client-secret", "Dummy-test-secret");
     }
 
 }

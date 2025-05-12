@@ -71,7 +71,7 @@ public class CertificationService {
 
         List<String> urls = myPost.getCertification().getImageUrls();
         for(String url : urls){
-            fileService.deleteSavedFileWithPath(url);
+            fileService.deleteSavedFileWithUrl(url);
         }
 
         repository.delete(myPost.getCertification());
