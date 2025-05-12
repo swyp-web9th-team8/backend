@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +42,9 @@ public class PostServiceTest {
     private static final Logger log = LoggerFactory.getLogger(PostServiceTest.class);
 
     @BeforeEach
-    public void createData() {
+    public void createData() throws Exception {
         user = AppUser.newInstance("user@user.com", "user", "Seoul", AuthProvider.GOOGLE, null);
+        setEntityId(user, 1L);
         data = Post.builder()
             .id(1L)
             .writer(user)
@@ -187,4 +189,9 @@ public class PostServiceTest {
         log.info(() -> testInfo.getDisplayName() + " 완료");
     }
 
+    private void setEntityId(Object entity, Long id) throws Exception {
+        Field idField = entity.getClass().getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(entity, id);
+    }
 }

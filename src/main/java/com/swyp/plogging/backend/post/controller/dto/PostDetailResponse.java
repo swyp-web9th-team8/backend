@@ -1,11 +1,10 @@
 package com.swyp.plogging.backend.post.controller.dto;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import com.swyp.plogging.backend.controller.dto.UserResponse;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,6 +22,7 @@ public class PostDetailResponse {
     private int maxParticipants;
     private LocalDateTime deadLine;
     private List<NicknameAndImageResponse> participants;
+    private List<String> imageUrls;
 
     // 위치 정보 추가
     private Double latitude;

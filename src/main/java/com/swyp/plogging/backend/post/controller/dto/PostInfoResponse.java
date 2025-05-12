@@ -1,10 +1,12 @@
 package com.swyp.plogging.backend.post.controller.dto;
 
+import com.swyp.plogging.backend.certificate.domain.Certification;
 import com.swyp.plogging.backend.post.domain.Post;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,6 +19,7 @@ public class PostInfoResponse {
     private String placeName;
     private String address;
     private int participantCount;
+    private String thumbnail;
 
     // 위치 정보 추가
     private Double latitude;
@@ -32,5 +35,16 @@ public class PostInfoResponse {
         this.participantCount = post.getParticipations().size();
         this.latitude = post.getLatitude();
         this.longitude = post.getLongitude();
+    }
+
+    public PostInfoResponse(Post post, Certification certification){
+        this(post);
+        // 완료된 모임에 첫번째 인증 이미지 추가
+        List<String> images = certification.getImageUrls();
+        if(post.isCompleted() && !images.isEmpty()){
+            this.thumbnail = images.get(0);
+        }else{
+            this.thumbnail = null;
+        }
     }
 }
