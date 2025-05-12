@@ -1,26 +1,14 @@
-package com.swyp.plogging.backend.service;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+package com.swyp.plogging.backend.participation.service;
 
 import com.swyp.plogging.backend.common.exception.NotParticipatingPostException;
 import com.swyp.plogging.backend.participation.domain.Participation;
 import com.swyp.plogging.backend.participation.repository.ParticipationRepository;
-import com.swyp.plogging.backend.participation.service.ParticipationService;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.sevice.PostService;
+import com.swyp.plogging.backend.post.sevice.PostServiceTest;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import com.swyp.plogging.backend.user.domain.AuthProvider;
-import java.time.LocalDateTime;
-import java.util.LinkedList;
-import java.util.Queue;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
@@ -28,6 +16,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.Queue;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)

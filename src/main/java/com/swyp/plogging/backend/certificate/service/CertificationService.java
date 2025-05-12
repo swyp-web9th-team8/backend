@@ -2,8 +2,10 @@ package com.swyp.plogging.backend.certificate.service;
 
 import com.swyp.plogging.backend.certificate.domain.Certification;
 import com.swyp.plogging.backend.certificate.repository.CertificateRepository;
+import com.swyp.plogging.backend.common.exception.CertificationException;
 import com.swyp.plogging.backend.common.exception.UnauthorizedUserException;
 import com.swyp.plogging.backend.common.service.FileService;
+import com.swyp.plogging.backend.participation.domain.Participation;
 import com.swyp.plogging.backend.participation.service.ParticipationService;
 import com.swyp.plogging.backend.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.domain.Post;
@@ -36,6 +38,7 @@ public class CertificationService {
         // certificate 가져오기(없으면 생성)
         Certification certification = getOrNewByPost(myPost);
 
+        // 이미지 저장후 고아로 남기지 않기 위함
         String imageUrl = fileService.uploadImageAndGetFileName(file);
         imageUrl = "/images/" + imageUrl;
         certification.addImageUrl(imageUrl);
@@ -50,18 +53,33 @@ public class CertificationService {
             throw new UnauthorizedUserException("올바른 접근이 아닙니다.");
         }
 
-        // 모임 참여후 인증목록에 있을 때, participation.join = true
-        myPost.getParticipations().forEach(participation -> {
-            if(userIds.contains(participation.getUser().getId())){
-                participation.joined();
+        // 모임 참여후 participation.join = true, 참여 기록이 없다면 예외
+        userIds.forEach(id -> {
+            for(Participation participation : myPost.getParticipations()){
+                if(participation.getUser().getId().equals(id)){
+                    participation.joined();
+                    return;
+                }
             }
+            throw CertificationException.notParticipated();
         });
 
-        myPost.getCertification().certificate();
+
+        Certification certification = getOrNewByPost(myPost);
+        // 최소 1개 이상의 이미지 필요
+        if(!certification.getImageUrls().isEmpty()){
+            certification.certificate();
+        }else{
+            throw CertificationException.needMinOneImage();
+        }
+
 
         return new PostInfoResponse(myPost);
     }
 
+    /*
+    용량 관계상 인증을 취소할 경우 인증과정 중 업로드한 이미지 삭제
+     */
     @Transactional
     public void cancelCertificate(Long postId,AppUser user){
         Post myPost = postService.findById(postId);

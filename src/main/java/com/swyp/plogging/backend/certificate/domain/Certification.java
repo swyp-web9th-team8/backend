@@ -1,5 +1,6 @@
 package com.swyp.plogging.backend.certificate.domain;
 
+import com.swyp.plogging.backend.common.exception.PostNotFoundException;
 import com.swyp.plogging.backend.domain.base.BaseTimeEntity;
 import com.swyp.plogging.backend.post.domain.Post;
 import jakarta.persistence.*;
@@ -43,6 +44,10 @@ public class Certification extends BaseTimeEntity {
     }
 
     public void certificate() {
-        certificated = true;
+        if(post.isCompleted()){
+            certificated = true;
+        }else{
+            throw new PostNotFoundException("완료되지 않은 모임입니다.");
+        }
     }
 }
