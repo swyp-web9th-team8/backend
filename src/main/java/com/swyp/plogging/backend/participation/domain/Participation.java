@@ -36,7 +36,11 @@ public class Participation extends BaseTimeEntity {
         Participation participation = new Participation();
         participation.post = target;
         participation.user = user;
-        participation.joined = true;
+        participation.joined = false;
         return participation;
+    }
+
+    public void joined() {
+        joined = true;
     }
 }
