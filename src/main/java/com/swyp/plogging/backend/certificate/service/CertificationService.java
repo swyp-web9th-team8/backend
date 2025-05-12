@@ -74,7 +74,7 @@ public class CertificationService {
         }
 
 
-        return new PostInfoResponse(myPost);
+        return new PostInfoResponse(myPost, certification);
     }
 
     /*

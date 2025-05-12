@@ -10,10 +10,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class NicknameAndImageResponse {
+    private Long id;
     private String nickname;
     private String profileImage;
 
     public NicknameAndImageResponse(AppUser writer) {
+        this.id = writer.getId();
         this.nickname = writer.getNickname();
         this.profileImage = writer.getProfileImageUrl();
     }

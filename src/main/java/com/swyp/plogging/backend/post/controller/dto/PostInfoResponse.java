@@ -1,5 +1,6 @@
 package com.swyp.plogging.backend.post.controller.dto;
 
+import com.swyp.plogging.backend.certificate.domain.Certification;
 import com.swyp.plogging.backend.post.domain.Post;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,9 +35,12 @@ public class PostInfoResponse {
         this.participantCount = post.getParticipations().size();
         this.latitude = post.getLatitude();
         this.longitude = post.getLongitude();
+    }
 
+    public PostInfoResponse(Post post, Certification certification){
+        this(post);
         // 완료된 모임에 첫번째 인증 이미지 추가
-        List<String> images = post.getCertification().getImageUrls();
+        List<String> images = certification.getImageUrls();
         if(post.isCompleted() && !images.isEmpty()){
             this.thumbnail = images.get(0);
         }else{
