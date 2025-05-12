@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,6 +18,7 @@ public class PostInfoResponse {
     private String placeName;
     private String address;
     private int participantCount;
+    private String representedImageUrl;
 
     // 위치 정보 추가
     private Double latitude;
@@ -32,5 +34,13 @@ public class PostInfoResponse {
         this.participantCount = post.getParticipations().size();
         this.latitude = post.getLatitude();
         this.longitude = post.getLongitude();
+
+        // 완료된 모임에 첫번째 인증 이미지 추가
+        List<String> images = post.getCertification().getImageUrls();
+        if(post.isCompleted() && !images.isEmpty()){
+            this.representedImageUrl = images.get(0);
+        }else{
+            this.representedImageUrl = null;
+        }
     }
 }
