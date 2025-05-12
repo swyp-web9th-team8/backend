@@ -18,7 +18,7 @@ public class PostInfoResponse {
     private String placeName;
     private String address;
     private int participantCount;
-    private String representedImageUrl;
+    private String thumbnail;
 
     // 위치 정보 추가
     private Double latitude;
@@ -38,9 +38,9 @@ public class PostInfoResponse {
         // 완료된 모임에 첫번째 인증 이미지 추가
         List<String> images = post.getCertification().getImageUrls();
         if(post.isCompleted() && !images.isEmpty()){
-            this.representedImageUrl = images.get(0);
+            this.thumbnail = images.get(0);
         }else{
-            this.representedImageUrl = null;
+            this.thumbnail = null;
         }
     }
 }
