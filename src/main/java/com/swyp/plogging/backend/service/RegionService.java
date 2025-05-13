@@ -3,7 +3,7 @@ package com.swyp.plogging.backend.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swyp.plogging.backend.domain.Region;
-import com.swyp.plogging.backend.repository.RegionRepository;
+import com.swyp.plogging.backend.post.repository.RegionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -215,5 +212,35 @@ public class RegionService {
     public List<String> getNeighborhoods(String district) {
         log.info("동 목록 조회 - 구: {}", district);
         return regionRepository.findNeighborhoodsByCityAndDistrict("서울특별시", district);
+    }
+
+    // RegionService.java에 추가
+    /**
+     * 문자열 형태의 지역 정보를 기반으로 Region 엔티티를 찾습니다.
+     * 형식: "서울특별시 강남구" 또는 "서울특별시 강남구 역삼동"
+     *
+     * @param regionString 지역 문자열
+     * @return 찾은 Region 객체 (없으면 빈 Optional)
+     */
+    public Optional<Region> findRegionFromString(String regionString) {
+        if (regionString == null || regionString.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String[] parts = regionString.split(" ");
+        if (parts.length < 2) {
+            return Optional.empty();
+        }
+
+        String city = parts[0];
+        String district = parts[1];
+        String neighborhood = parts.length > 2 ? parts[2] : "";
+
+        if (neighborhood.isEmpty()) {
+            List<Region> regions = regionRepository.findByCityAndDistrict(city, district);
+            return regions.isEmpty() ? Optional.empty() : Optional.of(regions.get(0));
+        } else {
+            return regionRepository.findByCityAndDistrictAndNeighborhood(city, district, neighborhood);
+        }
     }
 }
