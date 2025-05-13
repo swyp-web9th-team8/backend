@@ -10,6 +10,10 @@ import com.swyp.plogging.backend.post.controller.dto.CreatePostRequest;
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.sevice.PostService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -133,6 +137,8 @@ public class PostController {
         }
     }
 
+    // 초기 모임목록 조회
+    @Operation(summary = "초기 모임목록 조회", description = "초기 API로 현재는 미사용")
     @GetMapping("/list")
     public ApiPagedResponse<PostInfoResponse> getListOfPosts(
             @PageableDefault(size = 10, sort = "meetingTime", direction = Sort.Direction.DESC) Pageable pageable,
@@ -140,6 +146,68 @@ public class PostController {
             @RequestParam(name = "completed", defaultValue = "false", required = false) Boolean completed) {
         try {
             Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, recruitmentCompleted, completed);
+
+            return ApiPagedResponse.ok(response, "Successfully fetched the list.");
+        } catch (Exception e) {
+            return ApiPagedResponse.error(e.getMessage());
+        }
+    }
+
+    // 현재 모집중인 모임목록 조회
+    @Operation(summary = "현재 모집 중인 모임목록 조회", description = "현재 모집중인 모임의 목록을 요약된 정보로 페이지네이션하여 조회합니다.")
+    @Parameters({
+            @Parameter(name = "pos", description = "도로명 주소", in = ParameterIn.QUERY, required = true),
+            @Parameter(name = "v", description = "검색어", in = ParameterIn.QUERY, required = false),
+            @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", in = ParameterIn.QUERY, example = "0"),
+            @Parameter(name = "size", description = "한 페이지 크기", in = ParameterIn.QUERY, example = "10"),
+            @Parameter(name = "sort", description = "정렬 기준 필드,asc|desc (예: meetingDt,desc)", in = ParameterIn.QUERY, example = "meetingDt,desc")
+    })
+    @GetMapping("/list/ing")
+    public ApiPagedResponse<PostInfoResponse> getListOfActivePosts(
+            @RequestParam(required = true, name = "pos")String position,
+            @RequestParam(name = "v")String value,
+            @PageableDefault(size = 10, sort = "meetingDt", direction = Sort.Direction.DESC) Pageable pageable) {
+        try {
+            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, false, false);
+
+            return ApiPagedResponse.ok(response, "Successfully fetched the list.");
+        } catch (Exception e) {
+            return ApiPagedResponse.error(e.getMessage());
+        }
+    }
+
+    // 현재 모집완료된 모임목록 조회
+    @Operation(summary = "현재 모집만 완료된 모임목록 조회", description = "현재 모집만 완료된 모임의 목록을 요약된 정보로 페이지네이션하여 조회합니다.")
+    @Parameters({
+            @Parameter(name = "pos", description = "도로명 주소", in = ParameterIn.QUERY, required = true),
+            @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", in = ParameterIn.QUERY, example = "0"),
+            @Parameter(name = "size", description = "한 페이지 크기", in = ParameterIn.QUERY, example = "10"),
+            @Parameter(name = "sort", description = "정렬 기준 필드,asc|desc (예: meetingDt,desc)", in = ParameterIn.QUERY, example = "meetingDt,desc")
+    })
+    @GetMapping("/list/rec")
+    public ApiPagedResponse<PostInfoResponse> getListOfInactivePosts(
+            @RequestParam(required = true, name = "pos")String position,
+            @PageableDefault(size = 10, sort = "meetingDt", direction = Sort.Direction.DESC) Pageable pageable) {
+        try {
+            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, true, false);
+
+            return ApiPagedResponse.ok(response, "Successfully fetched the list.");
+        } catch (Exception e) {
+            return ApiPagedResponse.error(e.getMessage());
+        }
+    }
+
+    @Operation(summary = "현재 모집만 완료된 모임목록 조회", description = "현재 모집만 완료된 모임의 목록을 요약된 정보로 페이지네이션하여 조회합니다.")
+    @Parameters({
+            @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", in = ParameterIn.QUERY, example = "0"),
+            @Parameter(name = "size", description = "한 페이지 크기", in = ParameterIn.QUERY, example = "10"),
+            @Parameter(name = "sort", description = "정렬 기준 필드,asc|desc (예: meetingDt,desc)", in = ParameterIn.QUERY, example = "meetingDt,desc")
+    })
+    @GetMapping("/list/com")
+    public ApiPagedResponse<PostInfoResponse> getListOfCompletePosts(
+            @PageableDefault(size = 10, sort = "meetingDt", direction = Sort.Direction.DESC) Pageable pageable) {
+        try {
+            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, false, true);
 
             return ApiPagedResponse.ok(response, "Successfully fetched the list.");
         } catch (Exception e) {
