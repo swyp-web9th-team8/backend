@@ -17,23 +17,23 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${file.upload-dir:./uploads}")
     private String uploadDir;
 
-    @Value("${file.badge-icon-dir:./badges}")
+    @Value("${file.badge-icon-dir:./badge-icons}")
     private String badgeIconDir;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 이미지 파일 처리
         registry
-                .addResourceHandler("/images/**")
-                .addResourceLocations("file:" + uploadDir + "/");
+            .addResourceHandler("/images/**")
+            .addResourceLocations("file:" + uploadDir + "/");
 
         // 뱃지 아이콘 처리
-        registry.addResourceHandler("/badges/icons/**")
-                .addResourceLocations("file:" + badgeIconDir + "/");
+        registry.addResourceHandler("/badge-icons/**")
+            .addResourceLocations("file:" + badgeIconDir + "/");
 
         // Swagger UI 리소스 처리 (SpringDoc)
         registry.addResourceHandler("/swagger-ui/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/swagger-ui/");
+            .addResourceLocations("classpath:/META-INF/resources/webjars/swagger-ui/");
     }
 
     @Bean
