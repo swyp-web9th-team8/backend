@@ -56,16 +56,16 @@ jobs:
           echo "OWNER_LC=${OWNER,,}" >> ${GITHUB_ENV}
         env:
           OWNER: '${{github.repository_owner}}'
-#      - name: application-secret.yml 생성
-#        env:
-#          ACTIONS_STEP_DEBUG: true
-#          APPLICATION_SECRET: ${{secrets.APPLICATION_SECRET}}
-#        run: echo "$APPLICATION_SECRET" >> src/main/resources/application-secret.yml
-#      - name: application-jwtTK.yml 생성
-#        env:
-#          ACTIONS_STEP_DEBUG: true
-#          APPLICATION_JWTTK: ${{secrets.APPLICATION_JWTTK}}
-#        run: echo "$APPLICATION_JWTTK" >> src/main/resources/application-jwtTK.yml
+      #      - name: application-secret.yml 생성
+      #        env:
+      #          ACTIONS_STEP_DEBUG: true
+      #          APPLICATION_SECRET: ${{secrets.APPLICATION_SECRET}}
+      #        run: echo "$APPLICATION_SECRET" >> src/main/resources/application-secret.yml
+      #      - name: application-jwtTK.yml 생성
+      #        env:
+      #          ACTIONS_STEP_DEBUG: true
+      #          APPLICATION_JWTTK: ${{secrets.APPLICATION_JWTTK}}
+      #        run: echo "$APPLICATION_JWTTK" >> src/main/resources/application-jwtTK.yml
       - name: 빌드앤 푸쉬
         uses: docker/build-push-action@v3
         with:
@@ -90,6 +90,8 @@ jobs:
             docker run --name swyp_web9th_team8_backend \
             --network app-network \
             --env-file /etc/environment \
+            -v /opt/ploggo/images:/opt/ploggo/images  \
+            -v /opt/ploggo/badge-icons:/opt/ploggo/badge-icons \
             -p 8080:8080 \
             -d ghcr.io/${{ env.OWNER_LC }}/backend:latest
             docker image prune -f
