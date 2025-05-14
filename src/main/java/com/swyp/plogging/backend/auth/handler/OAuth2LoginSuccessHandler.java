@@ -106,14 +106,15 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                     "&id=" + user.getId() +
                     "&email=" + encodedEmail +
                     "&nickname=" + encodedNickname +
-                    "&provider=" + user.getAuthProvider();
+                    "&provider=" + user.getAuthProvider() +
+                    "&registered=" + user.isRegistered(); // registered 상태 추가
 
             log.debug("리다이렉트 URL: {}", redirectPath);
             response.sendRedirect(redirectPath);
         } catch (UnsupportedEncodingException e) {
             log.error("URL 인코딩 오류", e);
             // 인코딩 오류 시 기본 리다이렉트
-            response.sendRedirect(redirectUrl + "?success=true&id=" + user.getId());
+            response.sendRedirect(redirectUrl + "?success=true&id=" + user.getId() + "&registered=" + user.isRegistered());
         }
     }
 
