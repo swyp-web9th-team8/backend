@@ -1,6 +1,8 @@
 package com.swyp.plogging.backend.post.repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.swyp.plogging.backend.participation.domain.QParticipation;
@@ -9,6 +11,7 @@ import com.swyp.plogging.backend.post.domain.QPost;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -132,5 +135,37 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         Number count = (Number) countQuery.getSingleResult();
 
         return new PageImpl<>(results, pageable, count.longValue());
+    }
+
+    public Page<Post> findPostByRegion(MultiPolygon regionPolygons, Pageable pageable, String keyword) {
+        QPost post = QPost.post;
+
+        String pattern = "%"+keyword+"%";
+        Predicate conditions = Expressions.booleanTemplate(
+                        "ST_Contains({0},{1})",
+                        regionPolygons,
+                        post.location
+                )
+                .and(
+                        post.content.like(pattern)
+                                .or(post.title.like(pattern))
+                );
+
+        JPAQuery<Post> postJPAQuery = new JPAQuery<>(em)
+                .select(post).from(post)
+                .where(conditions)
+                .orderBy(post.createdDt.desc())
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset());
+
+        JPAQuery<Long> countQuery = new JPAQuery<>(em)
+                .select(post.id).from(post)
+                .where(conditions);
+
+        List<Post> posts = postJPAQuery
+                .fetch();
+        int totalCount = countQuery.fetch().size();
+
+        return new PageImpl<>(posts, pageable, totalCount);
     }
 }

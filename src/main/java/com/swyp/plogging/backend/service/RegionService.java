@@ -16,10 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -286,5 +283,9 @@ public class RegionService {
         }
 
         return factory.createMultiPolygon(polygons.toArray(new Polygon[0]));
+    }
+
+    public Optional<Region> findByDistrictAndNeighborhood(String district, String neighborhood){
+        return regionRepository.findByCityAndDistrictAndNeighborhood("서울특별시", district, neighborhood);
     }
 }

@@ -152,7 +152,7 @@ public class PostServiceTest {
 
     @Test
     @DisplayName("모임 정보목록 조회 테스트")
-    public void getPostListTest(TestInfo testInfo) {
+    public void getPostListTest(TestInfo testInfo) throws Exception {
         log.info(() -> testInfo.getDisplayName() + " 시작");
 
         List<Post> givenList = new ArrayList<>();
@@ -178,9 +178,11 @@ public class PostServiceTest {
         Boolean completed = false;
         when(postRepository.findPostByCondition(pageable, recruitmentCompleted, completed)).thenReturn(
             new PageImpl<>(givenList, pageable, givenList.size()));
+        AppUser user2 = AppUser.newInstance("user2@user.com", "user2", "Seoul", AuthProvider.GOOGLE, null);
+        setEntityId(user2, 2L);
 
         //when
-        Page<PostInfoResponse> dto = postService.getListOfPostInfo(pageable, recruitmentCompleted, completed);
+        Page<PostInfoResponse> dto = postService.getListOfPostInfo(pageable, "강남구 역삼동", "");
 
         //then
         Assertions.assertEquals(dto.getNumber(), pageable.getPageNumber());

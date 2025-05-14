@@ -1,17 +1,21 @@
 package com.swyp.plogging.backend.post.sevice;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.swyp.plogging.backend.common.exception.PostNotFoundException;
 import com.swyp.plogging.backend.common.exception.UnauthorizedUserException;
 import com.swyp.plogging.backend.common.service.LocationService;
+import com.swyp.plogging.backend.domain.Region;
 import com.swyp.plogging.backend.post.controller.dto.CreatePostRequest;
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.repository.PostRepository;
+import com.swyp.plogging.backend.service.RegionService;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +36,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final LocationService locationService;
+    private final RegionService regionService;
 
     /**
      * 기존 모임 생성 메서드
@@ -224,7 +230,7 @@ public class PostService {
         Post post = findById(postId);
 
         // 작성자인지 확인
-        if(!post.isWriter(user)){
+        if (!post.isWriter(user)) {
             throw new UnauthorizedUserException("작성자가 아닙니다.");
         }
 
@@ -235,20 +241,37 @@ public class PostService {
         return findById(postId).toDetailResponse();
     }
 
-    public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, Boolean recruitmentCompleted, Boolean completed) {
-        // 데이터 DTO로 정제
-        Page<Post> data = postRepository.findPostByCondition(pageable, recruitmentCompleted, completed);
-        List<PostInfoResponse> content;
-        // 완료 여부에 따른 응답 분리
-        if(completed){
-            content = data.getContent().stream().map(post -> new PostInfoResponse(post, post.getCertification())).toList();
-        }
-        else{
-            content = data.getContent().stream().map(PostInfoResponse::new).toList();
-        }
-
-        return new PageImpl<>(content, data.getPageable(), data.getTotalElements());
+    // 현재 모집 중인 모임 조회
+    public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, String position, String keyword) throws JsonProcessingException {
+        return findPostsByDistrictAndNeighborhood(pageable, position, keyword);
     }
+
+    public Page<PostInfoResponse> getListOfCompletePostInfo(Pageable pageable, boolean recruitmentCompleted, boolean completed) {
+        // 모집만 완료한 모임 또는 모임을 완료한 모임 조회
+        Page<Post> posts = postRepository.findPostByCondition(pageable, recruitmentCompleted, completed);
+        List<PostInfoResponse> postList = posts.stream().map(post -> {
+            if(post.isCompleted()){
+                return new PostInfoResponse(post, post.getCertification());
+            }
+            return new PostInfoResponse(post);
+        }).toList();
+
+        return new PageImpl<>(postList, pageable, posts.getTotalElements());
+    }
+//    public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, Boolean recruitmentCompleted, Boolean completed) {
+//        // 데이터 DTO로 정제
+//        Page<Post> data = postRepository.findPostByCondition(pageable, recruitmentCompleted, completed);
+//        List<PostInfoResponse> content;
+//        // 완료 여부에 따른 응답 분리
+//        if(completed){
+//            content = data.getContent().stream().map(post -> new PostInfoResponse(post, post.getCertification())).toList();
+//        }
+//        else{
+//            content = data.getContent().stream().map(PostInfoResponse::new).toList();
+//        }
+//
+//        return new PageImpl<>(content, data.getPageable(), data.getTotalElements());
+//    }
 
     /**
      * 주변 모임 검색 메서드
@@ -260,5 +283,32 @@ public class PostService {
                 .collect(Collectors.toList());
 
         return new PageImpl<>(content, pageable, posts.getTotalElements());
+    }
+
+    /**
+     * 지역 모임 검색 메서드
+     *
+     * @param position 검색지역
+     * @param keyword  검색어
+     */
+    @Transactional
+    public Page<PostInfoResponse> findPostsByDistrictAndNeighborhood(Pageable pageable, String position, String keyword) throws JsonProcessingException {
+        // 검색하고 싶은 지역 찾기
+        String[] regionFields = position.split(" ");
+        Optional<Region> opRegion = regionService.findByDistrictAndNeighborhood(regionFields[0], regionFields[1]);
+        if (opRegion.isEmpty()) {
+            throw new RuntimeException("해당 지역이 없습니다.");
+        }
+
+        Region region = opRegion.get();
+        if (!region.hasPolygons()) {
+            MultiPolygon multiPolygon = regionService.getPolygonOfNeighborhood(region.getCode());
+            region.setPolygons(multiPolygon);
+        }
+
+        Page<Post> posts = postRepository.findPostByRegion(region.getPolygons(), pageable, keyword);
+        List<PostInfoResponse> postList = posts.stream().map(PostInfoResponse::new).toList();
+
+        return new PageImpl<>(postList, pageable, posts.getTotalElements());
     }
 }

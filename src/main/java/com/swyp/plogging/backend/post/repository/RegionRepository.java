@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RegionRepository extends JpaRepository<Region, Long> {
@@ -21,4 +22,6 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     // 특정 구의 동 목록 가져오기 (동 이름이 비어있지 않은 경우만)
     @Query("SELECT r.neighborhood FROM Region r WHERE r.city = ?1 AND r.district = ?2 AND r.neighborhood <> '' ORDER BY r.neighborhood")
     List<String> findNeighborhoodsByCityAndDistrict(String city, String district);
+
+    Optional<Region> findByCityAndDistrictAndNeighborhood(String city, String district, String neighborhood);
 }

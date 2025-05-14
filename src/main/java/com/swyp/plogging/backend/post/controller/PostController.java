@@ -145,7 +145,7 @@ public class PostController {
             @RequestParam(name = "recruitmentCompleted", defaultValue = "false", required = false) Boolean recruitmentCompleted,
             @RequestParam(name = "completed", defaultValue = "false", required = false) Boolean completed) {
         try {
-            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, recruitmentCompleted, completed);
+            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable,null,null);
 
             return ApiPagedResponse.ok(response, "Successfully fetched the list.");
         } catch (Exception e) {
@@ -168,7 +168,7 @@ public class PostController {
             @RequestParam(name = "v")String value,
             @PageableDefault(size = 10, sort = "meetingDt", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
-            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, false, false);
+            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable,position, value);
 
             return ApiPagedResponse.ok(response, "Successfully fetched the list.");
         } catch (Exception e) {
@@ -189,7 +189,7 @@ public class PostController {
             @RequestParam(required = true, name = "pos")String position,
             @PageableDefault(size = 10, sort = "meetingDt", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
-            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, true, false);
+            Page<PostInfoResponse> response = postService.getListOfCompletePostInfo(pageable,true, false);
 
             return ApiPagedResponse.ok(response, "Successfully fetched the list.");
         } catch (Exception e) {
@@ -207,7 +207,7 @@ public class PostController {
     public ApiPagedResponse<PostInfoResponse> getListOfCompletePosts(
             @PageableDefault(size = 10, sort = "meetingDt", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
-            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, false, true);
+            Page<PostInfoResponse> response = postService.getListOfCompletePostInfo(pageable, false, true);
 
             return ApiPagedResponse.ok(response, "Successfully fetched the list.");
         } catch (Exception e) {
