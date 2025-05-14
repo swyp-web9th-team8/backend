@@ -1,16 +1,21 @@
 package com.swyp.plogging.backend.post.sevice;
 
 
+import com.swyp.plogging.backend.domain.Region;
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.repository.PostRepository;
+import com.swyp.plogging.backend.service.RegionService;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import com.swyp.plogging.backend.user.domain.AuthProvider;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,7 +40,8 @@ public class PostServiceTest {
 
     @Mock
     PostRepository postRepository;
-
+    @Mock
+    RegionService regionService;
     private static Post data;
     private static AppUser user;
 
@@ -152,7 +158,7 @@ public class PostServiceTest {
 
     @Test
     @DisplayName("모임 정보목록 조회 테스트")
-    public void getPostListTest(TestInfo testInfo) {
+    public void getPostListTest(TestInfo testInfo) throws Exception {
         log.info(() -> testInfo.getDisplayName() + " 시작");
 
         List<Post> givenList = new ArrayList<>();
@@ -173,14 +179,17 @@ public class PostServiceTest {
                 .build();
             givenList.add(post);
         }
+        Region region = new Region("서울특별시", "강남구", "역삼동", "1111");
+        region.setPolygons(new MultiPolygon(new Polygon[]{},new PrecisionModel(), 4326));
         Pageable pageable = PageRequest.of(0, 10, Sort.by("meetingTime").descending());
         Boolean recruitmentCompleted = false;
         Boolean completed = false;
-        when(postRepository.findPostByCondition(pageable, recruitmentCompleted, completed)).thenReturn(
+        when(postRepository.findPostByRegion(region.getPolygons(), pageable, "")).thenReturn(
             new PageImpl<>(givenList, pageable, givenList.size()));
+        when(regionService.findByDistrictAndNeighborhood(any(String.class),any(String.class))).thenReturn(Optional.of(region));
 
         //when
-        Page<PostInfoResponse> dto = postService.getListOfPostInfo(pageable, recruitmentCompleted, completed);
+        Page<PostInfoResponse> dto = postService.getListOfPostInfo(pageable, "강남구 역삼동", "");
 
         //then
         Assertions.assertEquals(dto.getNumber(), pageable.getPageNumber());

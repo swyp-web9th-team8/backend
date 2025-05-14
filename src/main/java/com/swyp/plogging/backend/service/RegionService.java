@@ -1,11 +1,13 @@
 package com.swyp.plogging.backend.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swyp.plogging.backend.domain.Region;
 import com.swyp.plogging.backend.post.repository.RegionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.locationtech.jts.geom.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -214,6 +216,78 @@ public class RegionService {
         return regionRepository.findNeighborhoodsByCityAndDistrict("서울특별시", district);
     }
 
+    // vworld에서 폴리곤 받아오기
+    public MultiPolygon getPolygonOfNeighborhood(String regionCode) throws JsonProcessingException{
+        String url = UriComponentsBuilder.fromHttpUrl("https://api.vworld.kr/req/data")
+                .queryParam("service", "data")
+                .queryParam("request", "GetFeature")
+                .queryParam("data", "LT_C_ADEMD_INFO")
+                .queryParam("key", apiKey)
+                .queryParam("domain", "localhost") // 포트 제거
+                .queryParam("attrFilter", "emd_cd:=:" + regionCode) // 이 부분은 기존과 동일
+                .queryParam("geometry", "true")
+                .queryParam("size", "1000")
+                .queryParam("geomFilter", "")
+                .queryParam("format", "json")
+                .build()
+                .toUriString();
+
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode response_node = root.get("response");
+
+        if (response_node == null || !response_node.get("status").asText().equals("OK")) {
+            log.error("API 응답 오류: {}", response.getBody());
+            throw new RuntimeException("V-World API 응답 오류");
+        }
+
+        JsonNode features = response_node.get("result").get("featureCollection").get("features");
+
+        for(JsonNode feature : features){
+            JsonNode properties = feature.get("properties");
+            JsonNode code = properties.get("emd_cd");
+            if(code.asText().equals(regionCode)){
+                return createMultiPolygon(feature);
+            }
+        }
+        return null;
+    }
+
+    // MultiPolygon 생성
+    private MultiPolygon createMultiPolygon(JsonNode feature) {
+        GeometryFactory factory = new GeometryFactory(new PrecisionModel(), 4326);
+        List<Polygon> polygons = new ArrayList<>();
+
+        JsonNode coordinates = feature.get("geometry").get("coordinates");
+        JsonNode polygonNodes = coordinates.get(0);
+        for(JsonNode polygon: polygonNodes){
+            JsonNode exteriorPolygon = polygon.get(0);
+
+            List<Coordinate> coordinateList = new ArrayList<>();
+            for(JsonNode pointNode: exteriorPolygon){
+                double x = pointNode.get(0).asDouble(); // 경도
+                double y = pointNode.get(1).asDouble(); // 위도
+                coordinateList.add(new Coordinate(x,y));
+            }
+
+            // 닫힌 도형 확인
+            if(!coordinateList.get(0).equals2D(coordinateList.get(coordinateList.size() -1))){
+                coordinateList.add(coordinateList.get(0));
+            }
+
+            Coordinate[] coords = coordinateList.toArray(new Coordinate[0]);
+            LinearRing shell = factory.createLinearRing(coords);
+            Polygon polygon1 = factory.createPolygon(shell);
+            polygons.add(polygon1);
+        }
+
+        return factory.createMultiPolygon(polygons.toArray(new Polygon[0]));
+    }
+
+    public Optional<Region> findByDistrictAndNeighborhood(String district, String neighborhood) {
+        return regionRepository.findByCityAndDistrictAndNeighborhood("서울특별시", district, neighborhood);
+    }
     // RegionService.java에 추가
     /**
      * 문자열 형태의 지역 정보를 기반으로 Region 엔티티를 찾습니다.

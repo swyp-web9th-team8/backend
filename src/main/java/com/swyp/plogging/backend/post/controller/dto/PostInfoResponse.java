@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -19,6 +20,7 @@ public class PostInfoResponse {
     private String placeName;
     private String address;
     private int participantCount;
+    private List<NicknameAndImageResponse> participants;
     private String thumbnail;
 
     // 위치 정보 추가
@@ -33,17 +35,23 @@ public class PostInfoResponse {
         this.placeName = post.getPlaceName();
         this.address = post.getAddress();
         this.participantCount = post.getParticipations().size();
+        this.participants = post.getParticipations().stream()
+                .map(
+                        participation -> new NicknameAndImageResponse(participation.getUser())
+                )
+                .collect(Collectors.toList());
         this.latitude = post.getLatitude();
         this.longitude = post.getLongitude();
+        this.thumbnail = null;
     }
 
-    public PostInfoResponse(Post post, Certification certification){
+    public PostInfoResponse(Post post, Certification certification) {
         this(post);
         // 완료된 모임에 첫번째 인증 이미지 추가
         List<String> images = certification.getImageUrls();
-        if(post.isCompleted() && !images.isEmpty()){
+        if (post.isCompleted() && !images.isEmpty()) {
             this.thumbnail = images.get(0);
-        }else{
+        } else {
             this.thumbnail = null;
         }
     }

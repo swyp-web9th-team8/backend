@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.locationtech.jts.geom.MultiPolygon;
 
 @Entity
 @Table(name = "regions")
@@ -28,11 +29,19 @@ public class Region {
     @Column
     private String code; // 행정구역 코드
 
+    // 지역단위 검색을 위한 지역 폴리곤
+    @Column(columnDefinition = "geometry(MULTIPOLYGON, 4326)")
+    private MultiPolygon polygons;
+
     // 엔티티 생성자
     public Region(String city, String district, String neighborhood, String code) {
         this.city = city;
         this.district = district;
         this.neighborhood = neighborhood;
         this.code = code;
+    }
+
+    public boolean hasPolygons(){
+        return polygons != null;
     }
 }
