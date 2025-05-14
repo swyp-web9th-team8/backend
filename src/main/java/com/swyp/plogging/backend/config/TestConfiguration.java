@@ -51,6 +51,10 @@ public class TestConfiguration {
         System.setProperty("naver.map.client-secret", "Dummy-test-secret");
         System.setProperty("naver.search.client-id", "Dummy-test-id");
         System.setProperty("naver.search.client-secret", "Dummy-test-secret");
+        System.setProperty("spring.security.oauth2.client.registration.google.client-id", "test");
+        System.setProperty("spring.security.oauth2.client.registration.google.client-secret", "test");
+        System.setProperty("spring.security.oauth2.client.registration.kakao.client-id", "test");
+        System.setProperty("spring.security.oauth2.client.registration.kakao.client-secret", "test");
     }
 
 }
