@@ -53,4 +53,4 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 RUN ln -sf "$JAVA_HOME/bin/java" /usr/bin/java
 
 # 실행할 JAR 파일 지정
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
