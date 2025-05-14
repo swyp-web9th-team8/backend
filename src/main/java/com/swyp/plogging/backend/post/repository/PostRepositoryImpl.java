@@ -46,17 +46,17 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         postCondition.and(post.completed.eq(completed));
 
         // recruitmentCompleted 조건 추가
-        if (!recruitmentCompleted) {
+        if (recruitmentCompleted) {
             postCondition.and(post.deadLine.gt(LocalDateTime.now()));
             // 기본 쿼리에 조인과 그룹바이 적용
             query.leftJoin(participation).on(participation.post.eq(post))
                     .groupBy(post.id)
-                    .having(participation.count().lt(post.maxParticipants));
+                    .having(participation.id.count().eq(post.maxParticipants.castToNum(Long.class)));
 
             // 카운트 쿼리에 조인과 그룹바이 적용
             countQuery.leftJoin(participation).on(participation.post.eq(post))
                     .groupBy(post.id)
-                    .having(participation.count().lt(post.maxParticipants));
+                    .having(participation.id.count().eq(post.maxParticipants.castToNum(Long.class)));
         }
 
         // 조건 적용
