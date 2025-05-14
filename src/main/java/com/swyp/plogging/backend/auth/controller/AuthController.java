@@ -4,8 +4,12 @@ import com.swyp.plogging.backend.auth.controller.dto.*;
 import com.swyp.plogging.backend.auth.domain.CustomOAuth2User;
 import com.swyp.plogging.backend.auth.service.AuthService;
 import com.swyp.plogging.backend.controller.dto.TokenRefreshRequest;
+import com.swyp.plogging.backend.domain.Region;
+import com.swyp.plogging.backend.post.repository.RegionRepository;
 import com.swyp.plogging.backend.user.domain.AppUser;
+import com.swyp.plogging.backend.user.domain.UserRegion;
 import com.swyp.plogging.backend.user.repository.AppUserRepository;
+import com.swyp.plogging.backend.user.repository.UserRegionRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,17 +25,18 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -39,6 +44,8 @@ import java.util.Map;
 public class AuthController {
 
     private final AppUserRepository appUserRepository;
+    private final RegionRepository regionRepository;
+    private final UserRegionRepository userRegionRepository;
     private final AuthService authService;
 
     @Operation(
@@ -74,7 +81,7 @@ public class AuthController {
     @SecurityRequirement(name = "kakao_oauth")
     @GetMapping("/kakao")
     public ResponseEntity<Map<String, Object>> kakaoLogin() {
-        // 이 메서드는 실제로 호출되지 않고 Swagger 문서화 용도로만 사용됨
+        // 이 메서드는 실제로 호출되지 않고 Swagger 문서화 용도로만 사용
         // 실제 카카오 로그인은 /oauth2/authorization/kakao 엔드포인트를 통해 이루어짐
         return ResponseEntity.ok(Map.of(
                 "success", true,
@@ -115,7 +122,7 @@ public class AuthController {
     @SecurityRequirement(name = "google_oauth")
     @GetMapping("/google")
     public ResponseEntity<Map<String, Object>> googleLogin() {
-        // 이 메서드는 실제로 호출되지 않고 Swagger 문서화 용도로만 사용됨
+        // 이 메서드는 실제로 호출되지 않고 Swagger 문서화 용도로만 사용
         // 실제 구글 로그인은 /oauth2/authorization/google 엔드포인트를 통해 이루어짐
         return ResponseEntity.ok(Map.of(
                 "success", true,
@@ -158,15 +165,17 @@ public class AuthController {
         }
 
         AppUser user = customOAuth2User.getAppUser();
-        Map<String, Object> userInfo = Map.of(
-                "id", user.getId(),
-                "email", user.getEmail(),
-                "nickname", user.getNickname(),
-                "region", user.getRegion(),
-                "profileImageUrl", user.getProfileImageUrl() != null ? user.getProfileImageUrl() : "",
-                "registered", user.isRegistered(),
-                "provider", user.getAuthProvider().toString()
-        );
+
+        // HashMap을 사용하여 더 많은 필드 추가 가능
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("id", user.getId());
+        userInfo.put("email", user.getEmail());
+        userInfo.put("nickname", user.getNickname());
+        userInfo.put("region", user.getRegion());
+        userInfo.put("profileImageUrl", user.getProfileImageUrl() != null ? user.getProfileImageUrl() : "");
+        userInfo.put("registered", user.isRegistered());
+        userInfo.put("provider", user.getAuthProvider().toString());
+        userInfo.put("gender", user.getGender()); // 성별 정보 추가
 
         return ResponseEntity.ok(Map.of("success", true, "user", userInfo));
     }
@@ -231,11 +240,57 @@ public class AuthController {
                     .body(Map.of("success", false, "error", "이미 사용중인 닉네임입니다."));
         }
 
-        // 사용자 정보 업데이트
+        // 기본 사용자 정보 업데이트
         user.update(request.getNickname(), request.getRegion(), request.getProfileImageUrl());
 
-        // 성별 정보 설정 (gender 필드 추가 필요)
+        // 성별 정보 설정
         user.setGender(request.getGender());
+
+        // Region 엔티티로 지역 정보 저장
+        String[] regionParts = request.getRegion().split(" ");
+        if (regionParts.length >= 2) {
+            String city = regionParts[0];
+            String district = regionParts[1];
+            String neighborhood = regionParts.length > 2 ? regionParts[2] : "";
+
+            // 해당 지역 찾기
+            Optional<Region> regionOptional;
+
+            if (!neighborhood.isEmpty()) {
+                regionOptional = regionRepository.findByCityAndDistrictAndNeighborhood(city, district, neighborhood);
+                log.info("지역 검색 결과: city={}, district={}, neighborhood={}, 결과={}",
+                        city, district, neighborhood, regionOptional.isPresent());
+            } else {
+                // 동 정보가 없는 경우, 구 정보만으로 검색
+                List<Region> regions = regionRepository.findByCityAndDistrict(city, district);
+                regionOptional = regions.isEmpty() ? Optional.empty() : Optional.of(regions.get(0));
+                log.info("지역 검색 결과: city={}, district={}, 결과={}",
+                        city, district, regionOptional.isPresent());
+            }
+
+            if (regionOptional.isPresent()) {
+                Region region = regionOptional.get();
+
+                // 기존 UserRegion 확인 및 설정 해제
+                userRegionRepository.findPrimaryRegionByUserId(user.getId())
+                        .ifPresent(existingPrimary -> {
+                            existingPrimary.unsetPrimary();
+                            userRegionRepository.save(existingPrimary);
+                        });
+
+                // 새 UserRegion 생성 및 저장
+                UserRegion userRegion = new UserRegion(user, region, true);
+                userRegionRepository.save(userRegion);
+
+
+                log.info("사용자 ID {}: 지역 정보 등록 - Region ID {}, 지역명: {}",
+                        user.getId(), region.getId(), region.getCity() + " " + region.getDistrict() +
+                                (region.getNeighborhood() != null && !region.getNeighborhood().isEmpty() ?
+                                        " " + region.getNeighborhood() : ""));
+            } else {
+                log.warn("사용자 ID {}: 지역 정보를 찾을 수 없음 - {}", user.getId(), request.getRegion());
+            }
+        }
 
         user.completeRegistration();
         appUserRepository.save(user);

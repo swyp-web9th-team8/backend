@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swyp.plogging.backend.domain.Region;
-import com.swyp.plogging.backend.repository.RegionRepository;
+import com.swyp.plogging.backend.post.repository.RegionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.*;
@@ -285,7 +285,36 @@ public class RegionService {
         return factory.createMultiPolygon(polygons.toArray(new Polygon[0]));
     }
 
-    public Optional<Region> findByDistrictAndNeighborhood(String district, String neighborhood){
+    public Optional<Region> findByDistrictAndNeighborhood(String district, String neighborhood) {
         return regionRepository.findByCityAndDistrictAndNeighborhood("서울특별시", district, neighborhood);
+    }
+    // RegionService.java에 추가
+    /**
+     * 문자열 형태의 지역 정보를 기반으로 Region 엔티티를 찾습니다.
+     * 형식: "서울특별시 강남구" 또는 "서울특별시 강남구 역삼동"
+     *
+     * @param regionString 지역 문자열
+     * @return 찾은 Region 객체 (없으면 빈 Optional)
+     */
+    public Optional<Region> findRegionFromString(String regionString) {
+        if (regionString == null || regionString.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String[] parts = regionString.split(" ");
+        if (parts.length < 2) {
+            return Optional.empty();
+        }
+
+        String city = parts[0];
+        String district = parts[1];
+        String neighborhood = parts.length > 2 ? parts[2] : "";
+
+        if (neighborhood.isEmpty()) {
+            List<Region> regions = regionRepository.findByCityAndDistrict(city, district);
+            return regions.isEmpty() ? Optional.empty() : Optional.of(regions.get(0));
+        } else {
+            return regionRepository.findByCityAndDistrictAndNeighborhood(city, district, neighborhood);
+        }
     }
 }

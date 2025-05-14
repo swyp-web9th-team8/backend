@@ -13,6 +13,12 @@ import com.swyp.plogging.backend.post.repository.PostRepository;
 import com.swyp.plogging.backend.service.RegionService;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.annotation.Nullable;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.MultiPolygon;
@@ -246,11 +252,12 @@ public class PostService {
         return findPostsByDistrictAndNeighborhood(pageable, position, keyword);
     }
 
-    public Page<PostInfoResponse> getListOfCompletePostInfo(Pageable pageable, boolean recruitmentCompleted, boolean completed) {
+    public Page<PostInfoResponse> getListOfCompletePostInfo(Pageable pageable, boolean recruitmentCompleted,
+                                                            boolean completed) {
         // 모집만 완료한 모임 또는 모임을 완료한 모임 조회
         Page<Post> posts = postRepository.findPostByCondition(pageable, recruitmentCompleted, completed);
         List<PostInfoResponse> postList = posts.stream().map(post -> {
-            if(post.isCompleted()){
+            if (post.isCompleted()) {
                 return new PostInfoResponse(post, post.getCertification());
             }
             return new PostInfoResponse(post);
@@ -276,7 +283,8 @@ public class PostService {
     /**
      * 주변 모임 검색 메서드
      */
-    public Page<PostInfoResponse> findNearbyPosts(Double latitude, Double longitude, Double radiusKm, Pageable pageable) {
+    public Page<PostInfoResponse> findNearbyPosts(Double latitude, Double longitude, Double radiusKm, Pageable
+            pageable) {
         Page<Post> posts = postRepository.findNearbyPosts(latitude, longitude, radiusKm, pageable);
         List<PostInfoResponse> content = posts.getContent().stream()
                 .map(PostInfoResponse::new)
@@ -292,7 +300,8 @@ public class PostService {
      * @param keyword  검색어
      */
     @Transactional
-    public Page<PostInfoResponse> findPostsByDistrictAndNeighborhood(Pageable pageable, String position, String keyword) throws JsonProcessingException {
+    public Page<PostInfoResponse> findPostsByDistrictAndNeighborhood(Pageable pageable, String position, String
+            keyword) throws JsonProcessingException {
         // 검색하고 싶은 지역 찾기
         String[] regionFields = position.split(" ");
         Optional<Region> opRegion = regionService.findByDistrictAndNeighborhood(regionFields[0], regionFields[1]);
@@ -310,5 +319,10 @@ public class PostService {
         List<PostInfoResponse> postList = posts.stream().map(PostInfoResponse::new).toList();
 
         return new PageImpl<>(postList, pageable, posts.getTotalElements());
+    }
+
+    public List<Long> getCompletedPostIds(Long writerId) {
+        List<Post> completedPosts = postRepository.findByWriterIdAndCompletedTrue(writerId);
+        return completedPosts.stream().map(Post::getId).collect(Collectors.toList());
     }
 }

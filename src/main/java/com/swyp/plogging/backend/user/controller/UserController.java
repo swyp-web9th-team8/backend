@@ -5,20 +5,30 @@ import com.swyp.plogging.backend.common.dto.ApiResponse;
 import com.swyp.plogging.backend.common.util.SecurityUtils;
 import com.swyp.plogging.backend.participation.dto.MyPostResponse;
 import com.swyp.plogging.backend.participation.service.ParticipationService;
+import com.swyp.plogging.backend.post.sevice.PostService;
 import com.swyp.plogging.backend.user.controller.dto.EditableProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
 import com.swyp.plogging.backend.user.controller.dto.UpdateNicknameRequest;
 import com.swyp.plogging.backend.user.controller.dto.UpdatePhoneNumRequest;
 import com.swyp.plogging.backend.user.controller.dto.UpdateRegionRequest;
 import com.swyp.plogging.backend.user.controller.dto.UserBadgesResponse;
+import com.swyp.plogging.backend.user.controller.dto.UserRegionRequest;
+import com.swyp.plogging.backend.user.controller.dto.UserRegionResponse;
+import com.swyp.plogging.backend.user.domain.UserRegion;
 import com.swyp.plogging.backend.user.service.UserService;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +43,7 @@ public class UserController {
 
     private final UserService userService;
     private final ParticipationService participationService;
+    private final PostService postService;
 
     @GetMapping("/profile")
     public ApiResponse<ProfileResponse> getProfile(@AuthenticationPrincipal OAuth2User principal) {
@@ -103,5 +114,87 @@ public class UserController {
         UserBadgesResponse userBadges = userService.getUserBadges(currentUserId);
 
         return ApiResponse.ok(userBadges, "User badges fetched successfully!");
+    }
+
+    // --- 새로운 UserRegion 관련 엔드포인트 ---
+
+    // 사용자 지역 목록 조회
+    @GetMapping("/regions")
+    public ApiResponse<List<UserRegionResponse>> getUserRegions(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) {
+            return ApiResponse.error("인증되지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        List<UserRegion> userRegions = userService.getUserRegions(currentUserId);
+
+        List<UserRegionResponse> response = userRegions.stream()
+            .map(ur -> new UserRegionResponse(
+                ur.getId(),
+                ur.getRegion().getId(),
+                ur.getRegion().getCity(),
+                ur.getRegion().getDistrict(),
+                ur.getRegion().getNeighborhood(),
+                ur.isPrimary()
+            ))
+            .collect(Collectors.toList());
+
+        return ApiResponse.ok(response, "사용자 지역 목록이 성공적으로 조회되었습니다.");
+    }
+
+    // 지역 추가
+    @PostMapping("/regions")
+    public ApiResponse<Void> addUserRegion(
+        @AuthenticationPrincipal OAuth2User principal,
+        @RequestBody UserRegionRequest request) {
+
+        if (principal == null) {
+            return ApiResponse.error("인증되지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        userService.addUserRegion(currentUserId, request.getRegionId(), request.isPrimary());
+
+        return ApiResponse.ok(null, "지역이 성공적으로 추가되었습니다.");
+    }
+
+    // 지역 삭제
+    @DeleteMapping("/regions/{regionId}")
+    public ApiResponse<Void> removeUserRegion(
+        @AuthenticationPrincipal OAuth2User principal,
+        @PathVariable Long regionId) {
+
+        if (principal == null) {
+            return ApiResponse.error("인증되지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        userService.removeUserRegion(currentUserId, regionId);
+
+        return ApiResponse.ok(null, "지역이 성공적으로 삭제되었습니다.");
+    }
+
+    // 기본 지역 변경
+    @PatchMapping("/regions/{regionId}/primary")
+    public ApiResponse<Void> updatePrimaryRegion(
+        @AuthenticationPrincipal OAuth2User principal,
+        @PathVariable Long regionId) {
+
+        if (principal == null) {
+            return ApiResponse.error("인증되지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        userService.updatePrimaryRegion(currentUserId, regionId);
+
+        return ApiResponse.ok(null, "기본 지역이 성공적으로 변경되었습니다.");
+    }
+
+    // todo : redis + websocket 으로 변경 필요, polling 으로 구현되어있음
+    @GetMapping("/completed-post-ids")
+    public ApiResponse<List<Long>> getCompletedPost(@AuthenticationPrincipal OAuth2User principal) {
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        List<Long> completedPostIds = postService.getCompletedPostIds(currentUserId);
+        return ApiResponse.ok(completedPostIds, "Completed postIds fetched successfully!");
     }
 }

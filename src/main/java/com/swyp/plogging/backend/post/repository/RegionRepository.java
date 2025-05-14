@@ -1,4 +1,4 @@
-package com.swyp.plogging.backend.repository;
+package com.swyp.plogging.backend.post.repository;
 
 import com.swyp.plogging.backend.domain.Region;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,5 +23,6 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     @Query("SELECT r.neighborhood FROM Region r WHERE r.city = ?1 AND r.district = ?2 AND r.neighborhood <> '' ORDER BY r.neighborhood")
     List<String> findNeighborhoodsByCityAndDistrict(String city, String district);
 
+    // 도시, 구, 동으로 지역 찾기
     Optional<Region> findByCityAndDistrictAndNeighborhood(String city, String district, String neighborhood);
 }
