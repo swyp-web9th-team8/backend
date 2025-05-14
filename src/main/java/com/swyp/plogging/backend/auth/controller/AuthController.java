@@ -81,7 +81,7 @@ public class AuthController {
     @SecurityRequirement(name = "kakao_oauth")
     @GetMapping("/kakao")
     public ResponseEntity<Map<String, Object>> kakaoLogin() {
-        // 이 메서드는 실제로 호출되지 않고 Swagger 문서화 용도로만 사용됨
+        // 이 메서드는 실제로 호출되지 않고 Swagger 문서화 용도로만 사용
         // 실제 카카오 로그인은 /oauth2/authorization/kakao 엔드포인트를 통해 이루어짐
         return ResponseEntity.ok(Map.of(
                 "success", true,
@@ -122,7 +122,7 @@ public class AuthController {
     @SecurityRequirement(name = "google_oauth")
     @GetMapping("/google")
     public ResponseEntity<Map<String, Object>> googleLogin() {
-        // 이 메서드는 실제로 호출되지 않고 Swagger 문서화 용도로만 사용됨
+        // 이 메서드는 실제로 호출되지 않고 Swagger 문서화 용도로만 사용
         // 실제 구글 로그인은 /oauth2/authorization/google 엔드포인트를 통해 이루어짐
         return ResponseEntity.ok(Map.of(
                 "success", true,
