@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryCustom {
 
     List<Post> findAllByMeetingDtBeforeAndCompletedFalse(LocalDateTime now);
+
+    List<Post> findByWriterIdAndCompletedTrue(Long writerId);
 }
