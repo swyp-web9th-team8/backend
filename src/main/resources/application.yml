@@ -1,19 +1,46 @@
+# application.yml - 모든 환경 설정 통합
 spring:
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+  profiles:
+    # 기본 프로필 - 로컬 환경
+    active: local
+
   jpa:
-    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
     hibernate:
       ddl-auto: update
-      show-sql: true
-      format-sql: true
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Seoul
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+# 공통 로깅 설정
+logging:
+  level:
+    root: INFO
+    com.swyp.plogging.backend: INFO
+
+---
+# 로컬 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/plogging
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
   security:
-    user:
-      name: admin
-      password: 1111
     oauth2:
       client:
         registration:
@@ -21,64 +48,91 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: profile, email
-            redirect-uri: ${app.baseUrl}/login/oauth2/code/google
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
           kakao:
             client-id: ${KAKAO_CLIENT_ID}
             client-secret: ${KAKAO_CLIENT_SECRET}
-            redirect-uri: ${app.baseUrl}/login/oauth2/code/kakao
+            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
             scope: profile_nickname, profile_image
             client-name: Kakao
         provider:
-          google:
-            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
-            token-uri: https://oauth2.googleapis.com/token
-            user-info-uri: https://openidconnect.googleapis.com/v1/userinfo
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
-  jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: Asia/Seoul
-  vworld:
-    api:
-      key: ${VWORLD_API_KEY}
-  servlet:
-    multipart:
-      max-file-size: 5MB
-      max-request-size: 5MB
 
-# 네이버 설정 추가
-naver:
-  map:
-    client-id: ${NAVER_MAP_CLIENT_ID}
-    client-secret: ${NAVER_MAP_CLIENT_SECRET}
-  search:
-    client-id: ${NAVER_SEARCH_CLIENT_ID}
-    client-secret: ${NAVER_SEARCH_CLIENT_SECRET}
-
+# 로컬 환경 앱 설정
 app:
-  baseUrl: https://ploggo.co.kr
+  baseUrl: http://localhost:8080
+  frontendUrl: http://localhost:3000
+  redirectUrl: http://localhost:3000/oauth/callback
 
+# 파일 업로드 설정 (로컬)
+file:
+  upload-dir: ./uploads/images
+  badge-icon-dir: ./uploads/badge-icons
+
+# 로컬 로깅 설정
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    com.swyp.plogging.backend: DEBUG
+
+---
+# 프로덕션 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: profile, email
+            redirect-uri: https://api.ploggo.co.kr/login/oauth2/code/google
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
+            redirect-uri: https://api.ploggo.co.kr/login/oauth2/code/kakao
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            scope: profile_nickname, profile_image
+            client-name: Kakao
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+# 프로덕션 환경 앱 설정
+app:
+  baseUrl: https://api.ploggo.co.kr
+  frontendUrl: https://ploggo.co.kr
+  redirectUrl: https://ploggo.co.kr/oauth/callback
+
+# 파일 업로드 설정 (프로덕션)
 file:
   upload-dir: /opt/ploggo/images
   badge-icon-dir: /opt/ploggo/badge-icons
 
-springdoc:
-  api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    disable-swagger-default-url: true
-    operations-sorter: alpha
-    oauth:
-      client-id: ${KAKAO_CLIENT_ID}  # 카카오 클라이언트 ID
-      use-pkce-with-authorization-code-grant: true
-      additional-query-string-params:
-        client_id: ${KAKAO_CLIENT_ID}
-  default-consumes-media-type: application/json
-  default-produces-media-type: application/json
-  paths-to-match: /api/**
+# 프로덕션 로깅 설정
+logging:
+  level:
+    org.springframework.security: INFO
+    org.springframework.security.oauth2: INFO
+    com.swyp.plogging.backend: INFO
