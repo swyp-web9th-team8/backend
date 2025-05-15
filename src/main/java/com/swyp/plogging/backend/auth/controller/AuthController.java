@@ -3,7 +3,6 @@ package com.swyp.plogging.backend.auth.controller;
 import com.swyp.plogging.backend.auth.controller.dto.*;
 import com.swyp.plogging.backend.auth.domain.CustomOAuth2User;
 import com.swyp.plogging.backend.auth.service.AuthService;
-import com.swyp.plogging.backend.controller.dto.TokenRefreshRequest;
 import com.swyp.plogging.backend.domain.Region;
 import com.swyp.plogging.backend.post.repository.RegionRepository;
 import com.swyp.plogging.backend.user.domain.AppUser;
@@ -130,17 +129,17 @@ public class AuthController {
         ));
     }
 
-    @Operation(summary = "현재 사용자 정보 조회", description = "현재 인증된 사용자의 상세 정보를 반환합니다.")
+    @Operation(summary = "현재 사용자 정보 조회", description = "현재 인증된 사용자의 정보를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "성공적으로 사용자 정보를 조회함",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = LoginSuccessResponse.class),
+                            schema = @Schema(implementation = UserResponse.class),
                             examples = @ExampleObject(
-                                    name = "success",
-                                    value = "{ \"success\": true, \"user\": { \"id\": 1, \"email\": \"user@example.com\", \"nickname\": \"홍길동\", \"region\": \"서울시 강남구\", \"profileImageUrl\": \"https://example.com/profile.jpg\", \"registered\": true, \"provider\": \"KAKAO\" } }"
+                                    name = "user",
+                                    value = "{ \"success\": true, \"user\": { \"id\": 1, \"email\": \"user@example.com\" } }"
                             )
                     )
             ),
@@ -158,13 +157,20 @@ public class AuthController {
             )
     })
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(@Parameter(hidden = true) @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-        if (customOAuth2User == null) {
+    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        
+        if (session == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("success", false, "error", "Not authenticated"));
+                    .body(Map.of("success", false, "error", "세션이 없습니다. 로그인이 필요합니다."));
         }
-
-        AppUser user = customOAuth2User.getAppUser();
+        
+        AppUser user = (AppUser) session.getAttribute("user");
+        
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("success", false, "error", "사용자 정보가 없습니다. 로그인이 필요합니다."));
+        }
 
         // HashMap을 사용하여 더 많은 필드 추가 가능
         Map<String, Object> userInfo = new HashMap<>();
@@ -314,8 +320,10 @@ public class AuthController {
             )
     })
     @GetMapping("/status")
-    public ResponseEntity<?> getAuthStatus(@Parameter(hidden = true) @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-        boolean isAuthenticated = customOAuth2User != null;
+    public ResponseEntity<?> getAuthStatus(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        boolean isAuthenticated = session != null && session.getAttribute("user") != null;
+        
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "authenticated", isAuthenticated
@@ -358,34 +366,5 @@ public class AuthController {
         }
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Logged out successfully"));
-    }
-
-    @Operation(summary = "토큰 갱신", description = "인증 토큰을 갱신합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "성공적으로 토큰을 갱신함",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = TokenRefreshResponse.class),
-                            examples = @ExampleObject(
-                                    name = "refresh",
-                                    value = "{ \"success\": true, \"message\": \"토큰이 갱신되었습니다.\", \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\" }"
-                            )
-                    )
-            )
-    })
-    @PostMapping("/token/refresh")
-    public ResponseEntity<?> refreshToken(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "토큰 갱신 요청",
-                    content = @Content(schema = @Schema(implementation = TokenRefreshRequest.class)))
-            @RequestBody TokenRefreshRequest request) {
-        // JWT 구현 시 사용할 토큰 갱신 로직
-        // 현재는 더미 응답만 반환
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "토큰이 갱신되었습니다.",
-                "token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-        ));
     }
 }

@@ -6,6 +6,7 @@ import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,19 +49,28 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
             AppUser user = oAuth2User.getAppUser();
 
-            log.info("OAuth2 로그인 성공: 사용자 ID = {}, 이메일 = {}, 제공자 = {}",
-                    user.getId(), user.getEmail(), user.getAuthProvider());
+            log.info("OAuth2 로그인 성공: 사용자 ID = {}, 이메일 = {}, 제공자 = {}, 등록 상태 = {}",
+                    user.getId(), user.getEmail(), user.getAuthProvider(), user.isRegistered());
+
+            // 세션에 사용자 정보 저장
+            HttpSession session = request.getSession(true);
+            session.setAttribute("user", user);
+            session.setAttribute("USER_ID", user.getId());
+            session.setAttribute("ROLE", "USER");
+            
+            // JSESSIONID 쿠키는 자동으로 설정됨
 
             // 디버깅 정보
             String acceptHeader = request.getHeader("Accept");
             log.debug("Request URL: {}", request.getRequestURL());
             log.debug("Request Query String: {}", request.getQueryString());
             log.debug("Accept Header: {}", acceptHeader);
+            log.debug("세션 ID: {}", session.getId());
 
             // API 요청 vs 브라우저 요청 처리 결정
             if (acceptHeader != null && acceptHeader.contains("application/json")) {
                 // API 요청에는 JSON 응답
-                sendJsonResponse(response, user);
+                sendJsonResponse(response, user, session.getId());
             } else {
                 // 브라우저 요청에는 프론트엔드로 리다이렉트
                 sendRedirect(response, user);
@@ -71,11 +81,12 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 
-    private void sendJsonResponse(HttpServletResponse response, AppUser user) throws IOException {
+    private void sendJsonResponse(HttpServletResponse response, AppUser user, String sessionId) throws IOException {
         // JSON 응답 생성
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("success", true);
         responseBody.put("message", "로그인 성공");
+        responseBody.put("sessionId", sessionId);
 
         Map<String, Object> userData = new HashMap<>();
         userData.put("id", user.getId());
@@ -96,25 +107,22 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private void sendRedirect(HttpServletResponse response, AppUser user) throws IOException {
         try {
-            // 닉네임 URL 인코딩
-            String encodedNickname = URLEncoder.encode(user.getNickname(), StandardCharsets.UTF_8.toString());
-            String encodedEmail = URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8.toString());
-
-            // 프론트엔드 리다이렉트 URL 구성
-            String redirectPath = redirectUrl +
+            // 최소한의 정보만 URL에 포함 (보안 강화)
+            String redirectPath = frontendUrl + "/oauth/callback" +
                     "?success=true" +
-                    "&id=" + user.getId() +
-                    "&email=" + encodedEmail +
-                    "&nickname=" + encodedNickname +
-                    "&provider=" + user.getAuthProvider() +
-                    "&registered=" + user.isRegistered(); // registered 상태 추가
-
-            log.debug("리다이렉트 URL: {}", redirectPath);
+                    "&registered=" + user.isRegistered();
+            
+            // 세션은 이미 생성되어 있으므로 JSESSIONID 쿠키가 자동으로 전송됨
+            // 추가 사용자 정보는 /api/auth/me 엔드포인트를 통해 가져올 수 있음
+            
+            log.info("프론트엔드로 리다이렉트합니다: {}", redirectPath);
             response.sendRedirect(redirectPath);
-        } catch (UnsupportedEncodingException e) {
-            log.error("URL 인코딩 오류", e);
-            // 인코딩 오류 시 기본 리다이렉트
-            response.sendRedirect(redirectUrl + "?success=true&id=" + user.getId() + "&registered=" + user.isRegistered());
+        } catch (Exception e) {
+            log.error("리다이렉트 처리 중 오류", e);
+            // 오류 시 기본 리다이렉트
+            String fallbackUrl = frontendUrl + "/oauth/callback?success=true";
+            log.info("오류로 기본 URL로 리다이렉트합니다: {}", fallbackUrl);
+            response.sendRedirect(fallbackUrl);
         }
     }
 
