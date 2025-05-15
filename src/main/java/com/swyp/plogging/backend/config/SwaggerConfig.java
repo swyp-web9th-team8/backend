@@ -18,13 +18,13 @@ public class SwaggerConfig {
                         .title("Plogging API 문서")
                         .description("Plogging 애플리케이션의 API 문서입니다.")
                         .version("v1.0.0"))
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                .addSecurityItem(new SecurityRequirement().addList("cookieAuth"))
                 .components(new io.swagger.v3.oas.models.Components()
-                        .addSecuritySchemes("bearerAuth",
+                        .addSecuritySchemes("cookieAuth",
                                 new SecurityScheme()
-                                        .name("bearerAuth")
-                                        .type(SecurityScheme.Type.HTTP)
-                                        .scheme("bearer")
-                                        .bearerFormat("JWT")));
+                                        .name("JSESSIONID")
+                                        .type(SecurityScheme.Type.APIKEY)
+                                        .in(SecurityScheme.In.COOKIE)
+                                        .description("세션 기반 인증")));
     }
 }

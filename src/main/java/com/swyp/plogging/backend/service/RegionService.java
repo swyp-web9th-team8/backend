@@ -30,8 +30,8 @@ public class RegionService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Value("${vworld.api.key}")
-    private String apiKey;
+    // VWorld API 키 하드코딩
+    private String apiKey = "2BA2A9B6-0003-3CEF-9AEF-0702B4A9E22C";
 
     // 애플리케이션 시작 시 데이터 초기화
     @Transactional

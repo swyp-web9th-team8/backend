@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,6 +21,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +52,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .authorizeHttpRequests(authorize ->
                         authorize
                                 // 공개 경로 설정
@@ -92,8 +94,9 @@ public class SecurityConfig {
                                 response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
                             } else {
                                 // 브라우저 요청에는 리다이렉트
-                                String redirectUrl = frontendUrl + "/login?error=oauth&message=" +
+                                String redirectUrl = frontendUrl + "/oauth/callback?error=true&message=" +
                                         exception.getMessage().replaceAll("\\s+", "+");
+                                log.info("OAuth2 로그인 실패 리다이렉트: {}", redirectUrl);
                                 response.sendRedirect(redirectUrl);
                             }
                         })
@@ -105,20 +108,57 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // 개발 환경과 프로덕션 환경 모두 허용
+        
+        // 모든 허용 오리진 명시적으로 설정
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:8080",
                 "http://localhost:3000",
+                "http://localhost:5173", // Vite 기본 포트
+                "http://127.0.0.1:3000",
+                "http://127.0.0.1:5173",
+                "http://127.0.0.1:8080",
                 "https://ploggo.co.kr",
                 "https://api.ploggo.co.kr"
         ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+        
+        // 허용할 HTTP 메서드 (모든 메서드 허용)
+        configuration.setAllowedMethods(Arrays.asList(
+                HttpMethod.GET.name(),
+                HttpMethod.POST.name(),
+                HttpMethod.PUT.name(),
+                HttpMethod.DELETE.name(),
+                HttpMethod.PATCH.name(),
+                HttpMethod.OPTIONS.name(),
+                HttpMethod.HEAD.name()
+        ));
+        
+        // 모든 헤더 허용
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization", 
+                "Cache-Control", 
+                "Content-Type",
+                "Accept",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Headers",
+                "X-Requested-With"
+        ));
+        
+        // 응답 헤더 노출 설정
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Disposition"
+        ));
+        
+        // 쿠키 허용
         configuration.setAllowCredentials(true);
+        
+        // 캐시 시간
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+        
+        log.info("CORS 설정이 완료되었습니다. 허용된 오리진: {}", configuration.getAllowedOrigins());
         return source;
     }
 

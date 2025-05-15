@@ -32,6 +32,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             String registrationId = request.getClientRegistration().getRegistrationId();
             Map<String, Object> attributes = oAuth2User.getAttributes();
 
+            // 디버깅: OAuth 제공자로부터 받은 속성 확인
+            log.debug("OAuth2 제공자({})로부터 받은 속성: {}", registrationId, attributes);
+
             // AuthProvider는 미리 얻어둠
             AuthProvider provider = AuthProvider.valueOf(registrationId.toUpperCase());
 
@@ -46,7 +49,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 appUser = processGoogleUser(attributes, provider);
             }
 
-            log.info("OAuth2 로그인 성공: 제공자 = {}, 이메일 = {}", provider, appUser.getEmail());
+            log.info("OAuth2 로그인 성공: 제공자 = {}, 이메일 = {}, 등록 상태 = {}", 
+                    provider, appUser.getEmail(), appUser.isRegistered());
             return new CustomOAuth2User(appUser, attributes);
         } catch (Exception e) {
             log.error("OAuth2 로그인 처리 중 오류 발생: " + e.getMessage(), e);
@@ -126,7 +130,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private AppUser findOrCreateUser(String email, String name, String pictureUrl, AuthProvider provider) {
         return appUserRepository.findByEmail(email)
                 .map(existingUser -> {
-                    log.info("기존 사용자 발견: 이메일 = {}", email);
+                    log.info("기존 사용자 발견: 이메일 = {}, 등록 상태 = {}", email, existingUser.isRegistered());
 
                     // 기존 사용자 정보 업데이트 (선택적)
                     boolean updated = false;
@@ -135,12 +139,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     if (name != null && !name.equals(existingUser.getNickname())) {
                         existingUser.updateNickname(name);
                         updated = true;
+                        log.debug("사용자 닉네임 업데이트: {} -> {}", existingUser.getNickname(), name);
                     }
 
                     // 프로필 이미지가 변경되었으면 업데이트
                     if (pictureUrl != null && !pictureUrl.equals(existingUser.getProfileImageUrl())) {
                         existingUser.updateProfileImageUrl(pictureUrl);
                         updated = true;
+                        log.debug("사용자 프로필 이미지 업데이트: {}", pictureUrl);
                     }
 
                     // 변경사항이 있으면 저장
@@ -153,13 +159,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 })
                 .orElseGet(() -> {
                     // 새 사용자 생성
-                    log.info("새 사용자 생성: 이메일 = {}", email);
+                    log.info("새 사용자 생성: 이메일 = {}, 소셜 제공자 = {}", email, provider);
                     String nickname = name != null ? name : "사용자";
-                    String region = "서울";
-
-                    return appUserRepository.save(
-                            AppUser.newInstance(email, nickname, region, provider, pictureUrl)
-                    );
+                    String region = "서울"; // 기본 지역
+                    
+                    // 새 사용자 생성 - 처음에는 등록되지 않은 상태로 생성
+                    // AppUser.newInstance 메서드는 이미 registered=false로 설정함
+                    AppUser newUser = AppUser.newInstance(email, nickname, region, provider, pictureUrl);
+                    
+                    AppUser savedUser = appUserRepository.save(newUser);
+                    log.info("새 사용자가 생성되었습니다: ID = {}, 이메일 = {}, 등록 상태 = {}", 
+                             savedUser.getId(), savedUser.getEmail(), savedUser.isRegistered());
+                    return savedUser;
                 });
     }
 }
