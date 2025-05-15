@@ -74,18 +74,18 @@ public class RegionService {
     // V-World API에서 서울시 구 데이터 가져오기 - 수정됨
     private List<Region> fetchSeoulDistricts() throws Exception {
         String url = UriComponentsBuilder.fromHttpUrl("https://api.vworld.kr/req/data")
-            .queryParam("service", "data")
-            .queryParam("request", "GetFeature")
-            .queryParam("data", "LT_C_ADSIGG_INFO")
-            .queryParam("key", apiKey)
-            .queryParam("domain", "localhost") // 포트 제거
-            .queryParam("attrFilter", "full_nm:like:서울특별시") // 속성명 변경
-            .queryParam("geometry", "false")
-            .queryParam("size", "50")
-            .queryParam("geomFilter", "")
-            .queryParam("format", "json")
-            .build()
-            .toUriString();
+                .queryParam("service", "data")
+                .queryParam("request", "GetFeature")
+                .queryParam("data", "LT_C_ADSIGG_INFO")
+                .queryParam("key", apiKey)
+                .queryParam("domain", "localhost") // 포트 제거
+                .queryParam("attrFilter", "full_nm:like:서울특별시") // 속성명 변경
+                .queryParam("geometry", "false")
+                .queryParam("size", "50")
+                .queryParam("geomFilter", "")
+                .queryParam("format", "json")
+                .build()
+                .toUriString();
 
         log.info("구 데이터 요청 URL: {}", url);
 
@@ -140,18 +140,18 @@ public class RegionService {
     // V-World API에서 특정 구의 동 데이터 가져오기 - 수정됨
     private List<Region> fetchNeighborhoods(String district) throws Exception {
         String url = UriComponentsBuilder.fromHttpUrl("https://api.vworld.kr/req/data")
-            .queryParam("service", "data")
-            .queryParam("request", "GetFeature")
-            .queryParam("data", "LT_C_ADEMD_INFO")
-            .queryParam("key", apiKey)
-            .queryParam("domain", "localhost") // 포트 제거
-            .queryParam("attrFilter", "full_nm:like:서울특별시 " + district) // 이 부분은 기존과 동일
-            .queryParam("geometry", "false")
-            .queryParam("size", "1000")
-            .queryParam("geomFilter", "")
-            .queryParam("format", "json")
-            .build()
-            .toUriString();
+                .queryParam("service", "data")
+                .queryParam("request", "GetFeature")
+                .queryParam("data", "LT_C_ADEMD_INFO")
+                .queryParam("key", apiKey)
+                .queryParam("domain", "localhost") // 포트 제거
+                .queryParam("attrFilter", "full_nm:like:서울특별시 " + district) // 이 부분은 기존과 동일
+                .queryParam("geometry", "false")
+                .queryParam("size", "1000")
+                .queryParam("geomFilter", "")
+                .queryParam("format", "json")
+                .build()
+                .toUriString();
 
         log.info("동 데이터 요청 URL: {}", url);
 
@@ -217,7 +217,7 @@ public class RegionService {
     }
 
     // vworld에서 폴리곤 받아오기
-    public MultiPolygon getPolygonOfNeighborhood(String regionCode) throws JsonProcessingException{
+    public MultiPolygon getPolygonOfNeighborhood(String regionCode) throws JsonProcessingException {
         String url = UriComponentsBuilder.fromHttpUrl("https://api.vworld.kr/req/data")
                 .queryParam("service", "data")
                 .queryParam("request", "GetFeature")
@@ -244,10 +244,10 @@ public class RegionService {
 
         JsonNode features = response_node.get("result").get("featureCollection").get("features");
 
-        for(JsonNode feature : features){
+        for (JsonNode feature : features) {
             JsonNode properties = feature.get("properties");
             JsonNode code = properties.get("emd_cd");
-            if(code.asText().equals(regionCode)){
+            if (code.asText().equals(regionCode)) {
                 return createMultiPolygon(feature);
             }
         }
@@ -259,20 +259,19 @@ public class RegionService {
         GeometryFactory factory = new GeometryFactory(new PrecisionModel(), 4326);
         List<Polygon> polygons = new ArrayList<>();
 
-        JsonNode coordinates = feature.get("geometry").get("coordinates");
-        JsonNode polygonNodes = coordinates.get(0);
-        for(JsonNode polygon: polygonNodes){
-            JsonNode exteriorPolygon = polygon.get(0);
+        JsonNode multiPolygon = feature.get("geometry").get("coordinates"); // 4차원 배열, 여러 폴리곤들
+        for (JsonNode polygonNodes : multiPolygon) { // 3차원 배열, 내외부 폴리곤
+            JsonNode exteriorPolygon = polygonNodes.get(0); // 외부(0), 내부(1) 폴리곤, 2차원 배열
 
             List<Coordinate> coordinateList = new ArrayList<>();
-            for(JsonNode pointNode: exteriorPolygon){
+            for (JsonNode pointNode : exteriorPolygon) { // 1차원 배열
                 double x = pointNode.get(0).asDouble(); // 경도
                 double y = pointNode.get(1).asDouble(); // 위도
-                coordinateList.add(new Coordinate(x,y));
+                coordinateList.add(new Coordinate(x, y));
             }
 
             // 닫힌 도형 확인
-            if(!coordinateList.get(0).equals2D(coordinateList.get(coordinateList.size() -1))){
+            if (!coordinateList.get(0).equals2D(coordinateList.get(coordinateList.size() - 1))) {
                 coordinateList.add(coordinateList.get(0));
             }
 
