@@ -54,6 +54,21 @@ public class PostService {
             throw new IllegalArgumentException("최대인원 설정이 잘못되었습니다.");
         }
 
+        // 네이버 지도에서 도로명 주소로 위치를 검색 후 위도경도 입력
+        List<Map<String, Object>> list = locationService.searchCoordinatesByAddress(address);
+        Map<String, Object> location = list.stream().filter(
+                        map ->
+                                map.get("roadAddress").equals(address))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("찾는 주소가 없습니다."));
+        Double latitude = (Double) location.get("latitude");
+        Double longitude = (Double) location.get("longitude");
+
+        Point point = locationService.createPoint(latitude, longitude);
+        if(point == null){
+            throw new RuntimeException("찾는 주소가 없습니다.");
+        }
+
         Post post = Post.builder()
                 .writer(user)
                 .title(title)
@@ -65,6 +80,9 @@ public class PostService {
                 .completed(false)
                 .maxParticipants(maxParticipants)
                 .openChatUrl(openChatUrl)
+                .latitude(latitude)
+                .longitude(longitude)
+                .location(point)
                 .build();
 
         // null일 경우 30분전 세팅
@@ -310,7 +328,7 @@ public class PostService {
         MultiPolygon multiPolygon;
         if (!region.hasPolygons()) {
             multiPolygon = regionService.getAndSavePolygonOfRegion(region);
-        }else{
+        } else {
             multiPolygon = region.getPolygons();
         }
 
