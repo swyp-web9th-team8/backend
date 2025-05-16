@@ -15,6 +15,7 @@ import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -242,6 +244,7 @@ public class PostService {
     }
 
     // 현재 모집 중인 모임 조회
+    @Transactional
     public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, String position, String keyword) throws JsonProcessingException {
         return findPostsByDistrictAndNeighborhood(pageable, position, keyword);
     }
