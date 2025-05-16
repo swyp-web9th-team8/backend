@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -29,7 +30,7 @@ public class CertificationService {
 
 
     @Transactional
-    public String uploadImageToPost(Long postId, AppUser user, MultipartFile file) {
+    public List<String> uploadImageToPost(Long postId, AppUser user, List<MultipartFile> files) {
         Post myPost = postService.findById(postId);
         if(!myPost.isWriter(user)){
             throw new UnauthorizedUserException("올바른 접근이 아닙니다.");
@@ -38,12 +39,16 @@ public class CertificationService {
         // certificate 가져오기(없으면 생성)
         Certification certification = getOrNewByPost(myPost);
 
-        // 이미지 저장후 고아로 남기지 않기 위함
-        String imageUrl = fileService.uploadImageAndGetFileName(file);
-        imageUrl = "/images/" + imageUrl;
-        certification.addImageUrl(imageUrl);
+        List<String> imageUrls = new ArrayList<>();
+        for(MultipartFile file : files) {
+            // 이미지 저장후 고아로 남기지 않기 위함
+            String imageUrl = fileService.uploadImageAndGetFileName(file);
+            imageUrl = "/images/" + imageUrl;
+            certification.addImageUrl(imageUrl);
+            imageUrls.add(imageUrl);
+        }
 
-        return imageUrl;
+        return imageUrls;
     }
 
     @Transactional

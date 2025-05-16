@@ -13,12 +13,6 @@ import com.swyp.plogging.backend.post.repository.PostRepository;
 import com.swyp.plogging.backend.service.RegionService;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.annotation.Nullable;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.MultiPolygon;
@@ -310,15 +304,18 @@ public class PostService {
         }
 
         Region region = opRegion.get();
+        MultiPolygon multiPolygon;
         if (!region.hasPolygons()) {
-            MultiPolygon multiPolygon = regionService.getPolygonOfNeighborhood(region.getCode());
-            region.setPolygons(multiPolygon);
+            multiPolygon = regionService.getAndSavePolygonOfRegion(region);
+        }else{
+            multiPolygon = region.getPolygons();
         }
 
-        Page<Post> posts = postRepository.findPostByRegion(region.getPolygons(), pageable, keyword);
+        Page<Post> posts = postRepository.findPostByRegion(multiPolygon, pageable, keyword);
         List<PostInfoResponse> postList = posts.stream().map(PostInfoResponse::new).toList();
 
         return new PageImpl<>(postList, pageable, posts.getTotalElements());
+
     }
 
     public List<Long> getCompletedPostIds(Long writerId) {
