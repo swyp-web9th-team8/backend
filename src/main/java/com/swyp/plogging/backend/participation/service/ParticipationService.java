@@ -5,6 +5,7 @@ import com.swyp.plogging.backend.participation.domain.Participation;
 import com.swyp.plogging.backend.participation.dto.MyPostResponse;
 import com.swyp.plogging.backend.participation.repository.ParticipationRepository;
 import com.swyp.plogging.backend.post.domain.Post;
+import com.swyp.plogging.backend.post.repository.PostRepository;
 import com.swyp.plogging.backend.post.sevice.PostService;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class ParticipationService {
 
     private final ParticipationRepository participationRepository;
     private final PostService postService;
+    private final PostRepository postRepository;
 
     @Transactional
     public void participateToPost(Long postId, AppUser user) {
@@ -45,6 +47,7 @@ public class ParticipationService {
         participation = participationRepository.save(participation);
 
         target.addParticipation(participation);
+        postRepository.save(target);
     }
 
     @Transactional

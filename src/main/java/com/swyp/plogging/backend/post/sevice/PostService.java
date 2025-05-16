@@ -28,6 +28,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -53,19 +55,50 @@ public class PostService {
         if (maxParticipants <= 0) {
             throw new IllegalArgumentException("최대인원 설정이 잘못되었습니다.");
         }
+        // 구 / 대로,로,길
+        Pattern pattern1 = Pattern.compile("(\\S+구)\\s+(\\S*(?:대로|로|길))\\s+(\\d+)");
+        Pattern pattern2 = Pattern.compile("(\\S*(?:대로|로|길))\\s+(\\d+)");
+        Matcher requestMatcher1 = pattern1.matcher(address);
+        Matcher requestMatcher2 = pattern1.matcher(address);
+        String r1, r2, r3;
+        if (requestMatcher1.find()) {
+            r1 = requestMatcher1.group(1);
+            r2 = requestMatcher1.group(2);
+            r3 = requestMatcher1.group(3);
+        } else if (requestMatcher2.find()) {
+            r1 = null;
+            r2 = requestMatcher1.group(2);
+            r3 = requestMatcher1.group(3);
+        } else {
+            throw new RuntimeException("잘못된 도로명주소 입니다.");
+        }
 
         // 네이버 지도에서 도로명 주소로 위치를 검색 후 위도경도 입력
         List<Map<String, Object>> list = locationService.searchCoordinatesByAddress(address);
         Map<String, Object> location = list.stream().filter(
-                        map ->
-                                map.get("roadAddress").equals(address))
+                        map -> {
+                            Matcher responseMatcher1 = pattern1.matcher((CharSequence) map.get("roadAddress"));
+                            Matcher responseMatcher2 = pattern2.matcher((CharSequence) map.get("roadAddress"));
+                            if (responseMatcher1.find()) {
+                                // 구, 길, 번호
+                                return responseMatcher1.group(1).equals(r1) &&
+                                        responseMatcher1.group(2).equals(r2) &&
+                                        responseMatcher1.group(3).equals(r3);
+
+                            }else if(responseMatcher2.find()){
+                                // 길, 번호
+                                return responseMatcher1.group(1).equals(r2) &&
+                                        responseMatcher1.group(2).equals(r3);
+                            }
+                            return false;
+                        })
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("찾는 주소가 없습니다."));
         Double latitude = (Double) location.get("latitude");
         Double longitude = (Double) location.get("longitude");
 
-        Point point = locationService.createPoint(latitude, longitude);
-        if(point == null){
+        Point point = locationService.createPoint(longitude, latitude);
+        if (point == null) {
             throw new RuntimeException("찾는 주소가 없습니다.");
         }
 
