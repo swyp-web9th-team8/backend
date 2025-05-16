@@ -1,6 +1,7 @@
 package com.swyp.plogging.backend.post.sevice;
 
 
+import com.swyp.plogging.backend.common.service.LocationService;
 import com.swyp.plogging.backend.domain.Region;
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.controller.dto.PostInfoResponse;
@@ -14,8 +15,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.io.WKTReader;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +29,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -42,8 +46,11 @@ public class PostServiceTest {
     PostRepository postRepository;
     @Mock
     RegionService regionService;
+    @Mock
+    LocationService locationService;
     private static Post data;
     private static AppUser user;
+    private static Point point;
 
     private static final Logger log = LoggerFactory.getLogger(PostServiceTest.class);
 
@@ -51,6 +58,8 @@ public class PostServiceTest {
     public void createData() throws Exception {
         user = AppUser.newInstance("user@user.com", "user", "Seoul", AuthProvider.GOOGLE, null);
         setEntityId(user, 1L);
+        WKTReader rd = new WKTReader();
+        point = (Point) rd.read(String.format("POINT(%f %f)", 23.2, 23.2));
         data = Post.builder()
             .id(1L)
             .writer(user)
@@ -62,6 +71,9 @@ public class PostServiceTest {
             .address("서울특별시 중구 세종대로 126")
             .maxParticipants(10)
             .openChatUrl("https://open.kakao.com/몰라")
+                .latitude(23.2)
+                .longitude(23.2)
+                .location(point)
             .build();
         data.setUpDeadLine(null);
     }
@@ -72,7 +84,10 @@ public class PostServiceTest {
         log.info(() -> testInfo.getDisplayName() + " 시작");
         //given
         Post expected = data;
+        List<Map<String, Object>> mapList = List.of(Map.of("latitude", Double.parseDouble("23.2"), "longitude",Double.parseDouble("23.2"),"roadAddress", "서울특별시 중구 세종대로 126"));
         when(postRepository.save(any(Post.class))).thenReturn(expected);
+        when(locationService.searchCoordinatesByAddress(any(String.class))).thenReturn(mapList);
+        when(locationService.createPoint(Double.parseDouble("23.2"),Double.parseDouble("23.2"))).thenReturn(point);
 
         //when
         PostDetailResponse dto = postService.createPost(user,
