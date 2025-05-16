@@ -1,10 +1,12 @@
 package com.swyp.plogging.backend.post.repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
+import com.swyp.plogging.backend.domain.QRegion;
 import com.swyp.plogging.backend.participation.domain.QParticipation;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.domain.QPost;
@@ -139,16 +141,20 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     public Page<Post> findPostByRegion(MultiPolygon regionPolygons, Pageable pageable, String keyword) {
         QPost post = QPost.post;
+        QRegion region = QRegion.region;
 
-        String pattern = "%"+keyword+"%";
+        SubQueryExpression<MultiPolygon> polygon = new JPAQuery<>()
+                .select(region.polygons).from(region).where(region.district.eq("도봉구").and(region.neighborhood.eq("창동")));
+
+        String pattern = "%" + keyword + "%";
         BooleanExpression conditions = Expressions.booleanTemplate(
-                        "ST_Contains({0},{1})",
-                        regionPolygons,
-                        post.location
-                );
+                "ST_Contains({0},{1})",
+                polygon,
+                post.location
+        );
 
-        if(keyword != null && keyword.isBlank()) {
-                conditions.and(
+        if (keyword != null && keyword.isBlank()) {
+            conditions.and(
                     post.content.like(pattern)
                             .or(post.title.like(pattern))
             );

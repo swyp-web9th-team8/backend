@@ -97,7 +97,7 @@ public class PostService {
         Double latitude = (Double) location.get("latitude");
         Double longitude = (Double) location.get("longitude");
 
-        Point point = locationService.createPoint(latitude, longitude);
+        Point point = locationService.createPoint(longitude, latitude);
         if (point == null) {
             throw new RuntimeException("찾는 주소가 없습니다.");
         }
