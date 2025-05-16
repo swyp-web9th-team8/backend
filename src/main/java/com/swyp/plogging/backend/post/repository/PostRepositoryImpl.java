@@ -1,7 +1,7 @@
 package com.swyp.plogging.backend.post.repository;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -141,15 +141,18 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         QPost post = QPost.post;
 
         String pattern = "%"+keyword+"%";
-        Predicate conditions = Expressions.booleanTemplate(
+        BooleanExpression conditions = Expressions.booleanTemplate(
                         "ST_Contains({0},{1})",
                         regionPolygons,
                         post.location
-                )
-                .and(
-                        post.content.like(pattern)
-                                .or(post.title.like(pattern))
                 );
+
+        if(keyword != null && keyword.isBlank()) {
+                conditions.and(
+                    post.content.like(pattern)
+                            .or(post.title.like(pattern))
+            );
+        }
 
         JPAQuery<Post> postJPAQuery = new JPAQuery<>(em)
                 .select(post).from(post)
