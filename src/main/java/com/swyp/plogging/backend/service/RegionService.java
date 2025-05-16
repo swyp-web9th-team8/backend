@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -217,14 +216,16 @@ public class RegionService {
     }
 
     // vworld에서 폴리곤 받아오기
-    public MultiPolygon getPolygonOfNeighborhood(String regionCode) throws JsonProcessingException {
+    @Transactional
+    public MultiPolygon getAndSavePolygonOfRegion(Region region) throws JsonProcessingException {
+        log.info("{}의 geometry 데이터 요청", region.getDistrict()+" " + region.getNeighborhood());
         String url = UriComponentsBuilder.fromHttpUrl("https://api.vworld.kr/req/data")
                 .queryParam("service", "data")
                 .queryParam("request", "GetFeature")
                 .queryParam("data", "LT_C_ADEMD_INFO")
                 .queryParam("key", apiKey)
                 .queryParam("domain", "localhost") // 포트 제거
-                .queryParam("attrFilter", "emd_cd:=:" + regionCode) // 이 부분은 기존과 동일
+                .queryParam("attrFilter", "emd_cd:=:" + region.getCode()) // 이 부분은 기존과 동일
                 .queryParam("geometry", "true")
                 .queryParam("size", "1000")
                 .queryParam("geomFilter", "")
@@ -247,8 +248,11 @@ public class RegionService {
         for (JsonNode feature : features) {
             JsonNode properties = feature.get("properties");
             JsonNode code = properties.get("emd_cd");
-            if (code.asText().equals(regionCode)) {
-                return createMultiPolygon(feature);
+            if (code.asText().equals(region.getCode())) {
+                region.setPolygons(createMultiPolygon(feature));
+                region = regionRepository.save(region);
+                log.info("{}의 geometry 데이터 저장 완료", region.getDistrict() + " "+ region.getNeighborhood());
+                return region.getPolygons();
             }
         }
         return null;

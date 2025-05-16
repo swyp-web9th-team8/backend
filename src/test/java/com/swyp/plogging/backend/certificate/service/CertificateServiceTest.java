@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -62,12 +64,12 @@ public class CertificateServiceTest {
                 AuthProvider.GOOGLE,
                 null
         );
-        MockMultipartFile file = new MockMultipartFile(
+        List<MultipartFile> files = List.of(new MockMultipartFile(
                 "file",
                 "profileImage.png",
                 MediaType.IMAGE_PNG_VALUE,
                 "testFileData".getBytes()
-        );
+        ));
         Post post = Post.builder()
                 .id(1L)
                 .writer(user)
@@ -81,19 +83,19 @@ public class CertificateServiceTest {
                 .openChatUrl("https://open.kakao.com/몰라")
                 .build();
         String randomName = UUID.randomUUID() + ".png";
-        String expect = "/images/" + randomName;
+        List<String> expect = List.of("/images/" + randomName);
         Certification certification = Certification.newInstance(post);
 
         when(postService.findById(1L)).thenReturn(post);
         when(repository.findByPostId(post.getId())).thenReturn(Optional.of(certification));
-        when(fileService.uploadImageAndGetFileName(file)).thenReturn(randomName);
+        when(fileService.uploadImageAndGetFileName(any(MultipartFile.class))).thenReturn(randomName);
 
         //when
-        String actual = service.uploadImageToPost(1L, user, file);
+        List<String> actual = service.uploadImageToPost(1L, user, files);
 
         //then
         Assertions.assertEquals(expect, actual);
-        Assertions.assertTrue(certification.getImageUrls().contains(expect));
+        Assertions.assertTrue(certification.getImageUrls().contains(expect.get(0)));
 
         log.info(() -> testInfo.getDisplayName() + " 완료");
     }
@@ -110,12 +112,12 @@ public class CertificateServiceTest {
                 AuthProvider.GOOGLE,
                 null
         );
-        MockMultipartFile file = new MockMultipartFile(
+        List<MultipartFile> files = List.of(new MockMultipartFile(
                 "file",
                 "profileImage.png",
                 MediaType.IMAGE_PNG_VALUE,
                 "testFileData".getBytes()
-        );
+        ));
         Post post = Post.builder()
                 .id(1L)
                 .writer(user)
@@ -150,19 +152,19 @@ public class CertificateServiceTest {
 
         when(postService.findById(1L)).thenReturn(post);
         when(repository.findByPostId(post.getId())).thenReturn(Optional.of(certification));
-        when(fileService.uploadImageAndGetFileName(file)).thenReturn(randomName);
+        when(fileService.uploadImageAndGetFileName(any(MultipartFile.class))).thenReturn(randomName);
 
 
         //when
-        String actual = service.uploadImageToPost(post.getId(), user, file);
+        List<String> actual = service.uploadImageToPost(post.getId(), user, files);
         service.certificate(post.getId(), user, List.of(2L, 3L, 5L));
 
         //then
         //참석 확인
-        for(Participation participation : post.getParticipations()){
-            if(List.of(4L,6L).contains(participation.getUser().getId())){
+        for (Participation participation : post.getParticipations()) {
+            if (List.of(4L, 6L).contains(participation.getUser().getId())) {
                 Assertions.assertFalse(participation.isJoined());
-            }else {
+            } else {
                 Assertions.assertTrue(participation.isJoined());
             }
         }
@@ -221,7 +223,7 @@ public class CertificateServiceTest {
 
         //then
         // 참가하지 않은 사람이 있는 경우 예외
-        Assertions.assertEquals("참가하지 않은 모임입니다." , exception.getMessage());
+        Assertions.assertEquals("참가하지 않은 모임입니다.", exception.getMessage());
 
         log.info(() -> testInfo.getDisplayName() + " 완료");
     }
