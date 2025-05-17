@@ -6,18 +6,26 @@ import com.swyp.plogging.backend.participation.domain.Participation;
 import com.swyp.plogging.backend.post.controller.dto.NicknameAndImageResponse;
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.user.domain.AppUser;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.Point;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -93,11 +101,11 @@ public class Post extends BaseEntity {
         response.setDeadLine(deadLine);
         response.setOpenChatUrl(openChatUrl);
         response.setParticipants(
-                participations.stream()
-                        .map(participation -> new NicknameAndImageResponse(participation.getUser()))
-                        .collect(Collectors.toList())
+            participations.stream()
+                .map(participation -> new NicknameAndImageResponse(participation.getUser()))
+                .collect(Collectors.toList())
         );
-        if(completed && certification != null && certification.isCertificated()){
+        if (completed && certification != null && certification.isCertificated()) {
             response.setImageUrls(certification.getImageUrls());
         }
         return response;
@@ -105,16 +113,16 @@ public class Post extends BaseEntity {
 
     // 위치 정보를 포함한 modify 메서드
     public void modify(String title,
-                       String content,
-                       LocalDateTime meetingTime,
-                       String placeId,
-                       String placeName,
-                       String address,
-                       Double latitude,
-                       Double longitude,
-                       Integer maxParticipants,
-                       String openChatUrl,
-                       Integer deadLine) {
+        String content,
+        LocalDateTime meetingTime,
+        String placeId,
+        String placeName,
+        String address,
+        Double latitude,
+        Double longitude,
+        Integer maxParticipants,
+        String openChatUrl,
+        Integer deadLine) {
 
         if (title != null && !this.title.equals(title)) {
             this.title = title;
@@ -227,5 +235,9 @@ public class Post extends BaseEntity {
 
     public void complete() {
         completed = true;
+    }
+
+    public boolean isWriterId(Long userId) {
+        return writer != null && this.writer.getId().equals(userId);
     }
 }

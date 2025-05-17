@@ -4,12 +4,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.swyp.plogging.backend.certificate.domain.Certification;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.user.domain.AppUser;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -31,6 +30,8 @@ public class PostInfoResponse {
     private Double latitude;
     private Double longitude;
 
+    private int maxParticipants;
+
     public PostInfoResponse(Post post) {
         this.id = post.getId();
         this.title = post.getTitle();
@@ -40,13 +41,14 @@ public class PostInfoResponse {
         this.address = post.getAddress();
         this.participantCount = post.getParticipations().size();
         this.participants = post.getParticipations().stream()
-                .map(
-                        participation -> new NicknameAndImageResponse(participation.getUser())
-                )
-                .collect(Collectors.toList());
+            .map(
+                participation -> new NicknameAndImageResponse(participation.getUser())
+            )
+            .collect(Collectors.toList());
         this.latitude = post.getLatitude();
         this.longitude = post.getLongitude();
         this.thumbnail = null;
+        this.maxParticipants = post.getMaxParticipants();
     }
 
     public PostInfoResponse(Post post, Certification certification) {
@@ -60,14 +62,15 @@ public class PostInfoResponse {
         }
     }
 
-    public PostInfoResponse(Post post, AppUser user){
+    public PostInfoResponse(Post post, AppUser user) {
         this(post);
-        if(post.isWriter(user)){
+        if (post.isWriter(user)) {
             this.iIn = true;
         }
-        if(!post.getParticipations().isEmpty() && post.getParticipations().stream().anyMatch(participation ->
-                participation.getUser().getId().equals(user.getId()))){
+        if (!post.getParticipations().isEmpty() && post.getParticipations().stream().anyMatch(participation ->
+            participation.getUser().getId().equals(user.getId()))) {
             this.iIn = true;
-        };
+        }
+        ;
     }
 }
