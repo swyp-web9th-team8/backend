@@ -1,5 +1,6 @@
 package com.swyp.plogging.backend.post.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.swyp.plogging.backend.certificate.domain.Certification;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.user.domain.AppUser;
@@ -16,6 +17,7 @@ public class PostInfoResponse {
 
     private Long id;
     private String title;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime meetingTime;
     private String placeId;
     private String placeName;
