@@ -1,5 +1,6 @@
 package com.swyp.plogging.backend.post.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,11 +25,14 @@ public class CreatePostRequest {
     @Schema(description = "도로명 주소")
     private String address;
     @Schema(description = "모임시간")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime meetingTime;
     @Schema(description = "오픈채팅방 주소")
     private String openChatUrl;
     @Schema(description = "최대 참석인원(모임장 미포함)")
     private int maxParticipants;
+    @Schema(description = "마감시간 = 시작전 30 or 60")
+    private int deadline;
 
     // 위치 정보 추가
     @Schema(description = "위도")

@@ -22,6 +22,7 @@ public class PostDetailResponse {
     private LocalDateTime meetingTime;
     private String openChatUrl;
     private int maxParticipants;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime deadLine;
     private List<NicknameAndImageResponse> participants;
     private List<String> imageUrls;
