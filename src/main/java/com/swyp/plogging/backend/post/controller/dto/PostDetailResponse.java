@@ -1,5 +1,6 @@
 package com.swyp.plogging.backend.post.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,6 +18,7 @@ public class PostDetailResponse {
     private String placeId;
     private String placeName;
     private String address;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime meetingTime;
     private String openChatUrl;
     private int maxParticipants;
