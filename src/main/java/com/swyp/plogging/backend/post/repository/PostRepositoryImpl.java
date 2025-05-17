@@ -150,7 +150,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         );
 
         if (keyword != null && !keyword.isBlank()) {
-            conditions.and(
+            conditions = conditions.and(
                     post.content.like(pattern)
                             .or(post.title.like(pattern))
             );
