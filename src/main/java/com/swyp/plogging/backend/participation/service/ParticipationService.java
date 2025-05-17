@@ -47,6 +47,7 @@ public class ParticipationService {
         participation = participationRepository.save(participation);
 
         target.addParticipation(participation);
+        // todo 이부분은 책임 분리 개선 필요
         postRepository.save(target);
     }
 
