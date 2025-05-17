@@ -14,18 +14,18 @@ public class AnnounceResponse {
     private boolean active;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime lastModifiedDt;
+    private LocalDateTime createdDt;
 
-    public AnnounceResponse(Long id, String title, String content, boolean active, LocalDateTime lastModifiedDt) {
+    public AnnounceResponse(Long id, String title, String content, boolean active, LocalDateTime createdDt) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.active = active;
-        this.lastModifiedDt = lastModifiedDt;
+        this.createdDt = createdDt;
     }
 
     public static AnnounceResponse from(Announce announce) {
         return new AnnounceResponse(announce.getId(), announce.getTitle(), announce.getContent(), announce.isActive(),
-            announce.getLastModifiedDt());
+            announce.getCreatedDt());
     }
 }
