@@ -97,7 +97,7 @@ public class Post extends BaseEntity {
                         .map(participation -> new NicknameAndImageResponse(participation.getUser()))
                         .collect(Collectors.toList())
         );
-        if(completed && certification.isCertificated()){
+        if(completed && certification != null && certification.isCertificated()){
             response.setImageUrls(certification.getImageUrls());
         }
         return response;
