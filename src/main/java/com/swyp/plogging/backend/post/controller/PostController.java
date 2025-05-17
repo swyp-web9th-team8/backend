@@ -181,9 +181,10 @@ public class PostController {
     public ApiPagedResponse<PostInfoResponse> getListOfPosts(
             @PageableDefault(size = 10, sort = "meetingTime", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(name = "recruitmentCompleted", defaultValue = "false", required = false) Boolean recruitmentCompleted,
-            @RequestParam(name = "completed", defaultValue = "false", required = false) Boolean completed) {
+            @RequestParam(name = "completed", defaultValue = "false", required = false) Boolean completed,
+            @AuthenticationPrincipal OAuth2User user) {
         try {
-            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, null, null);
+            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, null, null, SecurityUtils.getUserOrThrow(user));
 
             return ApiPagedResponse.ok(response, "Successfully fetched the list.");
         } catch (Exception e) {
@@ -204,9 +205,10 @@ public class PostController {
     public ApiPagedResponse<PostInfoResponse> getListOfActivePosts(
             @RequestParam(required = true, name = "pos") String position,
             @RequestParam(required = false, name = "v") String value,
-            @PageableDefault(size = 10, sort = "meetingDt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "meetingDt", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal OAuth2User user) {
         try {
-            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, position, value);
+            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, position, value, SecurityUtils.getUserOrThrow(user));
 
             return ApiPagedResponse.ok(response, "Successfully fetched the list.");
         } catch (Exception e) {

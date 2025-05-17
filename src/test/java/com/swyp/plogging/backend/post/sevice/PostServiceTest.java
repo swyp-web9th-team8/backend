@@ -204,7 +204,7 @@ public class PostServiceTest {
         when(regionService.findByDistrictAndNeighborhood(any(String.class),any(String.class))).thenReturn(Optional.of(region));
 
         //when
-        Page<PostInfoResponse> dto = postService.getListOfPostInfo(pageable, "강남구 역삼동", "");
+        Page<PostInfoResponse> dto = postService.getListOfPostInfo(pageable, "강남구 역삼동", "", user);
 
         //then
         Assertions.assertEquals(dto.getNumber(), pageable.getPageNumber());

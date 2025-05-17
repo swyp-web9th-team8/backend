@@ -2,6 +2,7 @@ package com.swyp.plogging.backend.post.controller.dto;
 
 import com.swyp.plogging.backend.certificate.domain.Certification;
 import com.swyp.plogging.backend.post.domain.Post;
+import com.swyp.plogging.backend.user.domain.AppUser;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,6 +23,7 @@ public class PostInfoResponse {
     private int participantCount;
     private List<NicknameAndImageResponse> participants;
     private String thumbnail;
+    private boolean iIn;
 
     // 위치 정보 추가
     private Double latitude;
@@ -54,5 +56,16 @@ public class PostInfoResponse {
         } else {
             this.thumbnail = null;
         }
+    }
+
+    public PostInfoResponse(Post post, AppUser user){
+        this(post);
+        if(post.isWriter(user)){
+            this.iIn = true;
+        }
+        if(post.getParticipations().stream().anyMatch(participation ->
+                participation.getUser().getId().equals(user.getId()))){
+            this.iIn = true;
+        };
     }
 }

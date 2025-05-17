@@ -296,8 +296,8 @@ public class PostService {
 
     // 현재 모집 중인 모임 조회
     @Transactional
-    public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, String position, String keyword) throws JsonProcessingException {
-        return findPostsByDistrictAndNeighborhood(pageable, position, keyword);
+    public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, String position, String keyword, AppUser user) throws JsonProcessingException {
+        return findPostsByDistrictAndNeighborhood(pageable, position, keyword, user);
     }
 
     public Page<PostInfoResponse> getListOfCompletePostInfo(Pageable pageable, boolean recruitmentCompleted,
@@ -349,7 +349,7 @@ public class PostService {
      */
     @Transactional
     public Page<PostInfoResponse> findPostsByDistrictAndNeighborhood(Pageable pageable, String position, String
-            keyword) throws JsonProcessingException {
+            keyword, AppUser user) throws JsonProcessingException {
         // 검색하고 싶은 지역 찾기
         String[] regionFields = position.split(" ");
         Optional<Region> opRegion = regionService.findByDistrictAndNeighborhood(regionFields[0], regionFields[1]);
@@ -366,7 +366,7 @@ public class PostService {
         }
 
         Page<Post> posts = postRepository.findPostByRegion(multiPolygon, pageable, keyword);
-        List<PostInfoResponse> postList = posts.stream().map(PostInfoResponse::new).toList();
+        List<PostInfoResponse> postList = posts.stream().map(post -> new PostInfoResponse(post, user)).toList();
 
         return new PageImpl<>(postList, pageable, posts.getTotalElements());
 
