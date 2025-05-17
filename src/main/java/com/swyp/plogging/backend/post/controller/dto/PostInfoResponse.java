@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.swyp.plogging.backend.certificate.domain.Certification;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.user.domain.AppUser;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Setter
@@ -54,11 +55,13 @@ public class PostInfoResponse {
     public PostInfoResponse(Post post, Certification certification) {
         this(post);
         // 완료된 모임에 첫번째 인증 이미지 추가
-        List<String> images = certification.getImageUrls();
-        if (post.isCompleted() && !images.isEmpty()) {
-            this.thumbnail = images.get(0);
-        } else {
-            this.thumbnail = null;
+        if(certification != null) {
+            List<String> images = certification.getImageUrls();
+            if (post.isCompleted() && !images.isEmpty()) {
+                this.thumbnail = images.get(0);
+            } else {
+                this.thumbnail = null;
+            }
         }
     }
 
