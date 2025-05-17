@@ -13,13 +13,6 @@ import com.swyp.plogging.backend.post.repository.PostRepository;
 import com.swyp.plogging.backend.service.RegionService;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.annotation.Nullable;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +23,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -372,6 +373,8 @@ public class PostService {
 
     public List<Long> getCompletedPostIds(Long writerId) {
         List<Post> completedPosts = postRepository.findByWriterIdAndCompletedTrue(writerId);
-        return completedPosts.stream().map(Post::getId).collect(Collectors.toList());
+        return completedPosts.stream()
+                .filter(post -> post.getCertification() == null || !post.getCertification().isCertificated())
+                .map(Post::getId).collect(Collectors.toList());
     }
 }
