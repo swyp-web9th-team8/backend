@@ -63,7 +63,7 @@ public class PostController {
                         request.getContent(),
                         request.getMeetingTime(), request.getPlaceId(),
                         request.getPlaceName(), request.getAddress(),
-                        request.getMaxParticipants(), request.getOpenChatUrl(), null);
+                        request.getMaxParticipants(), request.getOpenChatUrl(), request.getDeadline());
 
                 return ApiResponse.ok(response, "Successfully fetched the post details.");
             }
