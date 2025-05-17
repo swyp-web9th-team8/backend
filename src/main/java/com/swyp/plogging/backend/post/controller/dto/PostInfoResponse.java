@@ -63,7 +63,7 @@ public class PostInfoResponse {
         if(post.isWriter(user)){
             this.iIn = true;
         }
-        if(post.getParticipations().stream().anyMatch(participation ->
+        if(!post.getParticipations().isEmpty() && post.getParticipations().stream().anyMatch(participation ->
                 participation.getUser().getId().equals(user.getId()))){
             this.iIn = true;
         };
