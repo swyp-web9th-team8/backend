@@ -28,11 +28,9 @@ public class Badge {
     @Column(length = 100)
     private String description;
 
-    @Column(nullable = false)
     private String activeBadgeIconDir;
-    @Column(nullable = false)
     private String inactiveBadgeIconDir;
-
+    
     private int requiredActivitiesForBadge;
 
     @OneToMany(mappedBy = "badge", cascade = CascadeType.ALL, orphanRemoval = true)
