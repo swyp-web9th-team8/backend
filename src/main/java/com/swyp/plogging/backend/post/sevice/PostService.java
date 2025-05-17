@@ -13,6 +13,13 @@ import com.swyp.plogging.backend.post.repository.PostRepository;
 import com.swyp.plogging.backend.service.RegionService;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import jakarta.annotation.Nullable;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,14 +30,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -51,10 +50,10 @@ public class PostService {
      */
     @Transactional
     public PostDetailResponse createPost(AppUser user, String title, String content,
-                                         LocalDateTime meetingTime, String placeId,
-                                         String placeName, String address,
-                                         @NonNull Integer maxParticipants, String openChatUrl,
-                                         @Nullable Integer deadLine) {
+        LocalDateTime meetingTime, String placeId,
+        String placeName, String address,
+        @NonNull Integer maxParticipants, String openChatUrl,
+        @Nullable Integer deadLine) {
 
         if (maxParticipants <= 0) {
             throw new IllegalArgumentException("최대인원 설정이 잘못되었습니다.");
@@ -106,20 +105,20 @@ public class PostService {
         }
 
         Post post = Post.builder()
-                .writer(user)
-                .title(title)
-                .content(content)
-                .meetingDt(meetingTime)
-                .placeId(placeId)
-                .placeName(placeName)
-                .address(address)
-                .completed(false)
-                .maxParticipants(maxParticipants)
-                .openChatUrl(openChatUrl)
-                .latitude(latitude)
-                .longitude(longitude)
-                .location(point)
-                .build();
+            .writer(user)
+            .title(title)
+            .content(content)
+            .meetingDt(meetingTime)
+            .placeId(placeId)
+            .placeName(placeName)
+            .address(address)
+            .completed(false)
+            .maxParticipants(maxParticipants)
+            .openChatUrl(openChatUrl)
+            .latitude(latitude)
+            .longitude(longitude)
+            .location(point)
+            .build();
 
         // null일 경우 30분전 세팅
         post.setUpDeadLine(deadLine);
@@ -133,11 +132,11 @@ public class PostService {
      */
     @Transactional
     public PostDetailResponse createPost(AppUser user, String title, String content,
-                                         LocalDateTime meetingTime, String placeId,
-                                         String placeName, String address,
-                                         Double latitude, Double longitude,
-                                         @NonNull Integer maxParticipants, String openChatUrl,
-                                         @Nullable Integer deadLine) {
+        LocalDateTime meetingTime, String placeId,
+        String placeName, String address,
+        Double latitude, Double longitude,
+        @NonNull Integer maxParticipants, String openChatUrl,
+        @Nullable Integer deadLine) {
 
         if (maxParticipants <= 0) {
             throw new IllegalArgumentException("최대인원 설정이 잘못되었습니다.");
@@ -153,20 +152,20 @@ public class PostService {
         Point location = locationService.createPoint(longitude, latitude);
 
         Post post = Post.builder()
-                .writer(user)
-                .title(title)
-                .content(content)
-                .meetingDt(meetingTime)
-                .placeId(placeId)
-                .placeName(placeName)
-                .address(address)
-                .latitude(latitude)
-                .longitude(longitude)
-                .location(location)
-                .completed(false)
-                .maxParticipants(maxParticipants)
-                .openChatUrl(openChatUrl)
-                .build();
+            .writer(user)
+            .title(title)
+            .content(content)
+            .meetingDt(meetingTime)
+            .placeId(placeId)
+            .placeName(placeName)
+            .address(address)
+            .latitude(latitude)
+            .longitude(longitude)
+            .location(location)
+            .completed(false)
+            .maxParticipants(maxParticipants)
+            .openChatUrl(openChatUrl)
+            .build();
 
         // null일 경우 30분전 세팅
         post.setUpDeadLine(deadLine);
@@ -181,18 +180,18 @@ public class PostService {
     @Transactional
     public PostDetailResponse createPost(CreatePostRequest request, AppUser user) {
         return createPost(
-                user,
-                request.getTitle(),
-                request.getContent(),
-                request.getMeetingTime(),
-                request.getPlaceId(),
-                request.getPlaceName(),
-                request.getAddress(),
-                request.getLatitude(),
-                request.getLongitude(),
-                request.getMaxParticipants(),
-                request.getOpenChatUrl(),
-                30 // 기본값으로 30분 전 설정
+            user,
+            request.getTitle(),
+            request.getContent(),
+            request.getMeetingTime(),
+            request.getPlaceId(),
+            request.getPlaceName(),
+            request.getAddress(),
+            request.getLatitude(),
+            request.getLongitude(),
+            request.getMaxParticipants(),
+            request.getOpenChatUrl(),
+            30 // 기본값으로 30분 전 설정
         );
     }
 
@@ -201,9 +200,9 @@ public class PostService {
      */
     @Transactional
     public PostDetailResponse modifyPost(AppUser user, Long id, String title,
-                                         String content, LocalDateTime meetingTime,
-                                         String placeId, String placeName, String address,
-                                         Integer maxParticipants, String openChatUrl, Integer deadLine) {
+        String content, LocalDateTime meetingTime,
+        String placeId, String placeName, String address,
+        Integer maxParticipants, String openChatUrl, Integer deadLine) {
 
         Post post = findById(id);
 
@@ -213,10 +212,10 @@ public class PostService {
         }
 
         post.modify(
-                title, content, meetingTime,
-                placeId, placeName, address,
-                null, null, // 위치 정보는 변경하지 않음
-                maxParticipants, openChatUrl, deadLine
+            title, content, meetingTime,
+            placeId, placeName, address,
+            null, null, // 위치 정보는 변경하지 않음
+            maxParticipants, openChatUrl, deadLine
         );
 
         return post.toDetailResponse();
@@ -227,10 +226,10 @@ public class PostService {
      */
     @Transactional
     public PostDetailResponse modifyPost(AppUser user, Long id, String title,
-                                         String content, LocalDateTime meetingTime,
-                                         String placeId, String placeName, String address,
-                                         Double latitude, Double longitude,
-                                         Integer maxParticipants, String openChatUrl, Integer deadLine) {
+        String content, LocalDateTime meetingTime,
+        String placeId, String placeName, String address,
+        Double latitude, Double longitude,
+        Integer maxParticipants, String openChatUrl, Integer deadLine) {
 
         Post post = findById(id);
 
@@ -246,10 +245,10 @@ public class PostService {
         }
 
         post.modify(
-                title, content, meetingTime,
-                placeId, placeName, address,
-                latitude, longitude,
-                maxParticipants, openChatUrl, deadLine
+            title, content, meetingTime,
+            placeId, placeName, address,
+            latitude, longitude,
+            maxParticipants, openChatUrl, deadLine
         );
 
         return post.toDetailResponse();
@@ -261,19 +260,19 @@ public class PostService {
     @Transactional
     public PostDetailResponse modifyPost(AppUser user, Long id, CreatePostRequest request) {
         return modifyPost(
-                user,
-                id,
-                request.getTitle(),
-                request.getContent(),
-                request.getMeetingTime(),
-                request.getPlaceId(),
-                request.getPlaceName(),
-                request.getAddress(),
-                request.getLatitude(),
-                request.getLongitude(),
-                request.getMaxParticipants(),
-                request.getOpenChatUrl(),
-                30 // 기본값으로 30분 전 설정
+            user,
+            id,
+            request.getTitle(),
+            request.getContent(),
+            request.getMeetingTime(),
+            request.getPlaceId(),
+            request.getPlaceName(),
+            request.getAddress(),
+            request.getLatitude(),
+            request.getLongitude(),
+            request.getMaxParticipants(),
+            request.getOpenChatUrl(),
+            30 // 기본값으로 30분 전 설정
         );
     }
 
@@ -293,18 +292,28 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public PostDetailResponse getPostDetails(Long postId) {
-        return findById(postId).toDetailResponse();
+    public PostDetailResponse getPostDetails(Long postId, Long userId) {
+        Post post = findById(postId);
+        PostDetailResponse postDetailResponse = post.toDetailResponse();
+
+        boolean isWriter = post.isWriterId(userId);
+        boolean isParticipant = post.getParticipations().stream()
+            .anyMatch(p -> p.getUser().getId().equals(userId));
+
+        postDetailResponse.setIIn(isWriter || isParticipant);
+
+        return postDetailResponse;
     }
 
     // 현재 모집 중인 모임 조회
     @Transactional
-    public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, String position, String keyword, AppUser user) throws JsonProcessingException {
+    public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, String position, String keyword, AppUser user)
+        throws JsonProcessingException {
         return findPostsByDistrictAndNeighborhood(pageable, position, keyword, user);
     }
 
     public Page<PostInfoResponse> getListOfCompletePostInfo(Pageable pageable, boolean recruitmentCompleted,
-                                                            boolean completed) {
+        boolean completed) {
         // 모집만 완료한 모임 또는 모임을 완료한 모임 조회
         Page<Post> posts = postRepository.findPostByCondition(pageable, recruitmentCompleted, completed);
         List<PostInfoResponse> postList = posts.stream().map(post -> {
@@ -321,11 +330,11 @@ public class PostService {
      * 주변 모임 검색 메서드
      */
     public Page<PostInfoResponse> findNearbyPosts(Double latitude, Double longitude, Double radiusKm, Pageable
-            pageable) {
+        pageable) {
         Page<Post> posts = postRepository.findNearbyPosts(latitude, longitude, radiusKm, pageable);
         List<PostInfoResponse> content = posts.getContent().stream()
-                .map(PostInfoResponse::new)
-                .collect(Collectors.toList());
+            .map(PostInfoResponse::new)
+            .collect(Collectors.toList());
 
         return new PageImpl<>(content, pageable, posts.getTotalElements());
     }
@@ -338,7 +347,7 @@ public class PostService {
      */
     @Transactional
     public Page<PostInfoResponse> findPostsByDistrictAndNeighborhood(Pageable pageable, String position, String
-            keyword, AppUser user) throws JsonProcessingException {
+        keyword, AppUser user) throws JsonProcessingException {
         // 검색하고 싶은 지역 찾기
         String[] regionFields = position.split(" ");
         Optional<Region> opRegion = regionService.findByDistrictAndNeighborhood(regionFields[0], regionFields[1]);

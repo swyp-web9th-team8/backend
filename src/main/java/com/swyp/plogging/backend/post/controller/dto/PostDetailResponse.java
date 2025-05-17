@@ -1,11 +1,10 @@
 package com.swyp.plogging.backend.post.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -30,4 +29,6 @@ public class PostDetailResponse {
     // 위치 정보 추가
     private Double latitude;
     private Double longitude;
+
+    private boolean iIn;
 }

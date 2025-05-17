@@ -1,7 +1,6 @@
 package com.swyp.plogging.backend.post.repository;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
@@ -143,13 +142,10 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         QPost post = QPost.post;
         QRegion region = QRegion.region;
 
-        SubQueryExpression<MultiPolygon> polygon = new JPAQuery<>()
-                .select(region.polygons).from(region).where(region.district.eq("도봉구").and(region.neighborhood.eq("창동")));
-
         String pattern = "%" + keyword + "%";
         BooleanExpression conditions = Expressions.booleanTemplate(
                 "ST_Contains({0},{1})",
-                polygon,
+                regionPolygons,
                 post.location
         );
 

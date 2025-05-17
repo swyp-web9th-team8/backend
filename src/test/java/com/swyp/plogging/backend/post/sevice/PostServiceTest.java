@@ -1,6 +1,11 @@
 package com.swyp.plogging.backend.post.sevice;
 
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.swyp.plogging.backend.common.service.LocationService;
 import com.swyp.plogging.backend.domain.Region;
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
@@ -10,7 +15,17 @@ import com.swyp.plogging.backend.post.repository.PostRepository;
 import com.swyp.plogging.backend.service.RegionService;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import com.swyp.plogging.backend.user.domain.AuthProvider;
-import org.junit.jupiter.api.*;
+import java.lang.reflect.Field;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
@@ -22,18 +37,12 @@ import org.locationtech.jts.io.WKTReader;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.lang.reflect.Field;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
@@ -71,9 +80,9 @@ public class PostServiceTest {
             .address("서울특별시 중구 세종대로 126")
             .maxParticipants(10)
             .openChatUrl("https://open.kakao.com/몰라")
-                .latitude(23.2)
-                .longitude(23.2)
-                .location(point)
+            .latitude(23.2)
+            .longitude(23.2)
+            .location(point)
             .build();
         data.setUpDeadLine(null);
     }
@@ -84,10 +93,11 @@ public class PostServiceTest {
         log.info(() -> testInfo.getDisplayName() + " 시작");
         //given
         Post expected = data;
-        List<Map<String, Object>> mapList = List.of(Map.of("latitude", Double.parseDouble("23.2"), "longitude",Double.parseDouble("23.2"),"roadAddress", "서울특별시 중구 세종대로 126"));
+        List<Map<String, Object>> mapList = List.of(
+            Map.of("latitude", Double.parseDouble("23.2"), "longitude", Double.parseDouble("23.2"), "roadAddress", "서울특별시 중구 세종대로 126"));
         when(postRepository.save(any(Post.class))).thenReturn(expected);
         when(locationService.searchCoordinatesByAddress(any(String.class))).thenReturn(mapList);
-        when(locationService.createPoint(Double.parseDouble("23.2"),Double.parseDouble("23.2"))).thenReturn(point);
+        when(locationService.createPoint(Double.parseDouble("23.2"), Double.parseDouble("23.2"))).thenReturn(point);
 
         //when
         PostDetailResponse dto = postService.createPost(user,
@@ -161,7 +171,7 @@ public class PostServiceTest {
         when(postRepository.findById(1L)).thenReturn(Optional.of(given));
 
         //when
-        PostDetailResponse dto = postService.getPostDetails(1L);
+        PostDetailResponse dto = postService.getPostDetails(1L, 1L);
 
         //then
         Assertions.assertEquals(dto.getId(), 1L);
@@ -195,13 +205,13 @@ public class PostServiceTest {
             givenList.add(post);
         }
         Region region = new Region("서울특별시", "강남구", "역삼동", "1111");
-        region.setPolygons(new MultiPolygon(new Polygon[]{},new PrecisionModel(), 4326));
+        region.setPolygons(new MultiPolygon(new Polygon[]{}, new PrecisionModel(), 4326));
         Pageable pageable = PageRequest.of(0, 10, Sort.by("meetingTime").descending());
         Boolean recruitmentCompleted = false;
         Boolean completed = false;
         when(postRepository.findPostByRegion(region.getPolygons(), pageable, "")).thenReturn(
             new PageImpl<>(givenList, pageable, givenList.size()));
-        when(regionService.findByDistrictAndNeighborhood(any(String.class),any(String.class))).thenReturn(Optional.of(region));
+        when(regionService.findByDistrictAndNeighborhood(any(String.class), any(String.class))).thenReturn(Optional.of(region));
 
         //when
         Page<PostInfoResponse> dto = postService.getListOfPostInfo(pageable, "강남구 역삼동", "", user);
