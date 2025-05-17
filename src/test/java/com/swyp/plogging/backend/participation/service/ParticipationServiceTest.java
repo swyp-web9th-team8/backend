@@ -4,6 +4,7 @@ import com.swyp.plogging.backend.common.exception.NotParticipatingPostException;
 import com.swyp.plogging.backend.participation.domain.Participation;
 import com.swyp.plogging.backend.participation.repository.ParticipationRepository;
 import com.swyp.plogging.backend.post.domain.Post;
+import com.swyp.plogging.backend.post.repository.PostRepository;
 import com.swyp.plogging.backend.post.sevice.PostService;
 import com.swyp.plogging.backend.post.sevice.PostServiceTest;
 import com.swyp.plogging.backend.user.domain.AppUser;
@@ -35,6 +36,8 @@ public class ParticipationServiceTest {
     PostService postService;
     @Mock
     ParticipationRepository participationRepository;
+    @Mock
+    PostRepository postRepository;
 
 
     private static Post data;
@@ -70,6 +73,7 @@ public class ParticipationServiceTest {
         //given
         Long postId = 1L;
         when(postService.findById(postId)).thenReturn(data);
+        when(postRepository.save(data)).thenReturn(data);
 
         //when
         participationService.participateToPost(postId, user2);
@@ -92,6 +96,7 @@ public class ParticipationServiceTest {
         queue.add(Participation.newInstance(data, AppUser.newInstance("1", "1", "1", AuthProvider.GOOGLE, null)));
 
         when(postService.findById(postId)).thenReturn(data);
+        when(postRepository.save(data)).thenReturn(data);
         when(participationRepository.save(any(Participation.class))).thenReturn(queue.poll());
 
         participationService.participateToPost(postId, user2);
@@ -115,6 +120,7 @@ public class ParticipationServiceTest {
         //given
         Long postId = 1L;
         when(postService.findById(postId)).thenReturn(data);
+        when(postRepository.save(data)).thenReturn(data);
         when(participationRepository.save(any(Participation.class))).thenReturn(Participation.newInstance(data, user2));
         participationService.participateToPost(postId, user2);
 
