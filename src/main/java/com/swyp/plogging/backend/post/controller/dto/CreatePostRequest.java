@@ -31,6 +31,8 @@ public class CreatePostRequest {
     private String openChatUrl;
     @Schema(description = "최대 참석인원(모임장 미포함)")
     private int maxParticipants;
+    @Schema(description = "마감시간 = 시작전 30 or 60")
+    private int deadline;
 
     // 위치 정보 추가
     @Schema(description = "위도")
