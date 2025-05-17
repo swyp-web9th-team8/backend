@@ -59,7 +59,7 @@ public class PostService {
         Pattern pattern1 = Pattern.compile("(\\S+구)\\s+(\\S*(?:대로|로|길))\\s+(\\d+)");
         Pattern pattern2 = Pattern.compile("(\\S*(?:대로|로|길))\\s+(\\d+)");
         Matcher requestMatcher1 = pattern1.matcher(address);
-        Matcher requestMatcher2 = pattern1.matcher(address);
+        Matcher requestMatcher2 = pattern2.matcher(address);
         String r1, r2, r3;
         if (requestMatcher1.find()) {
             r1 = requestMatcher1.group(1);
@@ -67,8 +67,8 @@ public class PostService {
             r3 = requestMatcher1.group(3);
         } else if (requestMatcher2.find()) {
             r1 = null;
-            r2 = requestMatcher1.group(2);
-            r3 = requestMatcher1.group(3);
+            r2 = requestMatcher2.group(1);
+            r3 = requestMatcher2.group(2);
         } else {
             throw new RuntimeException("잘못된 도로명주소 입니다.");
         }
@@ -79,7 +79,7 @@ public class PostService {
                         map -> {
                             Matcher responseMatcher1 = pattern1.matcher((CharSequence) map.get("roadAddress"));
                             Matcher responseMatcher2 = pattern2.matcher((CharSequence) map.get("roadAddress"));
-                            if (responseMatcher1.find()) {
+                            if (r1 != null && responseMatcher1.find()) {
                                 // 구, 길, 번호
                                 return responseMatcher1.group(1).equals(r1) &&
                                         responseMatcher1.group(2).equals(r2) &&
@@ -87,8 +87,8 @@ public class PostService {
 
                             }else if(responseMatcher2.find()){
                                 // 길, 번호
-                                return responseMatcher1.group(1).equals(r2) &&
-                                        responseMatcher1.group(2).equals(r3);
+                                return responseMatcher2.group(1).equals(r2) &&
+                                        responseMatcher2.group(2).equals(r3);
                             }
                             return false;
                         })
