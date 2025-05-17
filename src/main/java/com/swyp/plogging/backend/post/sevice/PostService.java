@@ -36,6 +36,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PostService {
+    // 도로명 주소 구, 길, 번호 정규식 패턴
+    private final Pattern guGilNum = Pattern.compile("(\\S+구)\\s+(\\S*(?:대로|로|길))\\s+(\\d+)");
+    // 도로명 주소 길, 번호 정규식 패턴
+    private final Pattern gilNum = Pattern.compile("(\\S*(?:대로|로|길))\\s+(\\d+)");
 
     private final PostRepository postRepository;
     private final LocationService locationService;
@@ -54,20 +58,18 @@ public class PostService {
         if (maxParticipants <= 0) {
             throw new IllegalArgumentException("최대인원 설정이 잘못되었습니다.");
         }
-        // 구 / 대로,로,길
-        Pattern pattern1 = Pattern.compile("(\\S+구)\\s+(\\S*(?:대로|로|길))\\s+(\\d+)");
-        Pattern pattern2 = Pattern.compile("(\\S*(?:대로|로|길))\\s+(\\d+)");
-        Matcher requestMatcher1 = pattern1.matcher(address);
-        Matcher requestMatcher2 = pattern2.matcher(address);
-        String r1, r2, r3;
-        if (requestMatcher1.find()) {
-            r1 = requestMatcher1.group(1);
-            r2 = requestMatcher1.group(2);
-            r3 = requestMatcher1.group(3);
-        } else if (requestMatcher2.find()) {
-            r1 = null;
-            r2 = requestMatcher2.group(1);
-            r3 = requestMatcher2.group(2);
+        // 도로명 주소 정규식 패턴 매칭
+        Matcher requestMatcher1 = guGilNum.matcher(address);
+        Matcher requestMatcher2 = gilNum.matcher(address);
+        String gu, gil, num; // 구, 길, 번호
+        if (requestMatcher1.find()) { // 구,길, 번호가 다 있는 경우
+            gu = requestMatcher1.group(1);
+            gil = requestMatcher1.group(2);
+            num = requestMatcher1.group(3);
+        } else if (requestMatcher2.find()) { // 길, 번호만 있는 경우
+            gu = null;
+            gil = requestMatcher2.group(1);
+            num = requestMatcher2.group(2);
         } else {
             throw new RuntimeException("잘못된 도로명주소 입니다.");
         }
@@ -75,30 +77,31 @@ public class PostService {
         // 네이버 지도에서 도로명 주소로 위치를 검색 후 위도경도 입력
         List<Map<String, Object>> list = locationService.searchCoordinatesByAddress(address);
         Map<String, Object> location = list.stream().filter(
-                map -> {
-                    Matcher responseMatcher1 = pattern1.matcher((CharSequence) map.get("roadAddress"));
-                    Matcher responseMatcher2 = pattern2.matcher((CharSequence) map.get("roadAddress"));
-                    if (r1 != null && responseMatcher1.find()) {
-                        // 구, 길, 번호
-                        return responseMatcher1.group(1).equals(r1) &&
-                            responseMatcher1.group(2).equals(r2) &&
-                            responseMatcher1.group(3).equals(r3);
+                        map -> {
+                            // 새로 받아온 데이터가 적절한지 도로명 주소로 비교
+                            Matcher responseMatcher1 = guGilNum.matcher((CharSequence) map.get("roadAddress"));
+                            Matcher responseMatcher2 = gilNum.matcher((CharSequence) map.get("roadAddress"));
+                            if (gu != null && responseMatcher1.find()) {
+                                // 구, 길, 번호
+                                return responseMatcher1.group(1).equals(gu) &&
+                                        responseMatcher1.group(2).equals(gil) &&
+                                        responseMatcher1.group(3).equals(num);
 
-                    } else if (responseMatcher2.find()) {
-                        // 길, 번호
-                        return responseMatcher2.group(1).equals(r2) &&
-                            responseMatcher2.group(2).equals(r3);
-                    }
-                    return false;
-                })
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("찾는 주소가 없습니다."));
+                            }else if(responseMatcher2.find()){
+                                // 길, 번호
+                                return responseMatcher2.group(1).equals(gil) &&
+                                        responseMatcher2.group(2).equals(num);
+                            }
+                            return false;
+                        })
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("찾는 주소가 없습니다."));
         Double latitude = (Double) location.get("latitude");
         Double longitude = (Double) location.get("longitude");
 
         Point point = locationService.createPoint(longitude, latitude);
         if (point == null) {
-            throw new RuntimeException("찾는 주소가 없습니다.");
+            throw new RuntimeException("해당 주소의 지점을 생성할 수 없습니다.");
         }
 
         Post post = Post.builder()
@@ -322,20 +325,6 @@ public class PostService {
 
         return new PageImpl<>(postList, pageable, posts.getTotalElements());
     }
-//    public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, Boolean recruitmentCompleted, Boolean completed) {
-//        // 데이터 DTO로 정제
-//        Page<Post> data = postRepository.findPostByCondition(pageable, recruitmentCompleted, completed);
-//        List<PostInfoResponse> content;
-//        // 완료 여부에 따른 응답 분리
-//        if(completed){
-//            content = data.getContent().stream().map(post -> new PostInfoResponse(post, post.getCertification())).toList();
-//        }
-//        else{
-//            content = data.getContent().stream().map(PostInfoResponse::new).toList();
-//        }
-//
-//        return new PageImpl<>(content, data.getPageable(), data.getTotalElements());
-//    }
 
     /**
      * 주변 모임 검색 메서드

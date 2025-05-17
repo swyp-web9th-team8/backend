@@ -67,10 +67,10 @@ public class PostController {
             } else {
                 // 기존 로직 유지
                 PostDetailResponse response = postService.createPost(SecurityUtils.getUserOrThrow(user), request.getTitle(),
-                    request.getContent(),
-                    request.getMeetingTime(), request.getPlaceId(),
-                    request.getPlaceName(), request.getAddress(),
-                    request.getMaxParticipants(), request.getOpenChatUrl(), null);
+                        request.getContent(),
+                        request.getMeetingTime(), request.getPlaceId(),
+                        request.getPlaceName(), request.getAddress(),
+                        request.getMaxParticipants(), request.getOpenChatUrl(), request.getDeadline());
 
                 return ApiResponse.ok(response, "Successfully fetched the post details.");
             }
