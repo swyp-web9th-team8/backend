@@ -29,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -84,10 +83,10 @@ public class CertificateServiceTest {
                 .build();
         String randomName = UUID.randomUUID() + ".png";
         List<String> expect = List.of("/images/" + randomName);
-        Certification certification = Certification.newInstance(post);
+        Certification certification = Certification.newInstance(post,"/images/" + randomName);
 
         when(postService.findById(1L)).thenReturn(post);
-        when(repository.findByPostId(post.getId())).thenReturn(Optional.of(certification));
+        when(repository.save(any(Certification.class))).thenReturn(certification);
         when(fileService.uploadImageAndGetFileName(any(MultipartFile.class))).thenReturn(randomName);
 
         //when
@@ -148,10 +147,10 @@ public class CertificateServiceTest {
 
         String randomName = UUID.randomUUID() + ".png";
         String expect = "/images/" + randomName;
-        Certification certification = Certification.newInstance(post);
+        Certification certification = Certification.newInstance(post, "/images/" + randomName);
 
         when(postService.findById(1L)).thenReturn(post);
-        when(repository.findByPostId(post.getId())).thenReturn(Optional.of(certification));
+        when(repository.save(any(Certification.class))).thenReturn(certification);
         when(fileService.uploadImageAndGetFileName(any(MultipartFile.class))).thenReturn(randomName);
 
 
@@ -271,7 +270,7 @@ public class CertificateServiceTest {
         Certification certification = Certification.newInstance(post);
 
         when(postService.findById(1L)).thenReturn(post);
-        when(repository.findByPostId(post.getId())).thenReturn(Optional.of(certification));
+//        when(repository.save(any(Certification.class))).thenReturn(certification);
 
         //when
         Exception exception = Assertions.assertThrows(CertificationException.class,
