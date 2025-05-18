@@ -11,12 +11,13 @@ import com.swyp.plogging.backend.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.sevice.PostService;
 import com.swyp.plogging.backend.user.domain.AppUser;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,19 +35,29 @@ public class CertificationService {
             throw new UnauthorizedUserException("올바른 접근이 아닙니다.");
         }
 
-        // certificate 가져오기(없으면 생성)
-        Certification certification = getOrNewByPost(myPost);
-
-        List<String> imageUrls = new ArrayList<>();
+        String imageUrl;
+        Certification certification = myPost.getCertification();
         for (MultipartFile file : files) {
             // 이미지 저장후 고아로 남기지 않기 위함
-            String imageUrl = fileService.uploadImageAndGetFileName(file);
+            imageUrl = fileService.uploadImageAndGetFileName(file);
             imageUrl = "/images/" + imageUrl;
-            certification.addImageUrl(imageUrl);
-            imageUrls.add(imageUrl);
+
+            // certification 없으면 생성
+            if (certification == null) {
+                certification = Certification.newInstance(myPost, imageUrl);
+                certification = repository.save(certification);
+                myPost.setCertification(certification);
+            } else {
+                certification.getImageUrls().add(imageUrl);
+            }
         }
 
-        return imageUrls;
+        // 파일이 없고 Certification도 없으면 빈 리스트 반환
+        if(certification == null){
+            return new ArrayList<>();
+        }
+
+        return certification.getImageUrls();
     }
 
     @Transactional
