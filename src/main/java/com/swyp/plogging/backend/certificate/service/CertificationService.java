@@ -107,9 +107,4 @@ public class CertificationService {
 
         repository.delete(myPost.getCertification());
     }
-
-    private Certification getOrNewByPost(Post post) {
-        return repository.findByPostId(post.getId())
-            .orElseGet(() -> repository.save(Certification.newInstance(post)));
-    }
 }
