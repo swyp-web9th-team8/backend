@@ -78,9 +78,9 @@ public class CertificationService {
             throw CertificationException.notParticipated();
         });
 
-        Certification certification = getOrNewByPost(myPost);
+        Certification certification = myPost.getCertification();
         // 최소 1개 이상의 이미지 필요
-        if (!certification.getImageUrls().isEmpty()) {
+        if (certification != null && !certification.getImageUrls().isEmpty()) {
             certification.certificate();
         } else {
             throw CertificationException.needMinOneImage();
