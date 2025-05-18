@@ -4,6 +4,7 @@ import com.swyp.plogging.backend.auth.domain.CustomOAuth2User;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import com.swyp.plogging.backend.user.domain.AuthProvider;
 import com.swyp.plogging.backend.user.repository.AppUserRepository;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -12,8 +13,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -49,8 +48,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 appUser = processGoogleUser(attributes, provider);
             }
 
-            log.info("OAuth2 로그인 성공: 제공자 = {}, 이메일 = {}, 등록 상태 = {}", 
-                    provider, appUser.getEmail(), appUser.isRegistered());
+            log.info("OAuth2 로그인 성공: 제공자 = {}, 이메일 = {}, 등록 상태 = {}",
+                provider, appUser.getEmail(), appUser.isRegistered());
             return new CustomOAuth2User(appUser, attributes);
         } catch (Exception e) {
             log.error("OAuth2 로그인 처리 중 오류 발생: " + e.getMessage(), e);
@@ -72,10 +71,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             log.warn("카카오 계정 정보가 없습니다. ID: {}", kakaoId);
             // 기본값 설정
             return findOrCreateUser(
-                    "kakao_" + kakaoId + "@placeholder.com",
-                    "카카오사용자",
-                    null,
-                    provider
+                "kakao_" + kakaoId + "@placeholder.com",
+                "카카오사용자",
+                null,
+                provider
             );
         }
 
@@ -85,10 +84,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (kakaoProfile == null) {
             log.warn("카카오 프로필 정보가 없습니다. ID: {}", kakaoId);
             return findOrCreateUser(
-                    "kakao_" + kakaoId + "@placeholder.com",
-                    "카카오사용자",
-                    null,
-                    provider
+                "kakao_" + kakaoId + "@placeholder.com",
+                "카카오사용자",
+                null,
+                provider
             );
         }
 
@@ -123,54 +122,61 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String name = (String) attributes.get("name");
         String pictureUrl = (String) attributes.get("picture");
 
+        log.warn("================================================");
+        log.warn("email: {}", email);
+        log.warn("name: {}", name);
+        log.warn("picture (profileImageUrl): {}", pictureUrl);
+        attributes.forEach((key, value) -> log.warn("attr -> {} : {}", key, value));
+        log.warn("================================================");
+
         return findOrCreateUser(email, name, pictureUrl, provider);
     }
 
     // 사용자 찾기 또는 생성
     private AppUser findOrCreateUser(String email, String name, String pictureUrl, AuthProvider provider) {
         return appUserRepository.findByEmail(email)
-                .map(existingUser -> {
-                    log.info("기존 사용자 발견: 이메일 = {}, 등록 상태 = {}", email, existingUser.isRegistered());
+            .map(existingUser -> {
+                log.info("기존 사용자 발견: 이메일 = {}, 등록 상태 = {}", email, existingUser.isRegistered());
 
-                    // 기존 사용자 정보 업데이트 (선택적)
-                    boolean updated = false;
+                // 기존 사용자 정보 업데이트 (선택적)
+                boolean updated = false;
 
-                    // 이름이 변경되었으면 업데이트
-                    if (name != null && !name.equals(existingUser.getNickname())) {
-                        existingUser.updateNickname(name);
-                        updated = true;
-                        log.debug("사용자 닉네임 업데이트: {} -> {}", existingUser.getNickname(), name);
-                    }
+                // 이름이 변경되었으면 업데이트
+                if (name != null && !name.equals(existingUser.getNickname())) {
+                    existingUser.updateNickname(name);
+                    updated = true;
+                    log.debug("사용자 닉네임 업데이트: {} -> {}", existingUser.getNickname(), name);
+                }
 
-                    // 프로필 이미지가 변경되었으면 업데이트
-                    if (pictureUrl != null && !pictureUrl.equals(existingUser.getProfileImageUrl())) {
-                        existingUser.updateProfileImageUrl(pictureUrl);
-                        updated = true;
-                        log.debug("사용자 프로필 이미지 업데이트: {}", pictureUrl);
-                    }
+                // 프로필 이미지가 변경되었으면 업데이트
+                if (pictureUrl != null && !pictureUrl.equals(existingUser.getProfileImageUrl())) {
+                    existingUser.updateProfileImageUrl(pictureUrl);
+                    updated = true;
+                    log.debug("사용자 프로필 이미지 업데이트: {}", pictureUrl);
+                }
 
-                    // 변경사항이 있으면 저장
-                    if (updated) {
-                        log.info("사용자 정보 업데이트: 이메일 = {}", email);
-                        return appUserRepository.save(existingUser);
-                    }
+                // 변경사항이 있으면 저장
+                if (updated) {
+                    log.info("사용자 정보 업데이트: 이메일 = {}", email);
+                    return appUserRepository.save(existingUser);
+                }
 
-                    return existingUser;
-                })
-                .orElseGet(() -> {
-                    // 새 사용자 생성
-                    log.info("새 사용자 생성: 이메일 = {}, 소셜 제공자 = {}", email, provider);
-                    String nickname = name != null ? name : "사용자";
-                    String region = "서울"; // 기본 지역
-                    
-                    // 새 사용자 생성 - 처음에는 등록되지 않은 상태로 생성
-                    // AppUser.newInstance 메서드는 이미 registered=false로 설정함
-                    AppUser newUser = AppUser.newInstance(email, nickname, region, provider, pictureUrl);
-                    
-                    AppUser savedUser = appUserRepository.save(newUser);
-                    log.info("새 사용자가 생성되었습니다: ID = {}, 이메일 = {}, 등록 상태 = {}", 
-                             savedUser.getId(), savedUser.getEmail(), savedUser.isRegistered());
-                    return savedUser;
-                });
+                return existingUser;
+            })
+            .orElseGet(() -> {
+                // 새 사용자 생성
+                log.info("새 사용자 생성: 이메일 = {}, 소셜 제공자 = {}", email, provider);
+                String nickname = name != null ? name : "사용자";
+                String region = "서울"; // 기본 지역
+
+                // 새 사용자 생성 - 처음에는 등록되지 않은 상태로 생성
+                // AppUser.newInstance 메서드는 이미 registered=false로 설정함
+                AppUser newUser = AppUser.newInstance(email, nickname, region, provider, pictureUrl);
+
+                AppUser savedUser = appUserRepository.save(newUser);
+                log.info("새 사용자가 생성되었습니다: ID = {}, 이메일 = {}, 등록 상태 = {}",
+                    savedUser.getId(), savedUser.getEmail(), savedUser.isRegistered());
+                return savedUser;
+            });
     }
 }
