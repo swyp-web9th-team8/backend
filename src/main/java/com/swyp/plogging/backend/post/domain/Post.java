@@ -227,4 +227,12 @@ public class Post extends BaseEntity {
     public boolean isWriterId(Long userId) {
         return writer != null && this.writer.getId().equals(userId);
     }
+
+    public boolean setCertification(Certification certification) {
+        if(certification.getPost() == this){
+            this.certification = certification;
+            return true;
+        }
+        return false;
+    }
 }

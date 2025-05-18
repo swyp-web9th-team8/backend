@@ -37,10 +37,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PostService {
+    // todo 별도 addressUtil 작성 필요
     // 도로명 주소 구, 길, 번호 정규식 패턴
-    private final Pattern guGilNum = Pattern.compile("(\\S+구)\\s+(\\S*(?:대로|로|길))\\s+(\\d+)");
+    private final Pattern guGilNum = Pattern.compile("(\\S+구)\\s+(\\S*(?:대로|로|길))\\s+(\\d*)");
     // 도로명 주소 길, 번호 정규식 패턴
-    private final Pattern gilNum = Pattern.compile("(\\S*(?:대로|로|길))\\s+(\\d+)");
+    private final Pattern gilNum = Pattern.compile("(\\S*(?:대로|로|길))\\s+(\\d*)");
+    // 미사용
+    private final Pattern guGilUnderNum = Pattern.compile("(\\S+구)\\s+(\\S*(?:대로|로|길))\\s+(지하)\\s+(\\d*)");
+    // 미사용
+    private final Pattern gilUnderNum = Pattern.compile("(\\S*(?:대로|로|길))\\s+(지하)\\s+(\\d*)");
 
     private final PostRepository postRepository;
     private final LocationService locationService;

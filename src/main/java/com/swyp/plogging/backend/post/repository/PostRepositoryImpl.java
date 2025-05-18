@@ -147,7 +147,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 "ST_Contains({0},{1})",
                 regionPolygons,
                 post.location
-        );
+        ).and(post.completed.eq(false));
 
         if (keyword != null && !keyword.isBlank()) {
             conditions = conditions.and(

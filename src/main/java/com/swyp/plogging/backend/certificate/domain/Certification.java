@@ -22,7 +22,6 @@ public class Certification extends BaseTimeEntity {
 
     @ElementCollection
     @CollectionTable(name = "certification_image_urls", joinColumns = @JoinColumn(name = "certification_id"))
-    @Column(nullable = false)
     private List<String> imageUrls;
 
     @OneToOne
@@ -36,6 +35,11 @@ public class Certification extends BaseTimeEntity {
         instance.post = post;
         instance.imageUrls = new ArrayList<>();
         instance.certificated = false;
+        return instance;
+    }
+    public static Certification newInstance(Post post, String imageUrl){
+        Certification instance = Certification.newInstance(post);
+        instance.addImageUrl(imageUrl);
         return instance;
     }
 
