@@ -56,7 +56,7 @@ public class UserService {
 
     private AppUser getUser(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(String.format("Could not find user with ID: %d", userId)));
+            .orElseThrow(() -> new UserNotFoundException(String.format("Could not find user with ID: %d", userId)));
     }
 
     @Transactional
@@ -69,9 +69,9 @@ public class UserService {
             // Region ID가 제공된 경우
             if (regionRequest.getRegionId() != null) {
                 regionRepository.findById(regionRequest.getRegionId())
-                        .ifPresent(region -> {
-                            updateUserRegion(user, region);
-                        });
+                    .ifPresent(region -> {
+                        updateUserRegion(user, region);
+                    });
             }
             // 문자열 지역이 제공된 경우
             else if (regionRequest.getRegion() != null) {
@@ -80,9 +80,9 @@ public class UserService {
 
                 // 새 방식 - Region 객체로 변환하여 저장 (가능한 경우)
                 findRegionFromString(regionRequest.getRegion())
-                        .ifPresent(region -> {
-                            updateUserRegion(user, region);
-                        });
+                    .ifPresent(region -> {
+                        updateUserRegion(user, region);
+                    });
             }
         } else if (request instanceof UpdatePhoneNumRequest phoneRequest) {
             user.updatePhoneNum(phoneRequest.getPhoneNum());
@@ -96,10 +96,10 @@ public class UserService {
     private void updateUserRegion(AppUser user, Region region) {
         // 기존 기본 지역 확인 및 해제
         userRegionRepository.findPrimaryRegionByUserId(user.getId())
-                .ifPresent(existingPrimary -> {
-                    existingPrimary.unsetPrimary();
-                    userRegionRepository.save(existingPrimary);
-                });
+            .ifPresent(existingPrimary -> {
+                existingPrimary.unsetPrimary();
+                userRegionRepository.save(existingPrimary);
+            });
 
         // 새 UserRegion 생성 및 저장
         UserRegion userRegion = new UserRegion(user, region, true);
@@ -117,8 +117,7 @@ public class UserService {
     }
 
     /**
-     * 문자열 형태의 지역 정보를 기반으로 Region 엔티티를 찾습니다.
-     * 형식: "서울특별시 강남구" 또는 "서울특별시 강남구 역삼동"
+     * 문자열 형태의 지역 정보를 기반으로 Region 엔티티를 찾습니다. 형식: "서울특별시 강남구" 또는 "서울특별시 강남구 역삼동"
      *
      * @param regionString 지역 문자열
      * @return 찾은 Region 객체 (없으면 빈 Optional)
@@ -160,11 +159,11 @@ public class UserService {
         AppUser user = getUser(userId);
         List<UserBadge> userBadges = userBadgeRepository.findByUser(user);
         List<UserBadgeResponse> userBadgeResponses = userBadges.stream()
-                .map(UserBadgeResponse::from)
-                .collect(Collectors.toList());
+            .map(UserBadgeResponse::from)
+            .collect(Collectors.toList());
 
         UserBadge latestUserBadge = userBadgeRepository.findTopByUserIdOrderByCreatedDtDesc(userId)
-                .orElse(null);
+            .orElse(null);
         int remainingActionsForNextBadge = calculateRemainingActionsForNextBadge(user, latestUserBadge);
 
         return new UserBadgesResponse(remainingActionsForNextBadge, userBadgeResponses);
@@ -206,7 +205,10 @@ public class UserService {
     }
 
     public List<RankingResponse> getAllTimeRankings() {
-        return userRepository.findAllTimeRankings();
+        List<RankingResponse> rankingResponses = userRepository.findAllTimeRankings();
+        assignRanks(rankingResponses);
+
+        return rankingResponses;
     }
 
     // 사용자의 모든 지역 가져오기
@@ -223,18 +225,18 @@ public class UserService {
     @Transactional
     public void addUserRegion(Long userId, Long regionId, boolean isPrimary) {
         AppUser user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
         Region region = regionRepository.findById(regionId)
-                .orElseThrow(() -> new IllegalArgumentException("지역을 찾을 수 없습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("지역을 찾을 수 없습니다."));
 
         // 기본 지역인 경우 기존 기본 지역 해제
         if (isPrimary) {
             userRegionRepository.findPrimaryRegionByUserId(userId)
-                    .ifPresent(primaryRegion -> {
-                        primaryRegion.unsetPrimary();
-                        userRegionRepository.save(primaryRegion);
-                    });
+                .ifPresent(primaryRegion -> {
+                    primaryRegion.unsetPrimary();
+                    userRegionRepository.save(primaryRegion);
+                });
         }
 
         // 새 지역 추가
@@ -261,18 +263,18 @@ public class UserService {
     @Transactional
     public void updatePrimaryRegion(Long userId, Long regionId) {
         AppUser user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 기존 기본 지역 해제
         userRegionRepository.findPrimaryRegionByUserId(userId)
-                .ifPresent(primaryRegion -> {
-                    primaryRegion.unsetPrimary();
-                    userRegionRepository.save(primaryRegion);
-                });
+            .ifPresent(primaryRegion -> {
+                primaryRegion.unsetPrimary();
+                userRegionRepository.save(primaryRegion);
+            });
 
         // 새 기본 지역 설정
         UserRegion newPrimaryRegion = userRegionRepository.findById(regionId)
-                .orElseThrow(() -> new IllegalArgumentException("지역을 찾을 수 없습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("지역을 찾을 수 없습니다."));
 
         newPrimaryRegion.setAsPrimary();
         userRegionRepository.save(newPrimaryRegion);
