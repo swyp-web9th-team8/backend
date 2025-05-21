@@ -1,6 +1,5 @@
 package com.swyp.plogging.backend.post.sevice;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.swyp.plogging.backend.common.exception.PostNotFoundException;
 import com.swyp.plogging.backend.common.exception.UnauthorizedUserException;
 import com.swyp.plogging.backend.common.service.LocationService;
@@ -284,29 +283,14 @@ public class PostService {
 
     // 현재 모집 중인 모임 조회
     @Transactional
-    public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, String position, String keyword, AppUser user)
-        throws JsonProcessingException {
+    public Page<PostInfoResponse> getListOfPostInfo(Pageable pageable, String position, String keyword, AppUser user) {
         return findPostsByDistrictAndNeighborhood(pageable, position, keyword, user);
     }
 
-    public Page<PostInfoResponse> getListOfCompletePostInfo(Pageable pageable, String position, boolean recruitmentCompleted,
-        boolean completed) {
-        Address addressObject = RoadAddressUtil.getAddressObject(position);
-        Optional<Region> opRegion = regionService.findByDistrictAndNeighborhood(addressObject.getDistrict(), addressObject.getNeighborhood());
-        if (opRegion.isEmpty()) {
-            throw new RuntimeException("해당 지역이 없습니다.");
-        }
-
-        Region region = opRegion.get();
-        MultiPolygon multiPolygon;
-        if (!region.hasPolygons()) {
-            multiPolygon = regionService.getAndSavePolygonOfRegion(region);
-        } else {
-            multiPolygon = region.getPolygons();
-        }
-
+    public Page<PostInfoResponse> getListOfCompletePostInfo(
+            Pageable pageable, String position, boolean recruitmentCompleted, boolean completed) {
         // 모집만 완료한 모임 또는 모임을 완료한 모임 조회
-        Page<Post> posts = postRepository.findPostByCondition(multiPolygon, pageable, recruitmentCompleted, completed);
+        Page<Post> posts = postRepository.findPostByCondition(getMultiPolygon(position), pageable, recruitmentCompleted, completed);
         List<PostInfoResponse> postList = posts.stream().map(post -> {
             if (post.isCompleted()) {
                 return new PostInfoResponse(post, post.getCertification());
@@ -337,9 +321,25 @@ public class PostService {
      * @param keyword  검색어
      */
     @Transactional
-    public Page<PostInfoResponse> findPostsByDistrictAndNeighborhood(Pageable pageable, String position, String
-        keyword, AppUser user) throws JsonProcessingException {
+    public Page<PostInfoResponse> findPostsByDistrictAndNeighborhood(
+            Pageable pageable, String position, String keyword, AppUser user){
 
+        Page<Post> posts = postRepository.findPostByRegion(getMultiPolygon(position), pageable, keyword);
+        List<PostInfoResponse> postList = posts.stream().map(post -> new PostInfoResponse(post, user)).toList();
+
+        return new PageImpl<>(postList, pageable, posts.getTotalElements());
+
+    }
+
+    public List<Long> getCompletedPostIds(Long writerId) {
+        List<Post> completedPosts = postRepository.findByWriterIdAndCompletedTrue(writerId);
+        return completedPosts.stream()
+                .filter(post -> post.getCertification() == null || !post.getCertification().isCertificated())
+                .map(Post::getId).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public MultiPolygon getMultiPolygon(String position){
         // 검색하고 싶은 지역 찾기
         Address address = RoadAddressUtil.getAddressObject(position);
         Optional<Region> opRegion = regionService.findByDistrictAndNeighborhood(address.getDistrict(), address.getNeighborhood());
@@ -354,18 +354,6 @@ public class PostService {
         } else {
             multiPolygon = region.getPolygons();
         }
-
-        Page<Post> posts = postRepository.findPostByRegion(multiPolygon, pageable, keyword);
-        List<PostInfoResponse> postList = posts.stream().map(post -> new PostInfoResponse(post, user)).toList();
-
-        return new PageImpl<>(postList, pageable, posts.getTotalElements());
-
-    }
-
-    public List<Long> getCompletedPostIds(Long writerId) {
-        List<Post> completedPosts = postRepository.findByWriterIdAndCompletedTrue(writerId);
-        return completedPosts.stream()
-                .filter(post -> post.getCertification() == null || !post.getCertification().isCertificated())
-                .map(Post::getId).collect(Collectors.toList());
+        return multiPolygon;
     }
 }
