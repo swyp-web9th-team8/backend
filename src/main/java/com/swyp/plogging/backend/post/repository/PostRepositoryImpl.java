@@ -28,7 +28,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     // 기존 메서드 유지
     @Override
-    public Page<Post> findPostByCondition(MultiPolygon multiPolygon, Pageable pageable, Boolean recruitmentCompleted, Boolean completed) {
+    public Page<Post> findPostByCondition(MultiPolygon regionPolygons, Pageable pageable, Boolean recruitmentCompleted, Boolean completed) {
         QPost post = QPost.post;
         QParticipation participation = QParticipation.participation;
 
@@ -42,6 +42,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
         // 조건
         BooleanBuilder postCondition = new BooleanBuilder();
+
+        // 지역 조건 검색
+        postCondition.and(Expressions.booleanTemplate(
+                "ST_Contains({0},{1})",
+                regionPolygons,
+                post.location
+        ));
 
         // completed 조건 추가
         postCondition.and(post.completed.eq(completed));

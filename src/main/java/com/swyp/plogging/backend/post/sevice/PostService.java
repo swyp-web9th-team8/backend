@@ -287,6 +287,7 @@ public class PostService {
         return findPostsByDistrictAndNeighborhood(pageable, position, keyword, user);
     }
 
+    @Transactional
     public Page<PostInfoResponse> getListOfCompletePostInfo(
             Pageable pageable, String position, boolean recruitmentCompleted, boolean completed) {
         // 모집만 완료한 모임 또는 모임을 완료한 모임 조회
@@ -328,7 +329,6 @@ public class PostService {
         List<PostInfoResponse> postList = posts.stream().map(post -> new PostInfoResponse(post, user)).toList();
 
         return new PageImpl<>(postList, pageable, posts.getTotalElements());
-
     }
 
     public List<Long> getCompletedPostIds(Long writerId) {
