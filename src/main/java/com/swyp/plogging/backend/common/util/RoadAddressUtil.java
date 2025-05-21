@@ -72,6 +72,19 @@ public class RoadAddressUtil {
     }
 
     public static boolean compareRoadAddress(Address a1, Address a2) {
-        return a1.getFullName().equals(a2.getFullName());
+        // 뒤에서 부터 확인
+        // 길번호 확인
+        if(a1.getGilNum() != null && a1.getGilNum().equals(a2.getGilNum())){
+            // 길 확인, 여기까지 같다면 임시 통과
+            if(a1.getGil() != null && a1.getGil().equals(a2.getGil())){
+                // 마지막으로 구 확인
+                if(a1.getDistrict() != null && a2.getDistrict() != null){
+                    return a1.getDistrict().equals(a2.getDistrict());
+                }
+                // 구가 null이라면 통과
+                return true;
+            }
+        }
+        return false;
     }
 }
