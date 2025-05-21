@@ -28,7 +28,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     // 기존 메서드 유지
     @Override
-    public Page<Post> findPostByCondition(Pageable pageable, Boolean recruitmentCompleted, Boolean completed) {
+    public Page<Post> findPostByCondition(MultiPolygon multiPolygon, Pageable pageable, Boolean recruitmentCompleted, Boolean completed) {
         QPost post = QPost.post;
         QParticipation participation = QParticipation.participation;
 

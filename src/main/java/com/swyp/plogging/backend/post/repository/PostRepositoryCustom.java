@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface PostRepositoryCustom {
-    Page<Post> findPostByCondition(Pageable pageable, Boolean recruitmentCompleted, Boolean completed);
+    Page<Post> findPostByCondition(MultiPolygon multiPolygon,Pageable pageable, Boolean recruitmentCompleted, Boolean completed);
 
     // 추가: 위치 기반 검색 메서드
     Page<Post> findNearbyPosts(Double latitude, Double longitude, Double radiusKm, Pageable pageable);

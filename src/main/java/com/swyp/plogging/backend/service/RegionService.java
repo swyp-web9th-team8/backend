@@ -217,7 +217,7 @@ public class RegionService {
 
     // vworld에서 폴리곤 받아오기
     @Transactional
-    public MultiPolygon getAndSavePolygonOfRegion(Region region) throws JsonProcessingException {
+    public MultiPolygon getAndSavePolygonOfRegion(Region region){
         log.info("{}의 geometry 데이터 요청", region.getDistrict()+" " + region.getNeighborhood());
         String url = UriComponentsBuilder.fromHttpUrl("https://api.vworld.kr/req/data")
                 .queryParam("service", "data")
@@ -235,7 +235,13 @@ public class RegionService {
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
-        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode root;
+        try{
+            root = objectMapper.readTree(response.getBody());
+        }catch (JsonProcessingException e){
+            throw new RuntimeException(e.getMessage());
+        }
+
         JsonNode response_node = root.get("response");
 
         if (response_node == null || !response_node.get("status").asText().equals("OK")) {

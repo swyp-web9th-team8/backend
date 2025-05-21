@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.swyp.plogging.backend.common.exception.PostNotFoundException;
 import com.swyp.plogging.backend.common.exception.UnauthorizedUserException;
 import com.swyp.plogging.backend.common.service.LocationService;
+import com.swyp.plogging.backend.common.util.RoadAddressUtil;
+import com.swyp.plogging.backend.common.util.dto.Address;
 import com.swyp.plogging.backend.domain.Region;
 import com.swyp.plogging.backend.post.controller.dto.CreatePostRequest;
 import com.swyp.plogging.backend.post.controller.dto.PostDetailResponse;
@@ -28,8 +30,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,16 +37,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PostService {
-    // todo 별도 addressUtil 작성 필요
-    // 도로명 주소 구, 길, 번호 정규식 패턴
-    private final Pattern guGilNum = Pattern.compile("(\\S+구)\\s+(\\S*(?:대로|로|길))\\s+(\\d*)");
-    // 도로명 주소 길, 번호 정규식 패턴
-    private final Pattern gilNum = Pattern.compile("(\\S*(?:대로|로|길))\\s+(\\d*)");
-    // 미사용
-    private final Pattern guGilUnderNum = Pattern.compile("(\\S+구)\\s+(\\S*(?:대로|로|길))\\s+(지하)\\s+(\\d*)");
-    // 미사용
-    private final Pattern gilUnderNum = Pattern.compile("(\\S*(?:대로|로|길))\\s+(지하)\\s+(\\d*)");
-
     private final PostRepository postRepository;
     private final LocationService locationService;
     private final RegionService regionService;
@@ -64,47 +54,28 @@ public class PostService {
         if (maxParticipants <= 0) {
             throw new IllegalArgumentException("최대인원 설정이 잘못되었습니다.");
         }
-        // 도로명 주소 정규식 패턴 매칭
-        Matcher requestMatcher1 = guGilNum.matcher(address);
-        Matcher requestMatcher2 = gilNum.matcher(address);
-        String gu, gil, num; // 구, 길, 번호
-        if (requestMatcher1.find()) { // 구,길, 번호가 다 있는 경우
-            gu = requestMatcher1.group(1);
-            gil = requestMatcher1.group(2);
-            num = requestMatcher1.group(3);
-        } else if (requestMatcher2.find()) { // 길, 번호만 있는 경우
-            gu = null;
-            gil = requestMatcher2.group(1);
-            num = requestMatcher2.group(2);
-        } else {
-            throw new RuntimeException("잘못된 도로명주소 입니다.");
+
+        if(!RoadAddressUtil.isRoadAddress(address)){
+            throw new IllegalArgumentException("'OO구 OO대로(또는 '로' 또는 '길') 0' 형식으로 API 요청바랍니다.");
         }
+        Address a1 = RoadAddressUtil.getAddressObject(address);
 
         // 네이버 지도에서 도로명 주소로 위치를 검색 후 위도경도 입력
+        // 검색한 결과중 첫번째 선택
         List<Map<String, Object>> list = locationService.searchCoordinatesByAddress(address);
         Map<String, Object> location = list.stream().filter(
                         map -> {
+                            Address a2 = RoadAddressUtil.getAddressObject((CharSequence) map.get("roadAddress"));
                             // 새로 받아온 데이터가 적절한지 도로명 주소로 비교
-                            Matcher responseMatcher1 = guGilNum.matcher((CharSequence) map.get("roadAddress"));
-                            Matcher responseMatcher2 = gilNum.matcher((CharSequence) map.get("roadAddress"));
-                            if (gu != null && responseMatcher1.find()) {
-                                // 구, 길, 번호
-                                return responseMatcher1.group(1).equals(gu) &&
-                                        responseMatcher1.group(2).equals(gil) &&
-                                        responseMatcher1.group(3).equals(num);
-
-                            }else if(responseMatcher2.find()){
-                                // 길, 번호
-                                return responseMatcher2.group(1).equals(gil) &&
-                                        responseMatcher2.group(2).equals(num);
-                            }
-                            return false;
+                            return RoadAddressUtil.compareRoadAddress(a1, a2);
                         })
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("찾는 주소가 없습니다."));
+
+        // 위경도 추출
         Double latitude = (Double) location.get("latitude");
         Double longitude = (Double) location.get("longitude");
-
+        // 포인트 생성
         Point point = locationService.createPoint(longitude, latitude);
         if (point == null) {
             throw new RuntimeException("해당 주소의 지점을 생성할 수 없습니다.");
@@ -318,10 +289,24 @@ public class PostService {
         return findPostsByDistrictAndNeighborhood(pageable, position, keyword, user);
     }
 
-    public Page<PostInfoResponse> getListOfCompletePostInfo(Pageable pageable, boolean recruitmentCompleted,
+    public Page<PostInfoResponse> getListOfCompletePostInfo(Pageable pageable, String position, boolean recruitmentCompleted,
         boolean completed) {
+        Address addressObject = RoadAddressUtil.getAddressObject(position);
+        Optional<Region> opRegion = regionService.findByDistrictAndNeighborhood(addressObject.getDistrict(), addressObject.getNeighborhood());
+        if (opRegion.isEmpty()) {
+            throw new RuntimeException("해당 지역이 없습니다.");
+        }
+
+        Region region = opRegion.get();
+        MultiPolygon multiPolygon;
+        if (!region.hasPolygons()) {
+            multiPolygon = regionService.getAndSavePolygonOfRegion(region);
+        } else {
+            multiPolygon = region.getPolygons();
+        }
+
         // 모집만 완료한 모임 또는 모임을 완료한 모임 조회
-        Page<Post> posts = postRepository.findPostByCondition(pageable, recruitmentCompleted, completed);
+        Page<Post> posts = postRepository.findPostByCondition(multiPolygon, pageable, recruitmentCompleted, completed);
         List<PostInfoResponse> postList = posts.stream().map(post -> {
             if (post.isCompleted()) {
                 return new PostInfoResponse(post, post.getCertification());
@@ -354,9 +339,10 @@ public class PostService {
     @Transactional
     public Page<PostInfoResponse> findPostsByDistrictAndNeighborhood(Pageable pageable, String position, String
         keyword, AppUser user) throws JsonProcessingException {
+
         // 검색하고 싶은 지역 찾기
-        String[] regionFields = position.split(" ");
-        Optional<Region> opRegion = regionService.findByDistrictAndNeighborhood(regionFields[0], regionFields[1]);
+        Address address = RoadAddressUtil.getAddressObject(position);
+        Optional<Region> opRegion = regionService.findByDistrictAndNeighborhood(address.getDistrict(), address.getNeighborhood());
         if (opRegion.isEmpty()) {
             throw new RuntimeException("해당 지역이 없습니다.");
         }
