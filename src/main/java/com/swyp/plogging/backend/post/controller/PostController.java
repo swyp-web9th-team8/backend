@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,16 +26,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -184,23 +177,6 @@ public class PostController {
         }
     }
 
-    // 초기 모임목록 조회
-    @Operation(summary = "초기 모임목록 조회", description = "초기 API로 현재는 미사용")
-    @GetMapping("/list")
-    public ApiPagedResponse<PostInfoResponse> getListOfPosts(
-        @PageableDefault(size = 10, sort = "meetingTime", direction = Sort.Direction.DESC) Pageable pageable,
-        @RequestParam(name = "recruitmentCompleted", defaultValue = "false", required = false) Boolean recruitmentCompleted,
-        @RequestParam(name = "completed", defaultValue = "false", required = false) Boolean completed,
-        @AuthenticationPrincipal OAuth2User user) {
-        try {
-            Page<PostInfoResponse> response = postService.getListOfPostInfo(pageable, null, null, SecurityUtils.getUserOrThrow(user));
-
-            return ApiPagedResponse.ok(response, "Successfully fetched the list.");
-        } catch (Exception e) {
-            return ApiPagedResponse.error(e.getMessage());
-        }
-    }
-
     // 현재 모집중인 모임목록 조회
     @Operation(summary = "현재 모집 중인 모임목록 조회", description = "현재 모집중인 모임의 목록을 요약된 정보로 페이지네이션하여 조회합니다.")
     @Parameters({
@@ -228,7 +204,7 @@ public class PostController {
     // 현재 모집완료된 모임목록 조회
     @Operation(summary = "현재 모집만 완료된 모임목록 조회", description = "현재 모집만 완료된 모임의 목록을 요약된 정보로 페이지네이션하여 조회합니다.")
     @Parameters({
-        @Parameter(name = "pos", description = "도로명 주소", in = ParameterIn.QUERY, required = true),
+        @Parameter(name = "pos", description = "서울특별시 OO구 OO동", in = ParameterIn.QUERY, required = true),
         @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", in = ParameterIn.QUERY, example = "0"),
         @Parameter(name = "size", description = "한 페이지 크기", in = ParameterIn.QUERY, example = "10"),
         @Parameter(name = "sort", description = "정렬 기준 필드,asc|desc (예: meetingDt,desc)", in = ParameterIn.QUERY, example = "meetingDt,desc")
@@ -238,7 +214,7 @@ public class PostController {
         @RequestParam(required = true, name = "pos") String position,
         @PageableDefault(size = 10, sort = "meetingDt", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
-            Page<PostInfoResponse> response = postService.getListOfCompletePostInfo(pageable, true, false);
+            Page<PostInfoResponse> response = postService.getListOfCompletePostInfo(pageable, position,true, false);
 
             return ApiPagedResponse.ok(response, "Successfully fetched the list.");
         } catch (Exception e) {
@@ -248,15 +224,17 @@ public class PostController {
 
     @Operation(summary = "현재 모임이 완료된 모임목록 조회", description = "현재 모임이 완료된 모임의 목록을 요약된 정보로 페이지네이션하여 조회합니다.")
     @Parameters({
+            @Parameter(name = "pos", description = "서울특별시 OO구 OO동", in = ParameterIn.QUERY, required = true),
         @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", in = ParameterIn.QUERY, example = "0"),
         @Parameter(name = "size", description = "한 페이지 크기", in = ParameterIn.QUERY, example = "10"),
         @Parameter(name = "sort", description = "정렬 기준 필드,asc|desc (예: meetingDt,desc)", in = ParameterIn.QUERY, example = "meetingDt,desc")
     })
     @GetMapping("/list/com")
     public ApiPagedResponse<PostInfoResponse> getListOfCompletePosts(
+            @RequestParam(name = "pos") String position,
         @PageableDefault(size = 10, sort = "meetingDt", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
-            Page<PostInfoResponse> response = postService.getListOfCompletePostInfo(pageable, false, true);
+            Page<PostInfoResponse> response = postService.getListOfCompletePostInfo(pageable, position, false, true);
 
             return ApiPagedResponse.ok(response, "Successfully fetched the list.");
         } catch (Exception e) {
