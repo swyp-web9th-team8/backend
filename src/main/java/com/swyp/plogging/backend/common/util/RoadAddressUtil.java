@@ -35,19 +35,19 @@ public class RoadAddressUtil {
 
     public static Address getAddressObject(String address) {
         if (!isRoadAddress(address)) {
-            return new JibunAddress(matcher.group(0), matcher.group(1), matcher.group(2));
+            return new JibunAddress(matcher.group(1), matcher.group(2), matcher.group(3));
         }
         // 여기서부터 도로명주소 매쳐
         if (matcher.groupCount() < 3) {
-            return new RoadAddress(null, null, matcher.group(0), false, Integer.parseInt(matcher.group(1)));
-        }
-        if (matcher.group(1).equals("지하")) {
-            return new RoadAddress(null, null, matcher.group(0), true, Integer.parseInt(matcher.group(1)));
+            return new RoadAddress(null, null, matcher.group(1), false, Integer.parseInt(matcher.group(2)));
         }
         if (matcher.group(2).equals("지하")) {
-            return new RoadAddress(null, matcher.group(0), matcher.group(1), true, Integer.parseInt(matcher.group(2)));
+            return new RoadAddress(null, null, matcher.group(1), true, Integer.parseInt(matcher.group(2)));
         }
-        return new RoadAddress(null, matcher.group(0), matcher.group(1), false, Integer.parseInt(matcher.group(2)));
+        if (matcher.group(3).equals("지하")) {
+            return new RoadAddress(null, matcher.group(1), matcher.group(2), true, Integer.parseInt(matcher.group(3)));
+        }
+        return new RoadAddress(null, matcher.group(1), matcher.group(2), false, Integer.parseInt(matcher.group(3)));
     }
 
     public static Address getAddressObject(CharSequence address) {
