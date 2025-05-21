@@ -58,8 +58,12 @@ public class RoadAddressUtil {
         matcher = gibunAddressPattern.matcher(address);
         if (!matcher.find()) {
             // 도로명주소다.
-            matcher = patterns.stream().map(pattern -> pattern.matcher(address)).filter(Matcher::find).findFirst().orElseThrow(() -> new RuntimeException("일치하는 도로명 주소 패턴이 없습니다."));
-            return true;
+            for(Pattern pattern : patterns){
+                matcher = pattern.matcher(address);
+                if(matcher.find()){
+                    return true;
+                }
+            }
         } else if (matcher.find()) {
             // 지번주소다.
             return false;
