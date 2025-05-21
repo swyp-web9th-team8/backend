@@ -58,27 +58,26 @@ public class RoadAddressUtil {
         matcher = gibunAddressPattern.matcher(address);
         if (!matcher.find()) {
             // 도로명주소다.
-            for(Pattern pattern : patterns){
+            for (Pattern pattern : patterns) {
                 matcher = pattern.matcher(address);
-                if(matcher.find()){
+                if (matcher.find()) {
                     return true;
                 }
             }
-        } else if (matcher.find()) {
-            // 지번주소다.
-            return false;
+            throw new RuntimeException("올바른 주소 형식이 아닙니다.");
         }
-        throw new RuntimeException("올바른 주소 형식이 아닙니다.");
+        // 지번주소다.
+        return false;
     }
 
     public static boolean compareRoadAddress(Address a1, Address a2) {
         // 뒤에서 부터 확인
         // 길번호 확인
-        if(a1.getGilNum() != null && a1.getGilNum().equals(a2.getGilNum())){
+        if (a1.getGilNum() != null && a1.getGilNum().equals(a2.getGilNum())) {
             // 길 확인, 여기까지 같다면 임시 통과
-            if(a1.getGil() != null && a1.getGil().equals(a2.getGil())){
+            if (a1.getGil() != null && a1.getGil().equals(a2.getGil())) {
                 // 마지막으로 구 확인
-                if(a1.getDistrict() != null && a2.getDistrict() != null){
+                if (a1.getDistrict() != null && a2.getDistrict() != null) {
                     return a1.getDistrict().equals(a2.getDistrict());
                 }
                 // 구가 null이라면 통과
