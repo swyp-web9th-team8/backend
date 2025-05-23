@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 @Component
 public class RoadAddressUtil {
     private static final List<Pattern> patterns = new ArrayList<>();
-    private static final Pattern gibunAddressPattern = Pattern.compile("(\\S+구)\\s+(\\S+동)");
+    private static final Pattern gibunAddressPattern = Pattern.compile("(\\S+시)\\s+(\\S+구)\\s+(\\S+동)");
     private static Matcher matcher;
 
     @PostConstruct
