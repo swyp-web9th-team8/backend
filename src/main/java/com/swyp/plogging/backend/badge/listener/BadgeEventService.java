@@ -26,15 +26,13 @@ public class BadgeEventService {
     @Transactional
     public void awardBadgeToUser(CompletePostEvent event){
         Long count = postService.getCountCompletedPostByWriter(event.getAppUser());
-        log.info("현재 완료한 모임 개수: {}", count);
         List<UserBadge> userBadges = userBadgeRepository.findByUser(event.getAppUser());
 
         List<Badge> badges = badgeRepository.findByRequiredActivitiesForBadgeLessThanEqual(count.intValue());
-        log.info("활성화 할 수 있는 뱃지 개수 {}", badges.size());
         for(Badge badge : badges){
-            log.info("활성화 할 수 있는 뱃지 {}", badge.getDescription());
             // 첫 베지는 그냥 넣기
             if(userBadges.isEmpty()){
+                log.info("유저 뱃지 생성");
                 userBadgeRepository.save(UserBadge.newInstance(event.getAppUser(),badge));
             }
 
