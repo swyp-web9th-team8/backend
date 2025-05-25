@@ -17,10 +17,31 @@ public class BasicAddress implements Address {
 
     @Override
     public String getFullName() {
-        if (!isRoadAddress()) {
-            return String.format("%s %s %s", si, district, neighborhood);
+        String siName = si;
+        if(siName == null){
+            siName = "";
         }
-        return String.format("%s %s %s %d", si, district, gil, gilNum);
+        String districtName = district;
+        if(districtName == null){
+            districtName = "";
+        }
+        String neighborhoodName = neighborhood;
+        if(neighborhoodName == null){
+            neighborhoodName = "";
+        }
+        String gilName = gil;
+        if(gilName == null){
+            gilName = "";
+        }
+        Integer gilNumName = gilNum;
+        if(gilNumName == null){
+            gilNumName = 0;
+        }
+
+        if (!isRoadAddress()) {
+            return String.format("%s %s %s", siName, districtName, neighborhoodName).strip().trim();
+        }
+        return String.format("%s %s %s %d", siName, districtName, gilName, gilNumName).strip().trim();
     }
 
     @Override
