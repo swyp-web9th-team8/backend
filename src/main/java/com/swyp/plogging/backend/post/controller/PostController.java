@@ -290,6 +290,7 @@ public class PostController {
         @RequestBody CertificationRequest request) {
         try {
             PostInfoResponse response = certificateService.certificate(postId, SecurityUtils.getUserOrThrow(user), request.getUserIds());
+            eventPublisher.publishEvent(new CompletePostEvent(SecurityUtils.getUserOrThrow(user)));
             return ApiResponse.ok(null, "Successfully certificate the post.");
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());
@@ -308,7 +309,6 @@ public class PostController {
         @AuthenticationPrincipal OAuth2User user) {
         try {
             certificateService.cancelCertificate(postId, SecurityUtils.getUserOrThrow(user));
-            eventPublisher.publishEvent(new CompletePostEvent(SecurityUtils.getUserOrThrow(user)));
             return ApiResponse.ok(null, "Successfully cancel certification.");
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());

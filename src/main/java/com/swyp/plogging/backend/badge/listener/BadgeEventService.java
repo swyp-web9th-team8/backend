@@ -33,6 +33,12 @@ public class BadgeEventService {
         log.info("활성화 할 수 있는 뱃지 개수 {}", badges.size());
         for(Badge badge : badges){
             log.info("활성화 할 수 있는 뱃지 {}", badge.getDescription());
+            // 첫 베지는 그냥 넣기
+            if(userBadges.isEmpty()){
+                userBadgeRepository.save(UserBadge.newInstance(event.getAppUser(),badge));
+            }
+
+            // 같은 베지가 있는지 확인하고 없으면 넣기
             for(UserBadge userBadge : userBadges){
                 if(badge.getId().equals(userBadge.getBadge().getId())){
                     continue;
