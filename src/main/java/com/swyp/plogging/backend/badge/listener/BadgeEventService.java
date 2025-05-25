@@ -28,23 +28,21 @@ public class BadgeEventService {
         Long count = postService.getCountCompletedPostByWriter(event.getAppUser());
         List<UserBadge> userBadges = userBadgeRepository.findByUser(event.getAppUser());
 
+        // 만들 수 있는 뱃지 다 가져오기
         List<Badge> badges = badgeRepository.findByRequiredActivitiesForBadgeLessThanEqual(count.intValue());
-        for(Badge badge : badges){
-            // 첫 베지는 그냥 넣기
-            if(userBadges.isEmpty()){
-                log.info("유저 뱃지 생성");
-                userBadgeRepository.save(UserBadge.newInstance(event.getAppUser(),badge));
+        // 비어 있다면 그냥 다 넣기
+        if(userBadges.isEmpty()){
+            for(Badge badge : badges){
+                UserBadge ub = userBadgeRepository.save(UserBadge.newInstance(event.getAppUser(),badge));
+                badge.getUserBadges().add(ub);
             }
-
-            // 같은 베지가 있는지 확인하고 없으면 넣기
-            for(UserBadge userBadge : userBadges){
-                if(badge.getId().equals(userBadge.getBadge().getId())){
-                    continue;
-                }
-                // 얻을 수 있는 벳지중 없는게 있다면 저장
-                log.info("유저 뱃지 생성");
-                userBadgeRepository.save(UserBadge.newInstance(event.getAppUser(),badge));
-            }
+        }else if(userBadges.size() < badges.size()) {
+            List<Badge> awardedBadges = userBadges.stream().map(UserBadge::getBadge).toList();
+            badges.stream().filter(badge -> !awardedBadges.contains(badge))
+                    .forEach(badge -> {
+                        UserBadge ub = userBadgeRepository.save(UserBadge.newInstance(event.getAppUser(), badge));
+                        badge.getUserBadges().add(ub);
+                    });
         }
     }
 }
