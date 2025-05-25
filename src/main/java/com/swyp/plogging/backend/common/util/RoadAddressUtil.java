@@ -20,16 +20,16 @@ public class RoadAddressUtil {
     @PostConstruct
     public void init() {
         // 도로명주소 길, 번호 정규식 패턴
-        Pattern gilNum = Pattern.compile("(\\S*(?:대로|로|길)\\b)\\s+(\\d*)");
+        Pattern gilNum = Pattern.compile("(\\S*(?:대로|로|길)\\b)\\s+(\\d+)");
         patterns.add(gilNum);
         // 도로명주소 길 지하 번호 정규식 패턴
-        Pattern gilUnderNum = Pattern.compile("(\\S*(?:대로|로|길)\\b)\\s+(지하\\b)\\s+(\\d*)");
+        Pattern gilUnderNum = Pattern.compile("(\\S*(?:대로|로|길)\\b)\\s+(지하\\b)\\s+(\\d+)");
         patterns.add(gilUnderNum);
         // 도로명주소 구, 길, 번호 정규식 패턴
-        Pattern guGilNum = Pattern.compile("(\\S+구\\b)\\s+(\\S*(?:대로|로|길)\\b)\\s+(\\d*)");
+        Pattern guGilNum = Pattern.compile("(\\S+구\\b)\\s+(\\S*(?:대로|로|길)\\b)\\s+(\\d+)");
         patterns.add(guGilNum);
         // 도롤명주소 구 길 지하 번호 정규식 패턴
-        Pattern guGilUnderNum = Pattern.compile("(\\S+구\\b)\\s+(\\S*(?:대로|로|길)\\b)\\s+(지하\\b)\\s+(\\d*)");
+        Pattern guGilUnderNum = Pattern.compile("(\\S+구\\b)\\s+(\\S*(?:대로|로|길)\\b)\\s+(지하\\b)\\s+(\\d+)");
         patterns.add(guGilUnderNum);
     }
 
@@ -63,16 +63,16 @@ public class RoadAddressUtil {
             for (Pattern pattern : patterns) {
                 matcher = pattern.matcher(address);
                 if (matcher.find()) {
-                    if(bestGroupCount <= matcher.groupCount()){
+                    int matchCount = matcher.groupCount();
+                    if(bestGroupCount <= matchCount){
                         bestPattern = pattern;
-                        bestGroupCount = matcher.groupCount();
+                        bestGroupCount = matchCount;
                     }
                 }
             }
             if(bestPattern == null){
                 throw new RuntimeException("올바른 주소 형식이 아닙니다.");
             }
-
             matcher = bestPattern.matcher(address);
             return matcher.find();
         }
