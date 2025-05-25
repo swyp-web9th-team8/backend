@@ -61,7 +61,7 @@ public class PostService {
 
         // 네이버 지도에서 도로명 주소로 위치를 검색 후 위도경도 입력
         // 검색한 결과중 첫번째 선택
-        List<Map<String, Object>> list = locationService.searchCoordinatesByAddress(address);
+        List<Map<String, Object>> list = locationService.searchCoordinatesByAddress(a1.getFullName());
         Map<String, Object> location = list.stream().filter(
                         map -> {
                             Address a2 = RoadAddressUtil.getAddressObject((CharSequence) map.get("roadAddress"));
