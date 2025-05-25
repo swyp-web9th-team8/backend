@@ -12,6 +12,7 @@ import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.sevice.PostService;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CertificationService {
@@ -87,6 +89,7 @@ public class CertificationService {
         }
 
         myPost.complete();
+        log.info("---인증완료 {} : postId = {}",user.getId(), myPost.getId());
         return new PostInfoResponse(myPost, certification);
     }
 
