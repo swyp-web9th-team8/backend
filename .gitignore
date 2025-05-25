@@ -146,3 +146,4 @@ replay_pid*
 
 # 도커를 사용하므로 윈도우 빌드는 불필요
 gradlew.bat
+/uploads

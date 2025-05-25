@@ -30,4 +30,11 @@ public class UserBadge extends BaseTimeEntity {
     private Badge badge;
 
     private String grantedReason;
+
+    public static UserBadge newInstance(AppUser user, Badge badge) {
+        UserBadge userBadge = new UserBadge();
+        userBadge.user = user;
+        userBadge.badge = badge;
+        return userBadge;
+    }
 }

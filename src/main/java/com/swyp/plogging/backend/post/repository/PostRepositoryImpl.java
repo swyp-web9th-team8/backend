@@ -44,11 +44,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         BooleanBuilder postCondition = new BooleanBuilder();
 
         // 지역 조건 검색
-        postCondition.and(Expressions.booleanTemplate(
-                "ST_Contains({0},{1})",
-                regionPolygons,
-                post.location
-        ));
+        if(regionPolygons != null) {
+            postCondition.and(Expressions.booleanTemplate(
+                    "ST_Contains({0},{1})",
+                    regionPolygons,
+                    post.location
+            ));
+        }
 
         // completed 조건 추가
         postCondition.and(post.completed.eq(completed));

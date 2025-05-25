@@ -1,5 +1,6 @@
 package com.swyp.plogging.backend.post.controller;
 
+import com.swyp.plogging.backend.badge.event.CompletePostEvent;
 import com.swyp.plogging.backend.certificate.dto.CertificationRequest;
 import com.swyp.plogging.backend.certificate.service.CertificationService;
 import com.swyp.plogging.backend.common.dto.ApiPagedResponse;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -40,6 +42,7 @@ public class PostController {
     private final PostService postService;
     private final ParticipationService participationService;
     private final CertificationService certificateService;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 기존 API 엔드포인트 유지
     @Operation(
@@ -224,14 +227,14 @@ public class PostController {
 
     @Operation(summary = "현재 모임이 완료된 모임목록 조회", description = "현재 모임이 완료된 모임의 목록을 요약된 정보로 페이지네이션하여 조회합니다.")
     @Parameters({
-            @Parameter(name = "pos", description = "서울특별시 OO구 OO동", in = ParameterIn.QUERY, required = true),
+            @Parameter(name = "pos", description = "서울특별시 OO구 OO동", in = ParameterIn.QUERY, required = false),
         @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", in = ParameterIn.QUERY, example = "0"),
         @Parameter(name = "size", description = "한 페이지 크기", in = ParameterIn.QUERY, example = "10"),
         @Parameter(name = "sort", description = "정렬 기준 필드,asc|desc (예: meetingDt,desc)", in = ParameterIn.QUERY, example = "meetingDt,desc")
     })
     @GetMapping("/list/com")
     public ApiPagedResponse<PostInfoResponse> getListOfCompletePosts(
-            @RequestParam(name = "pos") String position,
+            @RequestParam(name = "pos", defaultValue = "") String position,
         @PageableDefault(size = 10, sort = "meetingDt", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
             Page<PostInfoResponse> response = postService.getListOfCompletePostInfo(pageable, position, false, true);
@@ -287,6 +290,7 @@ public class PostController {
         @RequestBody CertificationRequest request) {
         try {
             PostInfoResponse response = certificateService.certificate(postId, SecurityUtils.getUserOrThrow(user), request.getUserIds());
+            eventPublisher.publishEvent(new CompletePostEvent(SecurityUtils.getUserOrThrow(user)));
             return ApiResponse.ok(null, "Successfully certificate the post.");
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());
