@@ -148,11 +148,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     log.debug("사용자 닉네임 업데이트: {} -> {}", existingUser.getNickname(), name);
                 }
 
-                // 프로필 이미지가 변경되었으면 업데이트
-                if (pictureUrl != null && !pictureUrl.equals(existingUser.getProfileImageUrl())) {
+                // 프로필 이미지 업데이트하지 않음 - 사용자가 직접 변경한 이미지 유지
+                // 로그인 시마다 OAuth 제공자의 이미지로 덮어쓰지 않도록 수정
+                if (pictureUrl != null && existingUser.getProfileImageUrl() == null) {
+                    // 프로필 이미지가 아직 없는 경우에만 설정
                     existingUser.updateProfileImageUrl(pictureUrl);
                     updated = true;
-                    log.debug("사용자 프로필 이미지 업데이트: {}", pictureUrl);
+                    log.debug("초기 프로필 이미지 설정: {}", pictureUrl);
                 }
 
                 // 변경사항이 있으면 저장
