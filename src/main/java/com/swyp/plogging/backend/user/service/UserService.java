@@ -173,7 +173,7 @@ public class UserService {
     private int calculateRemainingActionsForNextBadge(AppUser user, UserBadge latestUserBadge) {
         int highestBadgeRequiredActivities = 40;
         int necessaryActivitiesForNextBadge = 10;
-        int totalMeeting = user.getTotalMeeting();
+        int totalMeeting = user.getCertificatedMeeting();
 
         if (latestUserBadge == null) {
             return totalMeeting - necessaryActivitiesForNextBadge;

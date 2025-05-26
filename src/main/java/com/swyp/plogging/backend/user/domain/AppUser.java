@@ -4,7 +4,14 @@ import com.swyp.plogging.backend.domain.Region;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
 import com.swyp.plogging.backend.participation.domain.Participation;
 import com.swyp.plogging.backend.post.domain.Post;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -76,14 +83,15 @@ public class AppUser extends BaseEntity {
     }
 
     // 신규 메서드 - Region 엔티티를 직접 사용
-    public static AppUser newInstanceWithRegion(String email, String nickname, Region region, AuthProvider authProvider, String profileImageUrl) {
+    public static AppUser newInstanceWithRegion(String email, String nickname, Region region, AuthProvider authProvider,
+        String profileImageUrl) {
         // 먼저 문자열 region을 포함한 사용자 생성
         AppUser user = newInstance(
-                email,
-                nickname,
-                formatRegionString(region),
-                authProvider,
-                profileImageUrl
+            email,
+            nickname,
+            formatRegionString(region),
+            authProvider,
+            profileImageUrl
         );
 
         // UserRegion 엔티티 생성 및 연결
@@ -136,6 +144,17 @@ public class AppUser extends BaseEntity {
         return writtenPosts.size() + participations.size();
     }
 
+    public int getCertificatedMeeting() {
+        int certificatedWrittenPostCount = (int) writtenPosts.stream()
+            .filter(Post::isCertified)
+            .count();
+        int certificatedParticipationPostCount = (int) participations.stream()
+            .filter(participation -> participation.getPost().isCertified())
+            .count();
+
+        return certificatedWrittenPostCount + certificatedParticipationPostCount;
+    }
+
     // 사용자 정보 업데이트 메서드
     public void update(String nickname, String region, String profileImageUrl) {
         this.nickname = nickname;
@@ -159,8 +178,8 @@ public class AppUser extends BaseEntity {
         if (isPrimary) {
             // 다른 모든 지역을 기본이 아닌 것으로 설정
             userRegions.stream()
-                    .filter(ur -> ur.getRegion() != region)
-                    .forEach(UserRegion::unsetPrimary);
+                .filter(ur -> ur.getRegion() != region)
+                .forEach(UserRegion::unsetPrimary);
 
             // region 문자열 필드 업데이트 (호환성)
             this.region = formatRegionString(region);
@@ -170,9 +189,9 @@ public class AppUser extends BaseEntity {
     // 새로운 메서드: 기본 지역 가져오기
     public UserRegion getPrimaryRegion() {
         return userRegions.stream()
-                .filter(UserRegion::isPrimary)
-                .findFirst()
-                .orElse(null);
+            .filter(UserRegion::isPrimary)
+            .findFirst()
+            .orElse(null);
     }
 
     // 기존 updateRegion 메서드 오버로드 - Region 객체 사용
