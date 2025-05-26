@@ -181,11 +181,12 @@ public class UserService {
 
         int latestBadgeRequiredActivities = latestUserBadge.getBadge().getRequiredActivitiesForBadge();
         int nextBadgeNum = latestBadgeRequiredActivities + necessaryActivitiesForNextBadge;
-        if (nextBadgeNum >= highestBadgeRequiredActivities) {
+
+        if (totalMeeting >= highestBadgeRequiredActivities) {
             return 0;
         }
 
-        return nextBadgeNum - totalMeeting;
+        return totalMeeting - nextBadgeNum;
     }
 
     public List<RankingResponse> getWeeklyRankings() {
