@@ -28,8 +28,12 @@ public class BadgeEventService {
         Long count = postService.getCountCompletedPostByWriter(event.getAppUser());
         List<UserBadge> userBadges = userBadgeRepository.findByUser(event.getAppUser());
 
-        // 만들 수 있는 뱃지 다 가져오기
-        List<Badge> badges = badgeRepository.findByRequiredActivitiesForBadgeLessThanEqual(count.intValue());
+        // 만들 수 있는 활성 뱃지 다 가져오기
+        List<Badge> badges = badgeRepository.findByRequiredActivitiesForBadgeLessThanEqualOrderByRequiredActivitiesForBadgeAsc(count.intValue())
+                .stream()
+                .filter(badge -> badge.getInactiveBadgeIconDir().isBlank())
+                .toList();
+
         // 비어 있다면 그냥 다 넣기
         if(userBadges.isEmpty()){
             for(Badge badge : badges){
