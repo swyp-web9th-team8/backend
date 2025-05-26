@@ -100,7 +100,7 @@ public class UserController {
     }
 
     @GetMapping("/created-posts")
-    public ApiPagedResponse<MyPostResponse> fetchCreatedPsotsOfUser(@AuthenticationPrincipal OAuth2User principal,
+    public ApiPagedResponse<MyPostResponse> fetchCreatedPostsOfUser(@AuthenticationPrincipal OAuth2User principal,
         @PageableDefault Pageable pageable) {
         Long currentUserId = SecurityUtils.getUserId(principal);
         Page<MyPostResponse> createdPosts = participationService.getCreatedPosts(currentUserId, pageable);

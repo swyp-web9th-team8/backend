@@ -55,7 +55,7 @@ public class ParticipationRepositoryImpl implements ParticipationRepositoryCusto
         BooleanExpression isCreatedByUser = post.writer.id.eq(userId);
 
         List<MyPostResponse> content = queryFactory
-            .select(new QMyPostResponse(post.id, post.title, post.placeName, post.meetingDt, post.completed))
+            .select(new QMyPostResponse(post.id, post.title, post.address, post.meetingDt, post.completed))
             .from(post)
             .where(isCreatedByUser)
             .offset(pageable.getOffset())
