@@ -26,7 +26,7 @@ public class ParticipationRepositoryImpl implements ParticipationRepositoryCusto
             .and(participation.joined.isTrue());
 
         List<MyPostResponse> content = queryFactory
-            .select(new QMyPostResponse(post.id, post.title, post.placeName, post.meetingDt, post.completed))
+            .select(new QMyPostResponse(post.id, post.title, post.address, post.meetingDt, post.completed))
             .from(participation)
             .join(participation.post, post)
             .where(isParticipated)
