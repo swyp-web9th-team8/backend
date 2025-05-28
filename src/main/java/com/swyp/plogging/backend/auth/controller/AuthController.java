@@ -372,10 +372,11 @@ public class AuthController {
 
     @Operation(summary = "회원탈퇴 기능", description = "회원탈퇴를 진행하면 소셜로그인만 끊고 사용자의 계정을 inactive로 전환")
     @PostMapping("/withdraw")
-    public ResponseEntity<?> withdrawUser(@AuthenticationPrincipal OAuth2User oAuth2User){
+    public ResponseEntity<?> withdrawUser(@AuthenticationPrincipal OAuth2User oAuth2User,
+                                          HttpServletRequest request, HttpServletResponse response){
         AppUser user = SecurityUtils.getUserOrThrow(oAuth2User);
         try{
-            if(authService.unlink(user)) return ResponseEntity.ok("Success withdraw" + user.getAuthProvider() +" account");
+            if(authService.unlink(user)) return logout(request, response);
             return ResponseEntity.badRequest().body("fail to withdraw account");
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
