@@ -334,7 +334,10 @@ public class PostService {
             Pageable pageable, String position, String keyword, AppUser user) {
 
         Page<Post> posts = postRepository.findPostByRegion(getMultiPolygon(position), pageable, keyword);
-        List<PostInfoResponse> postList = posts.stream().map(post -> new PostInfoResponse(post, user)).toList();
+        List<PostInfoResponse> postList = posts.stream()
+                .filter(post -> !post.isMax())
+                .filter(post -> post.getDeadLine().isAfter(LocalDateTime.now()))
+                .map(post -> new PostInfoResponse(post, user)).toList();
 
         return new PageImpl<>(postList, pageable, posts.getTotalElements());
     }
