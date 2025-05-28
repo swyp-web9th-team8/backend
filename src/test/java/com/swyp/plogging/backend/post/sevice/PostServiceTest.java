@@ -197,6 +197,7 @@ public class PostServiceTest {
                 .maxParticipants(10)
                 .openChatUrl("https://open.kakao.com/몰라")
                 .build();
+            post.setUpDeadLine(30);
             givenList.add(post);
         }
         Region region = new Region("서울특별시", "강남구", "역삼동", "1111");
