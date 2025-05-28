@@ -3,6 +3,7 @@ package com.swyp.plogging.backend.auth.controller;
 import com.swyp.plogging.backend.auth.controller.dto.*;
 import com.swyp.plogging.backend.auth.domain.CustomOAuth2User;
 import com.swyp.plogging.backend.auth.service.AuthService;
+import com.swyp.plogging.backend.common.util.SecurityUtils;
 import com.swyp.plogging.backend.domain.Region;
 import com.swyp.plogging.backend.post.repository.RegionRepository;
 import com.swyp.plogging.backend.user.domain.AppUser;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -366,5 +368,16 @@ public class AuthController {
         }
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Logged out successfully"));
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<?> withdrawUser(@AuthenticationPrincipal OAuth2User oAuth2User){
+        AppUser user = SecurityUtils.getUserOrThrow(oAuth2User);
+        try{
+            authService.unlink(user);
+            return ResponseEntity.ok("Success withdraw" + user.getAuthProvider() +" account");
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
