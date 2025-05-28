@@ -370,6 +370,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Logged out successfully"));
     }
 
+    @Operation(summary = "회원탈퇴 기능", description = "회원탈퇴를 진행하면 소셜로그인만 끊고 사용자의 계정을 inactive로 전환")
     @PostMapping("/withdraw")
     public ResponseEntity<?> withdrawUser(@AuthenticationPrincipal OAuth2User oAuth2User){
         AppUser user = SecurityUtils.getUserOrThrow(oAuth2User);
