@@ -4,20 +4,14 @@ import com.swyp.plogging.backend.domain.Region;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
 import com.swyp.plogging.backend.participation.domain.Participation;
 import com.swyp.plogging.backend.post.domain.Post;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -55,6 +49,8 @@ public class AppUser extends BaseEntity {
     private String profileImageUrl;
 
     private int score;
+    // 정지여부 필드
+    private boolean activeUser = true;
 
     @OneToMany(mappedBy = "writer")
     private List<Post> writtenPosts = new ArrayList<>();
@@ -224,5 +220,9 @@ public class AppUser extends BaseEntity {
 
         // 새 지역 추가
         addRegion(region, true);
+    }
+
+    public void inActive() {
+        this.activeUser = false;
     }
 }
