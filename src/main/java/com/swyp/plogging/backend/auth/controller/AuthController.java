@@ -375,8 +375,8 @@ public class AuthController {
     public ResponseEntity<?> withdrawUser(@AuthenticationPrincipal OAuth2User oAuth2User){
         AppUser user = SecurityUtils.getUserOrThrow(oAuth2User);
         try{
-            authService.unlink(user);
-            return ResponseEntity.ok("Success withdraw" + user.getAuthProvider() +" account");
+            if(authService.unlink(user)) return ResponseEntity.ok("Success withdraw" + user.getAuthProvider() +" account");
+            return ResponseEntity.badRequest().body("fail to withdraw account");
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
