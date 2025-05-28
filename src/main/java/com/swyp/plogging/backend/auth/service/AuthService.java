@@ -8,6 +8,7 @@ import com.swyp.plogging.backend.user.domain.AppUser;
 import com.swyp.plogging.backend.user.domain.AuthProvider;
 import com.swyp.plogging.backend.user.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -18,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -52,6 +54,9 @@ public class AuthService {
         AuthProvider provider = user.getAuthProvider();
         OAuth2AuthorizedClient client = oAuth2AuthorizedClientService.loadAuthorizedClient(provider.toString().toLowerCase(), String.valueOf(user.getId()));
         String token = client.getAccessToken().getTokenValue();
+
+        log.info("------현재 탈퇴 진행중인 계정: {}, 플랫폼: {}", user.getEmail(), provider);
+
         if (provider.equals(AuthProvider.KAKAO)) {
             return unlinkFromKakao(token);
         } else {
@@ -73,6 +78,7 @@ public class AuthService {
 
         if (response.getStatusCode().is2xxSuccessful()) {
             try {
+                log.info("---카카오 연결해제 성공---");
                 Map body = objectMapper.readValue(response.getBody(), Map.class);
                 String kakaoId = body.get("id").toString();
                 String email = "kakao_" + kakaoId + "@placeholder.com";
@@ -99,6 +105,7 @@ public class AuthService {
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
+            log.info("---구글 연결해제 성공---");
             AppUser inActiveUser = appUserRepository.findByEmail(user.getEmail()).orElseThrow(() -> new RuntimeException("일치하는 사용자가 없습니다."));
             inActiveUser.inActive();
             return true;
