@@ -1,5 +1,6 @@
 package com.swyp.plogging.backend.user.domain;
 
+import com.swyp.plogging.backend.common.exception.UserFCMTokenNotFoundException;
 import com.swyp.plogging.backend.domain.Region;
 import com.swyp.plogging.backend.domain.base.BaseEntity;
 import com.swyp.plogging.backend.participation.domain.Participation;
@@ -51,6 +52,8 @@ public class AppUser extends BaseEntity {
     private int score;
     // 정지여부 필드
     private boolean activeUser = true;
+    //fcm token
+    private String fcmToken;
 
     @OneToMany(mappedBy = "writer")
     private List<Post> writtenPosts = new ArrayList<>();
@@ -224,5 +227,16 @@ public class AppUser extends BaseEntity {
 
     public void inActive() {
         this.activeUser = false;
+    }
+
+    public void setFcmToken(String token){
+        this.fcmToken = token;
+    }
+
+    public String getFcmToken(){
+        if(this.fcmToken == null || this.fcmToken.isBlank()){
+            throw new UserFCMTokenNotFoundException();
+        }
+        return this.fcmToken;
     }
 }

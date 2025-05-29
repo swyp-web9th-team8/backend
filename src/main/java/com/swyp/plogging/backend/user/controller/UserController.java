@@ -6,18 +6,9 @@ import com.swyp.plogging.backend.common.util.SecurityUtils;
 import com.swyp.plogging.backend.participation.dto.MyPostResponse;
 import com.swyp.plogging.backend.participation.service.ParticipationService;
 import com.swyp.plogging.backend.post.sevice.PostService;
-import com.swyp.plogging.backend.user.controller.dto.EditableProfileResponse;
-import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
-import com.swyp.plogging.backend.user.controller.dto.UpdateNicknameRequest;
-import com.swyp.plogging.backend.user.controller.dto.UpdatePhoneNumRequest;
-import com.swyp.plogging.backend.user.controller.dto.UpdateRegionRequest;
-import com.swyp.plogging.backend.user.controller.dto.UserBadgesResponse;
-import com.swyp.plogging.backend.user.controller.dto.UserRegionRequest;
-import com.swyp.plogging.backend.user.controller.dto.UserRegionResponse;
+import com.swyp.plogging.backend.user.controller.dto.*;
 import com.swyp.plogging.backend.user.domain.UserRegion;
 import com.swyp.plogging.backend.user.service.UserService;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,16 +16,11 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -196,5 +182,13 @@ public class UserController {
         Long currentUserId = SecurityUtils.getUserId(principal);
         List<Long> completedPostIds = postService.getCompletedPostIds(currentUserId);
         return ApiResponse.ok(completedPostIds, "Completed postIds fetched successfully!");
+    }
+
+    @PostMapping("/fcm")
+    public ApiResponse<Object> setFCMToken(@AuthenticationPrincipal OAuth2User principal,
+                                           @RequestBody String token){
+        Long currentUserId = SecurityUtils.getUserId(principal);
+        userService.setFCMToken(currentUserId, token);
+        return ApiResponse.ok(currentUserId, "Complete to set FCM Token successfully!");
     }
 }

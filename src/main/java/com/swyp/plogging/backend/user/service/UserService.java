@@ -7,31 +7,24 @@ import com.swyp.plogging.backend.common.util.DateUtils;
 import com.swyp.plogging.backend.domain.Region;
 import com.swyp.plogging.backend.post.repository.RegionRepository;
 import com.swyp.plogging.backend.rank.controller.dto.RankingResponse;
-import com.swyp.plogging.backend.user.controller.dto.EditableProfileResponse;
-import com.swyp.plogging.backend.user.controller.dto.ProfileResponse;
-import com.swyp.plogging.backend.user.controller.dto.UpdateNicknameRequest;
-import com.swyp.plogging.backend.user.controller.dto.UpdatePhoneNumRequest;
-import com.swyp.plogging.backend.user.controller.dto.UpdateProfileRequest;
-import com.swyp.plogging.backend.user.controller.dto.UpdatePushEnabledRequest;
-import com.swyp.plogging.backend.user.controller.dto.UpdateRegionRequest;
-import com.swyp.plogging.backend.user.controller.dto.UserBadgeResponse;
-import com.swyp.plogging.backend.user.controller.dto.UserBadgesResponse;
+import com.swyp.plogging.backend.user.controller.dto.*;
 import com.swyp.plogging.backend.user.domain.AppUser;
 import com.swyp.plogging.backend.user.domain.UserBadge;
 import com.swyp.plogging.backend.user.domain.UserRegion;
 import com.swyp.plogging.backend.user.repository.UserBadgeRepository;
 import com.swyp.plogging.backend.user.repository.UserRegionRepository;
 import com.swyp.plogging.backend.user.repository.UserRepository;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -287,5 +280,12 @@ public class UserService {
             regionStr += " " + region.getNeighborhood();
         }
         user.updateRegion(regionStr);
+    }
+
+    @Transactional
+    public void setFCMToken(Long userId, String token) {
+        AppUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+        user.setFcmToken(token);
     }
 }
