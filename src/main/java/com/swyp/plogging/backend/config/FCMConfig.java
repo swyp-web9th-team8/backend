@@ -26,6 +26,6 @@ public class FCMConfig {
     @Bean
     public static FileInputStream getCredentailFileInputStream() throws FileNotFoundException {
         // service-account.json 필요
-        return new FileInputStream("service-account.json");
+        return new FileInputStream("src/main/resources/service_account.json");
     }
 }
