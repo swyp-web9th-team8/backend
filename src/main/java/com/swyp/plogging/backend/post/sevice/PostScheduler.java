@@ -36,6 +36,7 @@ public class PostScheduler {
             event.setType(NotiType.REVIEW);
             event.setPostId(post.getId());
             event.setUser(post.getWriter());
+            log.info("-----{}에게 독촉 알림 보내기", post.getWriter().getNickname());
             eventPublisher.publishEvent(event);
         });
         log.info("------------> End of a scheduled task meetingCompleteProcess.");
