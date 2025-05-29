@@ -56,11 +56,11 @@ jobs:
           echo "OWNER_LC=${OWNER,,}" >> ${GITHUB_ENV}
         env:
           OWNER: '${{github.repository_owner}}'
-      #      - name: application-secret.yml 생성
-      #        env:
-      #          ACTIONS_STEP_DEBUG: true
-      #          APPLICATION_SECRET: ${{secrets.APPLICATION_SECRET}}
-      #        run: echo "$APPLICATION_SECRET" >> src/main/resources/application-secret.yml
+      - name: fcm service-account.json 생성
+        env:
+          ACTIONS_STEP_DEBUG: true
+          SERVICE_ACCOUNT: ${{secrets.SERVICE_ACCOUNT}}
+        run: echo "SERVICE_ACCOUNT" >> src/main/resources/service_account.json
       #      - name: application-jwtTK.yml 생성
       #        env:
       #          ACTIONS_STEP_DEBUG: true
