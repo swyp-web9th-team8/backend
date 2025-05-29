@@ -5,7 +5,6 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
@@ -15,8 +14,11 @@ import java.io.IOException;
 
 @Configuration
 public class FCMConfig {
-    @Autowired
-    private static Environment env;
+    private final Environment env;
+
+    FCMConfig(Environment env){
+        this.env = env;
+    }
     @PostConstruct
     public void init() throws IOException {
         FirebaseOptions options = new FirebaseOptions.Builder()
@@ -26,7 +28,7 @@ public class FCMConfig {
         FirebaseApp.initializeApp(options);
     }
 
-    public static FileInputStream getCredentailFileInputStream() throws IOException {
+    public FileInputStream getCredentailFileInputStream() throws IOException {
         String[] activeProfiles =  env.getActiveProfiles();
         // service-account.json 필요
         for(String profile : activeProfiles){
