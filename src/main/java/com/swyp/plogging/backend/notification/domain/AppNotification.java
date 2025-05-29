@@ -19,12 +19,13 @@ public class AppNotification {
     @Id @GeneratedValue
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 200)
     private String title;
 
     @Column(nullable = false)
     private String message;
 
+    @Column(length = 500)
     private String url;
 
     @Column(nullable = false)

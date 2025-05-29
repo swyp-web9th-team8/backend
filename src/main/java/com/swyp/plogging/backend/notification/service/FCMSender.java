@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FCMSender implements Sender{
     private static final String MESSAGING_SCOPE = "https://www.googleapis.com/auth/firebase.messaging";
     private static final String[] SCOPES = { MESSAGING_SCOPE };
-    private final FirebaseMessaging firebaseMessaging;
+
     @Override
     @Transactional
     public void send(AppNotification notification) {

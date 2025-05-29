@@ -1,14 +1,19 @@
 package com.swyp.plogging.backend.post.sevice;
 
+import com.swyp.plogging.backend.notification.event.NotiType;
+import com.swyp.plogging.backend.notification.event.NotificationEvent;
+import com.swyp.plogging.backend.notification.strategy.NotiStrategy;
 import com.swyp.plogging.backend.post.domain.Post;
 import com.swyp.plogging.backend.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -18,12 +23,21 @@ public class PostScheduler {
 
     private final PostService postService;
     private final PostRepository postRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Scheduled(cron = "0 */10 * * * *")
     public void meetingCompleteProcess() {
         log.info("------------> Start of a scheduled task - meetingCompleteProcess.");
         List<Post> targetPosts = postRepository.findAllByMeetingDtBeforeAndCompletedFalse(LocalDateTime.now());
-        targetPosts.forEach(Post::complete);
+        targetPosts.forEach(post -> {
+            post.complete();
+            NotificationEvent event = new NotificationEvent();
+            event.setStrategy(NotiStrategy.FCM);
+            event.setType(NotiType.REVIEW);
+            event.setPostId(post.getId());
+            event.setUser(post.getWriter());
+            eventPublisher.publishEvent(event);
+        });
         log.info("------------> End of a scheduled task meetingCompleteProcess.");
     }
 }
