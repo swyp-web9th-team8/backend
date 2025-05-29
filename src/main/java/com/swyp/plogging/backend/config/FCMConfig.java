@@ -11,6 +11,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Configuration
 public class FCMConfig {
@@ -28,12 +29,12 @@ public class FCMConfig {
         FirebaseApp.initializeApp(options);
     }
 
-    public FileInputStream getCredentailFileInputStream() throws IOException {
+    public InputStream getCredentailFileInputStream() throws IOException {
         String[] activeProfiles =  env.getActiveProfiles();
         // service-account.json 필요
         for(String profile : activeProfiles){
             if("prod".equals(profile)){
-                return (FileInputStream) new ClassPathResource("service_account.json").getInputStream();
+                return new ClassPathResource("service_account.json").getInputStream();
             }
         }
         return new FileInputStream("src/main/resources/service_account.json");
