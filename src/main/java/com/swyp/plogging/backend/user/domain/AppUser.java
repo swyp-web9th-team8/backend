@@ -51,6 +51,8 @@ public class AppUser extends BaseEntity {
     private int score;
     // 정지여부 필드
     private boolean activeUser = true;
+    //fcm token
+    private String fcmToken;
 
     @OneToMany(mappedBy = "writer")
     private List<Post> writtenPosts = new ArrayList<>();
@@ -224,5 +226,9 @@ public class AppUser extends BaseEntity {
 
     public void inActive() {
         this.activeUser = false;
+    }
+
+    public void setFcmToken(String token){
+        this.fcmToken = token;
     }
 }
