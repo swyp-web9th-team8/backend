@@ -55,6 +55,24 @@ public class AppNotification {
         return instance;
     }
 
+    /**
+     * 테스트를 위한 새로운 인스턴스 생성
+     * @param title 알림 제목
+     * @param body 알림 내용
+     * @param user 보낼 유저
+     * @return 새로운 AppNotification 인스턴스
+     */
+    public static AppNotification newInstance(String title, String body, AppUser user) {
+        AppNotification instance = new AppNotification();
+        instance.title = title.isBlank() ? "Ploggo 알림" : title;
+        instance.user = user;
+        instance.post = null;
+        instance.message = body;
+        // 임시로 빈 문자열 생성
+        instance.targetRegion = "";
+        return instance;
+    }
+
     public void sentNow() {
         this.sentAt = LocalDateTime.now();
     }
