@@ -6,17 +6,18 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.swyp.plogging.backend.badge.domain.QBadge;
-import com.swyp.plogging.backend.participation.domain.QParticipation;
-import com.swyp.plogging.backend.post.domain.QPost;
+import com.swyp.plogging.backend.post.participation.domain.QParticipation;
+import com.swyp.plogging.backend.post.post.domain.QPost;
 import com.swyp.plogging.backend.rank.controller.dto.QRankingResponse;
 import com.swyp.plogging.backend.rank.controller.dto.RankingResponse;
 import com.swyp.plogging.backend.user.user.controller.dto.ProfileResponse;
-import com.swyp.plogging.backend.user.controller.dto.QProfileResponse;
-import com.swyp.plogging.backend.user.domain.QAppUser;
-import com.swyp.plogging.backend.user.domain.QUserBadge;
+import com.swyp.plogging.backend.user.user.controller.dto.QProfileResponse;
+import com.swyp.plogging.backend.user.user.domain.QAppUser;
+import com.swyp.plogging.backend.user.user.domain.QUserBadge;
+import lombok.RequiredArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepositoryCustom {

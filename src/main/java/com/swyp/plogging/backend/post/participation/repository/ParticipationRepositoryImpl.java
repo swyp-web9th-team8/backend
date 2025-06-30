@@ -2,16 +2,16 @@ package com.swyp.plogging.backend.post.participation.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.swyp.plogging.backend.participation.domain.QParticipation;
+import com.swyp.plogging.backend.post.participation.domain.QParticipation;
 import com.swyp.plogging.backend.post.participation.dto.MyPostResponse;
-import com.swyp.plogging.backend.participation.dto.QMyPostResponse;
-import com.swyp.plogging.backend.post.domain.QPost;
-import java.util.List;
-
+import com.swyp.plogging.backend.post.participation.dto.QMyPostResponse;
+import com.swyp.plogging.backend.post.post.domain.QPost;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 public class ParticipationRepositoryImpl implements ParticipationRepositoryCustom {
