@@ -1,6 +1,6 @@
 package com.swyp.plogging.backend.badge.domain;
 
-import com.swyp.plogging.backend.user.domain.UserBadge;
+import com.swyp.plogging.backend.user.user.domain.UserBadge;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

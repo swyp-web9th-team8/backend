@@ -4,7 +4,7 @@ import com.swyp.plogging.backend.common.dto.ApiResponse;
 import com.swyp.plogging.backend.common.util.SecurityUtils;
 import com.swyp.plogging.backend.rank.controller.dto.RankingResponse;
 import com.swyp.plogging.backend.rank.controller.dto.RankingViewType;
-import com.swyp.plogging.backend.user.service.UserService;
+import com.swyp.plogging.backend.user.user.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

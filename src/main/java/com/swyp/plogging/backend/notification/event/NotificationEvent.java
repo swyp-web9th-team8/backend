@@ -1,7 +1,7 @@
 package com.swyp.plogging.backend.notification.event;
 
 import com.swyp.plogging.backend.notification.strategy.NotiStrategy;
-import com.swyp.plogging.backend.user.domain.AppUser;
+import com.swyp.plogging.backend.user.user.domain.AppUser;
 import lombok.Getter;
 import lombok.Setter;
 

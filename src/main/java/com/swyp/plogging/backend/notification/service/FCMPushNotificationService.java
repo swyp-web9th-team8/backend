@@ -3,8 +3,8 @@ package com.swyp.plogging.backend.notification.service;
 import com.swyp.plogging.backend.notification.domain.AppNotification;
 import com.swyp.plogging.backend.notification.event.NotificationEvent;
 import com.swyp.plogging.backend.notification.repository.AppNotificationRepository;
-import com.swyp.plogging.backend.post.domain.Post;
-import com.swyp.plogging.backend.post.sevice.PostService;
+import com.swyp.plogging.backend.post.post.domain.Post;
+import com.swyp.plogging.backend.post.post.sevice.PostService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

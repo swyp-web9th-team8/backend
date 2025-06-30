@@ -1,8 +1,8 @@
 package com.swyp.plogging.backend.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.swyp.plogging.backend.auth.handler.OAuth2LoginSuccessHandler;
-import com.swyp.plogging.backend.auth.service.CustomOAuth2UserService;
+import com.swyp.plogging.backend.user.auth.handler.OAuth2LoginSuccessHandler;
+import com.swyp.plogging.backend.user.auth.service.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 

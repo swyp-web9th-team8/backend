@@ -1,14 +1,15 @@
 package com.swyp.plogging.backend.participation.service;
 
 import com.swyp.plogging.backend.common.exception.NotParticipatingPostException;
-import com.swyp.plogging.backend.participation.domain.Participation;
-import com.swyp.plogging.backend.participation.repository.ParticipationRepository;
-import com.swyp.plogging.backend.post.domain.Post;
-import com.swyp.plogging.backend.post.repository.PostRepository;
-import com.swyp.plogging.backend.post.sevice.PostService;
+import com.swyp.plogging.backend.post.participation.domain.Participation;
+import com.swyp.plogging.backend.post.participation.repository.ParticipationRepository;
+import com.swyp.plogging.backend.post.participation.service.ParticipationService;
+import com.swyp.plogging.backend.post.post.domain.Post;
+import com.swyp.plogging.backend.post.post.repository.PostRepository;
+import com.swyp.plogging.backend.post.post.sevice.PostService;
 import com.swyp.plogging.backend.post.sevice.PostServiceTest;
-import com.swyp.plogging.backend.user.domain.AppUser;
-import com.swyp.plogging.backend.user.domain.AuthProvider;
+import com.swyp.plogging.backend.user.user.domain.AppUser;
+import com.swyp.plogging.backend.user.user.domain.AuthProvider;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.logging.Logger;

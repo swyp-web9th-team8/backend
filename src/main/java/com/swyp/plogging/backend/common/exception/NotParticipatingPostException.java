@@ -1,6 +1,6 @@
 package com.swyp.plogging.backend.common.exception;
 
-import com.swyp.plogging.backend.user.domain.AppUser;
+import com.swyp.plogging.backend.user.user.domain.AppUser;
 import org.springframework.http.HttpStatus;
 
 public class NotParticipatingPostException extends CustomException{

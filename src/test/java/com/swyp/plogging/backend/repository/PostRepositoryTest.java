@@ -1,7 +1,7 @@
 package com.swyp.plogging.backend.repository;
 
-import com.swyp.plogging.backend.post.repository.PostRepository;
-import com.swyp.plogging.backend.post.repository.PostRepositoryImpl;
+import com.swyp.plogging.backend.post.post.repository.PostRepository;
+import com.swyp.plogging.backend.post.post.repository.PostRepositoryImpl;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;

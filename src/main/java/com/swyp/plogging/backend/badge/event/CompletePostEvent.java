@@ -1,6 +1,6 @@
 package com.swyp.plogging.backend.badge.event;
 
-import com.swyp.plogging.backend.user.domain.AppUser;
+import com.swyp.plogging.backend.user.user.domain.AppUser;
 import lombok.Getter;
 
 @Getter

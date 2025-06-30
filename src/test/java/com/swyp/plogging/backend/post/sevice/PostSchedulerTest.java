@@ -2,11 +2,12 @@ package com.swyp.plogging.backend.post.sevice;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.swyp.plogging.backend.post.domain.Post;
-import com.swyp.plogging.backend.post.repository.PostRepository;
-import com.swyp.plogging.backend.user.domain.AppUser;
-import com.swyp.plogging.backend.user.domain.AuthProvider;
-import com.swyp.plogging.backend.user.repository.AppUserRepository;
+import com.swyp.plogging.backend.post.post.domain.Post;
+import com.swyp.plogging.backend.post.post.repository.PostRepository;
+import com.swyp.plogging.backend.post.post.sevice.PostScheduler;
+import com.swyp.plogging.backend.user.user.domain.AppUser;
+import com.swyp.plogging.backend.user.user.domain.AuthProvider;
+import com.swyp.plogging.backend.user.user.repository.AppUserRepository;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

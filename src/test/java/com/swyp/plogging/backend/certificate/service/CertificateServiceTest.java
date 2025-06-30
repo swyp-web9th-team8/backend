@@ -1,16 +1,17 @@
 package com.swyp.plogging.backend.certificate.service;
 
-import com.swyp.plogging.backend.certificate.domain.Certification;
-import com.swyp.plogging.backend.certificate.repository.CertificateRepository;
+import com.swyp.plogging.backend.post.certificate.domain.Certification;
+import com.swyp.plogging.backend.post.certificate.repository.CertificateRepository;
 import com.swyp.plogging.backend.common.exception.CertificationException;
 import com.swyp.plogging.backend.common.service.FileService;
-import com.swyp.plogging.backend.participation.domain.Participation;
-import com.swyp.plogging.backend.participation.service.ParticipationService;
-import com.swyp.plogging.backend.post.domain.Post;
-import com.swyp.plogging.backend.post.sevice.PostService;
+import com.swyp.plogging.backend.post.certificate.service.CertificationService;
+import com.swyp.plogging.backend.post.participation.domain.Participation;
+import com.swyp.plogging.backend.post.participation.service.ParticipationService;
+import com.swyp.plogging.backend.post.post.domain.Post;
+import com.swyp.plogging.backend.post.post.sevice.PostService;
 import com.swyp.plogging.backend.post.sevice.PostServiceTest;
-import com.swyp.plogging.backend.user.domain.AppUser;
-import com.swyp.plogging.backend.user.domain.AuthProvider;
+import com.swyp.plogging.backend.user.user.domain.AppUser;
+import com.swyp.plogging.backend.user.user.domain.AuthProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

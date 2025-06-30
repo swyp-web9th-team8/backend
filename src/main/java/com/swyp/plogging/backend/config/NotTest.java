@@ -1,6 +1,6 @@
 package com.swyp.plogging.backend.config;
 
-import com.swyp.plogging.backend.service.RegionService;
+import com.swyp.plogging.backend.region.service.RegionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;

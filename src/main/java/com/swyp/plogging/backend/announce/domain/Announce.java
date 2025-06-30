@@ -1,6 +1,6 @@
 package com.swyp.plogging.backend.announce.domain;
 
-import com.swyp.plogging.backend.domain.base.BaseEntity;
+import com.swyp.plogging.backend.common.domain.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
