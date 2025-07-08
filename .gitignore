@@ -150,3 +150,6 @@ gradlew.bat
 
 # fcm 서비스 계정
 /src/main/resources/service_account.json
+
+# 기타
+.DS_Store
