@@ -371,4 +371,13 @@ public class PostService {
     public Long getCountCompletedPostByWriter(AppUser user) {
         return postRepository.countByWriterAndCompleted(user, true);
     }
+
+    // region data가 없는 post만 데이터 처리
+    @Transactional
+    public void fillRegion(){
+        postRepository.findAllByRegionIdIsNull().stream().forEach(post -> {
+            Region r = regionService.getContainedRegion(post.getLocation());
+            post.updateRegion(r);
+        });
+    }
 }
