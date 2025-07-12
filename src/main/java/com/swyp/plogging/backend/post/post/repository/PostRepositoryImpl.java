@@ -21,6 +21,7 @@ import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public class PostRepositoryImpl implements PostRepositoryCustom {
 
@@ -38,8 +39,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         query.select(post).from(post);
 
         // paging을 위한 totalCount
-        JPAQuery<Post> countQuery = new JPAQuery<>(em);
-        countQuery.select(post).from(post);
+        JPAQuery<Long> countQuery = new JPAQuery<>(em);
+        countQuery.select(post.count()).from(post);
 
         // 조건
         BooleanBuilder postCondition = new BooleanBuilder();
@@ -93,7 +94,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .limit(pageable.getPageSize());
 
         List<Post> result = query.fetch();
-        long totalCount = countQuery.fetch().size();
+        long totalCount = Optional.ofNullable(countQuery.fetchOne()).orElse(0L);
 
         return new PageImpl<>(result, pageable, totalCount);
     }
@@ -174,12 +175,12 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .offset(pageable.getOffset());
 
         JPAQuery<Long> countQuery = new JPAQuery<>(em)
-                .select(post.id).from(post)
+                .select(post.id.count()).from(post)
                 .where(conditions);
 
         List<Post> posts = postJPAQuery
                 .fetch();
-        int totalCount = countQuery.fetch().size();
+        long totalCount = Optional.ofNullable(countQuery.fetchOne()).orElse(0L);
 
         return new PageImpl<>(posts, pageable, totalCount);
     }
