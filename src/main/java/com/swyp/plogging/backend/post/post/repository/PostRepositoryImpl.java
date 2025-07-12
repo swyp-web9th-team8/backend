@@ -164,7 +164,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         JPAQuery<Post> postJPAQuery = new JPAQuery<>(em)
                 .select(post).from(post)
                 .where(conditions)
-                .orderBy(post.createdDt.desc())
+                .orderBy(post.meetingDt.desc())
                 .limit(pageable.getPageSize())
                 .offset(pageable.getOffset());
 
