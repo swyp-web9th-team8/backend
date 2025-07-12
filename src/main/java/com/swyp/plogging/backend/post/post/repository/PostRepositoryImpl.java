@@ -3,7 +3,6 @@ package com.swyp.plogging.backend.post.post.repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.swyp.plogging.backend.post.certificate.domain.QCertification;
 import com.swyp.plogging.backend.post.participation.domain.QParticipation;
@@ -46,7 +45,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         BooleanBuilder postCondition = new BooleanBuilder();
 
         // 지역 조건 검색
-        if(regionPolygons != null) {
+        if (regionPolygons != null) {
             postCondition.and(Expressions.booleanTemplate(
                     "ST_Contains({0},{1})",
                     regionPolygons,
@@ -76,17 +75,12 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         countQuery.where(postCondition);
 
         // sort
-        PathBuilder<Post> pathBuilder = new PathBuilder<>(Post.class, "post");
         Sort.Order order = pageable.getSort().get().findFirst().orElseThrow();
-        String property = order.getProperty();
 
-        if (property.equals("meetingTime")) {
-            property = "meetingDt";
-            if (order.isDescending()) {
-                query.orderBy(pathBuilder.getDateTime(property, LocalDateTime.class).desc());
-            } else {
-                query.orderBy(pathBuilder.getDateTime(property, LocalDateTime.class).asc());
-            }
+        if (order.isDescending()) {
+            query.orderBy(post.meetingDt.desc());
+        } else {
+            query.orderBy(post.meetingDt.asc());
         }
 
         // pageable 적용
@@ -185,7 +179,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return new PageImpl<>(posts, pageable, totalCount);
     }
 
-    public List<Post> find10ByCompletedAndNotCertificated(Long writerId){
+    public List<Post> find10ByCompletedAndNotCertificated(Long writerId) {
         QPost post = QPost.post;
         QCertification certification = QCertification.certification;
 
