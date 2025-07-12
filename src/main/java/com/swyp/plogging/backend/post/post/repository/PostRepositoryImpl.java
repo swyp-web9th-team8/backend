@@ -38,8 +38,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         query.select(post).from(post);
 
         // paging을 위한 totalCount
-        JPAQuery<Post> countQuery = new JPAQuery<>(em);
-        countQuery.select(post).from(post);
+        JPAQuery<Long> countQuery = new JPAQuery<>(em);
+        countQuery.select(post.count()).from(post);
 
         // 조건
         BooleanBuilder postCondition = new BooleanBuilder();
@@ -93,7 +93,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .limit(pageable.getPageSize());
 
         List<Post> result = query.fetch();
-        long totalCount = countQuery.fetch().size();
+        long totalCount = countQuery.fetchOne();
 
         return new PageImpl<>(result, pageable, totalCount);
     }
