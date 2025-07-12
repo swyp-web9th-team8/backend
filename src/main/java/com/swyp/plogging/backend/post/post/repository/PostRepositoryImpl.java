@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
+import com.swyp.plogging.backend.post.certificate.domain.QCertification;
 import com.swyp.plogging.backend.post.participation.domain.QParticipation;
 import com.swyp.plogging.backend.post.post.domain.Post;
 import com.swyp.plogging.backend.post.post.domain.QPost;
@@ -181,5 +182,23 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         int totalCount = countQuery.fetch().size();
 
         return new PageImpl<>(posts, pageable, totalCount);
+    }
+
+    public List<Post> find10ByCompletedAndNotCertificated(Long writerId){
+        QPost post = QPost.post;
+        QCertification certification = QCertification.certification;
+
+        JPAQuery<Post> query = new JPAQuery<>(em)
+                .select(post)
+                .from(post)
+                .leftJoin(certification).on(certification.post.eq(post));
+
+        //complted = ture, Certification = not certificated, limit 10
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(post.completed).andNot(certification.certificated);
+
+        return query.where(builder)
+                .limit(10)
+                .fetch();
     }
 }
