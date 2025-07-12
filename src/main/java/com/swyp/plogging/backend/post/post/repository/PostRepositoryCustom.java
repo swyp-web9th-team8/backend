@@ -6,6 +6,8 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface PostRepositoryCustom {
     Page<Post> findPostByCondition(MultiPolygon multiPolygon,Pageable pageable, Boolean recruitmentCompleted, Boolean completed);
 
@@ -13,4 +15,6 @@ public interface PostRepositoryCustom {
     Page<Post> findNearbyPosts(Double latitude, Double longitude, Double radiusKm, Pageable pageable);
 
     Page<Post> findPostByRegion(MultiPolygon polygons, Pageable pageable, String keyword);
+
+    List<Post> find10ByCompletedAndNotCertificated(Long writerId);
 }
