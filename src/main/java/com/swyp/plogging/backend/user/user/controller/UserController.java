@@ -180,8 +180,8 @@ public class UserController {
     @GetMapping("/completed-post-ids")
     public ApiResponse<List<Long>> getCompletedPost(@AuthenticationPrincipal OAuth2User principal) {
         Long currentUserId = SecurityUtils.getUserId(principal);
-        List<Long> completedPostIds = postService.getCompletedPostIds(currentUserId);
-        return ApiResponse.ok(completedPostIds, "Completed postIds fetched successfully!");
+        List<Long> completedPostId = postService.getCompletedPostIdsWithNotCertificatedMax10(currentUserId);
+        return ApiResponse.ok(completedPostId, "Completed postIds fetched successfully!");
     }
 
     @PostMapping("/fcm")

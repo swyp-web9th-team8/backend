@@ -342,11 +342,9 @@ public class PostService {
         return new PageImpl<>(postList, pageable, posts.getTotalElements());
     }
 
-    public List<Long> getCompletedPostIds(Long writerId) {
-        List<Post> completedPosts = postRepository.findByWriterIdAndCompletedTrue(writerId);
-        return completedPosts.stream()
-                .filter(post -> post.getCertification() == null || !post.getCertification().isCertificated())
-                .map(Post::getId).collect(Collectors.toList());
+    public List<Long> getCompletedPostIdsWithNotCertificatedMax10(Long writerId) {
+        List<Post> posts = postRepository.find10ByCompletedAndNotCertificated(writerId);
+        return posts.stream().mapToLong(Post::getId).boxed().toList();
     }
 
     @Transactional
