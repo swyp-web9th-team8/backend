@@ -1,9 +1,8 @@
 package com.swyp.plogging.backend.user.user.repository;
 
 import com.querydsl.core.types.SubQueryExpression;
-import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.swyp.plogging.backend.badge.domain.QBadge;
 import com.swyp.plogging.backend.post.participation.domain.QParticipation;
@@ -72,24 +71,20 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
         QParticipation participation = QParticipation.participation;
         boolean hasCondition = start != null && end != null;
 
-        JPQLQuery<Long> postCount = JPAExpressions
-            .select(post.count())
-            .from(post)
-            .where(post.writer.eq(user)
-                .and(hasCondition ? post.createdDt.between(start, end) : null));
+        // 쿼리DSL에서 select절에 그냥 사용해도 알아서 sql엔진에서 별칭 처리후 orderby에 사용하지만
+        // 가독성을 위해 별도 선언
+        NumberExpression<Long> postCount = post.id.countDistinct();
+        NumberExpression<Long> participationCount = participation.id.countDistinct();
 
-        JPQLQuery<Long> participationCount = JPAExpressions
-            .select(participation.count())
-            .from(participation)
-            .where(participation.user.eq(user)
-                .and(hasCondition ? participation.createdDt.between(start, end) : null));
-
-        return queryFactory
-            .select(new QRankingResponse(user.id, user.nickname, user.profileImageUrl, postCount, participationCount))
-            .from(user)
-            .orderBy(Expressions.numberTemplate(Integer.class,
-                "({0} + {1})", postCount, participationCount).desc())
-            .limit(10)
-            .fetch();
+        return queryFactory.select(new QRankingResponse(user.id, user.nickname, user.profileImageUrl, postCount, participationCount))
+                .from(user)
+                .leftJoin(post).on(post.writer.eq(user)
+                        .and(hasCondition ? post.createdDt.between(start, end) : null))
+                .leftJoin(participation).on(participation.user.eq(user)
+                        .and(hasCondition ? participation.createdDt.between(start, end) : null))
+                .groupBy(user)
+                .orderBy(postCount.add(participationCount).desc())
+                .limit(10)
+                .fetch();
     }
 }
