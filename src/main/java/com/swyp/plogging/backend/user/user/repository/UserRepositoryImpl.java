@@ -80,20 +80,22 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
         String postSub = """
                 SELECT p.writer_id AS writer_id,
                                COUNT(DISTINCT p.id) AS post_count
-                        FROM post p """;
+                        FROM post p
+                        """;
         if(hasCondition){
             postSub += "WHERE p.created_dt between :start and :end ";
         }
-        postSub += "GROUP BY p.writer_id";
+        postSub += " GROUP BY p.writer_id";
 
         String participationSub = """
                 SELECT pa.user_id AS user_id,
                                COUNT(DISTINCT pa.id) AS participation_count
-                        FROM participation pa """;
+                        FROM participation pa
+                        """;
         if(hasCondition){
-            participationSub += "WHERE pa.created_dt between :start and :end ";
+            participationSub += " WHERE pa.created_dt between :start and :end ";
         }
-        participationSub += "GROUP BY pa.user_id";
+        participationSub += " GROUP BY pa.user_id";
 
         String sql = """
                     SELECT u.id,
