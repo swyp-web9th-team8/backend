@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepositoryCustom {
@@ -119,14 +120,13 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 
         List<Object[]> result = query.getResultList();
 
-        List<RankingResponse> responses = result.stream()
+        return result.stream()
                 .map(row -> new RankingResponse(
                         (Long) row[0],
                         (String) row[1],
                         (String) row[2],
                         (Long) row[3],
                         (Long) row[4]))
-                .toList();
-        return responses;
+                .collect(Collectors.toList()); // toList()는 immutableCollections를 반환하여 변경이 불가.
     }
 }
