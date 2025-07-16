@@ -3,7 +3,6 @@ package com.swyp.plogging.backend.post.post.repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.swyp.plogging.backend.post.certificate.domain.QCertification;
 import com.swyp.plogging.backend.post.participation.domain.QParticipation;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public class PostRepositoryImpl implements PostRepositoryCustom {
 
@@ -38,14 +38,14 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         query.select(post).from(post);
 
         // paging을 위한 totalCount
-        JPAQuery<Post> countQuery = new JPAQuery<>(em);
-        countQuery.select(post).from(post);
+        JPAQuery<Long> countQuery = new JPAQuery<>(em);
+        countQuery.select(post.count()).from(post);
 
         // 조건
         BooleanBuilder postCondition = new BooleanBuilder();
 
         // 지역 조건 검색
-        if(regionPolygons != null) {
+        if (regionPolygons != null) {
             postCondition.and(Expressions.booleanTemplate(
                     "ST_Contains({0},{1})",
                     regionPolygons,
@@ -75,17 +75,12 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         countQuery.where(postCondition);
 
         // sort
-        PathBuilder<Post> pathBuilder = new PathBuilder<>(Post.class, "post");
         Sort.Order order = pageable.getSort().get().findFirst().orElseThrow();
-        String property = order.getProperty();
 
-        if (property.equals("meetingTime")) {
-            property = "meetingDt";
-            if (order.isDescending()) {
-                query.orderBy(pathBuilder.getDateTime(property, LocalDateTime.class).desc());
-            } else {
-                query.orderBy(pathBuilder.getDateTime(property, LocalDateTime.class).asc());
-            }
+        if (order.isDescending()) {
+            query.orderBy(post.meetingDt.desc());
+        } else {
+            query.orderBy(post.meetingDt.asc());
         }
 
         // pageable 적용
@@ -93,7 +88,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .limit(pageable.getPageSize());
 
         List<Post> result = query.fetch();
-        long totalCount = countQuery.fetch().size();
+        long totalCount = Optional.ofNullable(countQuery.fetchOne()).orElse(0L);
 
         return new PageImpl<>(result, pageable, totalCount);
     }
@@ -169,22 +164,22 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         JPAQuery<Post> postJPAQuery = new JPAQuery<>(em)
                 .select(post).from(post)
                 .where(conditions)
-                .orderBy(post.createdDt.desc())
+                .orderBy(post.meetingDt.desc())
                 .limit(pageable.getPageSize())
                 .offset(pageable.getOffset());
 
         JPAQuery<Long> countQuery = new JPAQuery<>(em)
-                .select(post.id).from(post)
+                .select(post.id.count()).from(post)
                 .where(conditions);
 
         List<Post> posts = postJPAQuery
                 .fetch();
-        int totalCount = countQuery.fetch().size();
+        long totalCount = Optional.ofNullable(countQuery.fetchOne()).orElse(0L);
 
         return new PageImpl<>(posts, pageable, totalCount);
     }
 
-    public List<Post> find10ByCompletedAndNotCertificated(Long writerId){
+    public List<Post> find10ByCompletedAndNotCertificated(Long writerId) {
         QPost post = QPost.post;
         QCertification certification = QCertification.certification;
 
