@@ -110,8 +110,10 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                     LIMIT 10
                 """;
         Query query = em.createNativeQuery(sql);
-        query.setParameter("start", start);
-        query.setParameter("end", end);
+        if(hasCondition) {
+            query.setParameter("start", start);
+            query.setParameter("end", end);
+        }
 
         List<Object[]> result = query.getResultList();
 
