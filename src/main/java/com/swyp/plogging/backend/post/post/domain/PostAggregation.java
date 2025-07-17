@@ -20,7 +20,7 @@ public class PostAggregation extends BaseTimeEntity {
     @Id
     private Long id;
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
+    @MapsId(value = "id")
     private AppUser user;
     private Long totalPostCount;
     private Long totalParticipationCount;

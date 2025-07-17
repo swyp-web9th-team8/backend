@@ -14,13 +14,14 @@ import com.swyp.plogging.backend.region.domain.Region;
 import com.swyp.plogging.backend.region.service.RegionService;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
 import jakarta.annotation.Nullable;
-import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,17 +41,6 @@ public class PostService {
     private final LocationService locationService;
     private final RegionService regionService;
     protected List<PostInfoResponse> cachedCompletedPostInfo = new ArrayList<>();
-
-    /**
-     * 완료모임 캐싱을 위한 메서드
-     */
-    @PostConstruct
-    public void setCachedCompletedPostInfo(){
-        if(cachedCompletedPostInfo.isEmpty()){
-            Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Order.desc("meetingDt")));
-            cachedCompletedPostInfo = getListOfCompletePostInfo(pageable, "", false, true).getContent();
-        }
-    }
 
     /**
      * 기존 모임 생성 메서드
@@ -313,7 +303,7 @@ public class PostService {
         }
 
         // 완료 목록 캐싱 0~29(30개)
-        if(!recruitmentCompleted && completed && pageable.getOffset() + pageable.getPageSize() <= 29){
+        if(!cachedCompletedPostInfo.isEmpty() && !recruitmentCompleted && completed && pageable.getOffset() + pageable.getPageSize() <= 29){
             // 페이지네이션을 버튼으로 하는 것이 아니기 때문에 토탈은 중요하지 않음.
             return new PageImpl<>(cachedCompletedPostInfo, pageable, 500);
         }

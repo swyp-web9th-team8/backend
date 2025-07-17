@@ -41,6 +41,9 @@ spring:
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      default_batch_fetch_size: 100
 
   security:
     oauth2:
