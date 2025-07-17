@@ -307,7 +307,7 @@ public class PostService {
 
         // 완료 목록 캐싱 0~29(30개)
         log.info("캐싱 조건 확인 : {} / {} / {} / {}",!cachedCompletedPostInfo.isEmpty(),!recruitmentCompleted,completed, pageable.getOffset() + pageable.getPageSize() <= 29);
-        if(!cachedCompletedPostInfo.isEmpty() && !recruitmentCompleted && completed && pageable.getOffset() + pageable.getPageSize() <= 29){
+        if(!cachedCompletedPostInfo.isEmpty() && !recruitmentCompleted && completed && pageable.getOffset() + pageable.getPageSize() <= 30){
             // 페이지네이션을 버튼으로 하는 것이 아니기 때문에 토탈은 중요하지 않음.
             log.info("캐싱데이터 응답");
             List<PostInfoResponse> content = cachedCompletedPostInfo.subList((int) pageable.getOffset(),(int) pageable.getOffset() + pageable.getPageSize());
