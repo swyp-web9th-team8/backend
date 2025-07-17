@@ -3,9 +3,6 @@ package com.swyp.plogging.backend.post.post.sevice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +16,6 @@ public class PostInitService implements ApplicationListener<ApplicationReadyEven
     @Override
     @Transactional
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Order.desc("meetingDt")));
-        postService.cachedCompletedPostInfo = postService.getListOfCompletePostInfo(pageable, "", false, true).getContent();
+        postService.initCachedCompletedPostInfo();
     }
 }
