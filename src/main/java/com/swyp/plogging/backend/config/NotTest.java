@@ -20,7 +20,8 @@ public class NotTest {
         return args -> {
             regionService.initRegionData();
             regionService.initRegionPolygon();
-            postService.fillRegion();
+            // 운영환경에서는 너무 많은 데이터로 OOM발생하여 주석처리
+//            postService.fillRegion();
         };
     }
 }

@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(indexes = {@Index(name = "post_region",columnList = "region_id")})
+//@Table(indexes = {@Index(name = "post_region",columnList = "region_id")})
 public class Post extends BaseEntity {
 
     @Id
