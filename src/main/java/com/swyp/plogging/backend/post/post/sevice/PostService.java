@@ -79,6 +79,7 @@ public class PostService {
         if (point == null) {
             throw new RuntimeException("해당 주소의 지점을 생성할 수 없습니다.");
         }
+        Region region = regionService.getContainedRegion(point);
 
         Post post = Post.builder()
                 .writer(user)
@@ -99,6 +100,7 @@ public class PostService {
         // null일 경우 30분전 세팅
         post.setUpDeadLine(deadLine);
         post = postRepository.save(post);
+
 
         return post.toDetailResponse();
     }
@@ -368,5 +370,18 @@ public class PostService {
 
     public Long getCountCompletedPostByWriter(AppUser user) {
         return postRepository.countByWriterAndCompleted(user, true);
+    }
+
+    // region data가 없는 post만 데이터 처리
+    @Transactional
+    public void fillRegion(List<Post> list){
+        list.forEach(post -> {
+            Region r = regionService.getContainedRegion(post.getLocation());
+            post.updateRegion(r);
+        });
+    }
+
+    public List<Post> findTop100ByRegionIdIsNull() {
+        return postRepository.findTop100ByRegionIdIsNull();
     }
 }

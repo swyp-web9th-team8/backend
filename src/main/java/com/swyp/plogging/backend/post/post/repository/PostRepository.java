@@ -16,4 +16,7 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     List<Post> findByWriterIdAndCompletedTrue(Long writerId);
 
     Long countByWriterAndCompleted(AppUser user, boolean completed);
+
+    List<Post> findAllByRegionIdIsNull();
+    List<Post> findTop100ByRegionIdIsNull();
 }

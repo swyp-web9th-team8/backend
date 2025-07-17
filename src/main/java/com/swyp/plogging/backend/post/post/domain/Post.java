@@ -1,37 +1,27 @@
 package com.swyp.plogging.backend.post.post.domain;
 
-import com.swyp.plogging.backend.post.certificate.domain.Certification;
 import com.swyp.plogging.backend.common.domain.base.BaseEntity;
+import com.swyp.plogging.backend.post.certificate.domain.Certification;
 import com.swyp.plogging.backend.post.participation.domain.Participation;
 import com.swyp.plogging.backend.post.post.controller.dto.NicknameAndImageResponse;
 import com.swyp.plogging.backend.post.post.controller.dto.PostDetailResponse;
+import com.swyp.plogging.backend.region.domain.Region;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
+import lombok.*;
+import org.locationtech.jts.geom.Point;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.locationtech.jts.geom.Point;
 
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+//@Table(indexes = {@Index(name = "post_region",columnList = "region_id")})
 public class Post extends BaseEntity {
 
     @Id
@@ -58,6 +48,11 @@ public class Post extends BaseEntity {
     // PostGIS 공간 데이터 타입 추가
     @Column(columnDefinition = "geometry(Point,4326)")
     private Point location;
+    // 인덱싱을 사용할 Region 추가
+    @ManyToOne
+    @JoinColumn(name="region_id")
+    private Region regionId;
+
 
     private LocalDateTime meetingDt;
     private LocalDateTime deadLine;
@@ -250,5 +245,9 @@ public class Post extends BaseEntity {
 
     public boolean isCertified() {
         return completed && certification != null && certification.isCertificated();
+    }
+
+    public void updateRegion(Region r) {
+        this.regionId = r;
     }
 }

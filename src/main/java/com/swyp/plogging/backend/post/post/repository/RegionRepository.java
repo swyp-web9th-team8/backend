@@ -1,6 +1,7 @@
 package com.swyp.plogging.backend.post.post.repository;
 
 import com.swyp.plogging.backend.region.domain.Region;
+import org.locationtech.jts.geom.Point;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -25,4 +26,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 
     // 도시, 구, 동으로 지역 찾기
     Optional<Region> findByCityAndDistrictAndNeighborhood(String city, String district, String neighborhood);
+
+    @Query("SELECT r FROM Region r WHERE ST_Contains(r.polygons,?1)")
+    Region findByLocation(Point postLocation);
 }

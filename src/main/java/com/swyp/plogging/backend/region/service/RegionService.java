@@ -70,6 +70,20 @@ public class RegionService {
         }
     }
 
+    @Transactional
+    public void initRegionPolygon(){
+        regionRepository.findAll().stream()
+                .filter(region -> !region.getNeighborhood().isBlank() && !region.hasPolygons())
+                .forEach(region -> {
+                    try {
+                        getAndSavePolygonOfRegion(region);
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
+
     // V-World API에서 서울시 구 데이터 가져오기 - 수정됨
     private List<Region> fetchSeoulDistricts() throws Exception {
         String url = UriComponentsBuilder.fromHttpUrl("https://api.vworld.kr/req/data")
@@ -325,5 +339,9 @@ public class RegionService {
         } else {
             return regionRepository.findByCityAndDistrictAndNeighborhood(city, district, neighborhood);
         }
+    }
+
+    public Region getContainedRegion(Point postLocation){
+        return regionRepository.findByLocation(postLocation);
     }
 }

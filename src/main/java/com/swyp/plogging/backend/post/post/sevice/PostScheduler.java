@@ -41,4 +41,13 @@ public class PostScheduler {
         });
         log.info("------------> End of a scheduled task meetingCompleteProcess.");
     }
+
+    @Scheduled(cron = "0 0/5 * * * *")
+    public void fillRegionOfPost(){
+        List<Post> posts = postService.findTop100ByRegionIdIsNull();
+        if(!posts.isEmpty()) {
+            postService.fillRegion(posts);
+            log.info(posts.size() + "개의 모임에 지역을 채워 넣었습니다.");
+        }
+    }
 }
