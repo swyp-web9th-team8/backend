@@ -8,6 +8,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 유저별 모임 및 참여 집계테이블<br>
+ * 매일 자정 갱신, 유저 랭킹과 뱃지에 사용.
+ */
 @Entity
 @Getter
 @AllArgsConstructor

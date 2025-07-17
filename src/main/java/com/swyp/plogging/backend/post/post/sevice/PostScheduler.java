@@ -9,6 +9,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -49,5 +52,14 @@ public class PostScheduler {
             postService.fillRegion(posts);
             log.info(posts.size() + "개의 모임에 지역을 채워 넣었습니다.");
         }
+    }
+
+    /**
+     * 1시간 마다 캐싱을 위한 완료모임 30개 조회
+     */
+    @Scheduled(cron = "0 0 0/1 * * *")
+    public void renewCachedCompletedPosts(){
+        Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Order.desc("meetingDt")));
+        postService.cachedCompletedPostInfo = postService.getListOfCompletePostInfo(pageable, "", false, true).getContent();
     }
 }
