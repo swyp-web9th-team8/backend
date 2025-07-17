@@ -79,7 +79,7 @@ public class PostService {
         if (point == null) {
             throw new RuntimeException("해당 주소의 지점을 생성할 수 없습니다.");
         }
-        Region region = regionService.findRegionFromPoint(point);
+        Region region = regionService.getContainedRegion(point);
 
         Post post = Post.builder()
                 .writer(user)

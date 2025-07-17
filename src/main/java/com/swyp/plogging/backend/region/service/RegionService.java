@@ -344,8 +344,4 @@ public class RegionService {
     public Region getContainedRegion(Point postLocation){
         return regionRepository.findByLocation(postLocation);
     }
-
-    public Region findRegionFromPoint(Point point) {
-        return regionRepository.findBySTContainsPoint();
-    }
 }
