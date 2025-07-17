@@ -19,9 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +39,11 @@ public class PostService {
     private final LocationService locationService;
     private final RegionService regionService;
     protected List<PostInfoResponse> cachedCompletedPostInfo = new ArrayList<>();
+
+    public void initCachedCompletedPostInfo(){
+        Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Order.desc("meetingDt")));
+        this.cachedCompletedPostInfo = getListOfCompletePostInfo(pageable, "", false, true).getContent();
+    }
 
     /**
      * 기존 모임 생성 메서드
@@ -303,9 +306,12 @@ public class PostService {
         }
 
         // 완료 목록 캐싱 0~29(30개)
+        log.info("캐싱 조건 확인 : {} / {} / {} / {}",!cachedCompletedPostInfo.isEmpty(),!recruitmentCompleted,completed, pageable.getOffset() + pageable.getPageSize() <= 29);
         if(!cachedCompletedPostInfo.isEmpty() && !recruitmentCompleted && completed && pageable.getOffset() + pageable.getPageSize() <= 29){
             // 페이지네이션을 버튼으로 하는 것이 아니기 때문에 토탈은 중요하지 않음.
-            return new PageImpl<>(cachedCompletedPostInfo, pageable, 500);
+            log.info("캐싱데이터 응답");
+            List<PostInfoResponse> content = cachedCompletedPostInfo.subList((int) pageable.getOffset(),(int) pageable.getOffset() + pageable.getPageSize());
+            return new PageImpl<>(content, pageable, 500);
         }
 
         // 모집만 완료한 모임 또는 모임을 완료한 모임 조회

@@ -14,9 +14,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -69,10 +66,12 @@ public class PostScheduler {
      */
     @Scheduled(cron = "0 0 0/1 * * *")
     public void renewCachedCompletedPosts(){
-        Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Order.desc("meetingDt")));
-        postService.cachedCompletedPostInfo = postService.getListOfCompletePostInfo(pageable, "", false, true).getContent();
+        postService.initCachedCompletedPostInfo();
     }
 
+    /**
+     * 매일 자정 집계
+     */
     @Scheduled(cron = "0 0 0 * * *")
     public void countTotalPostAndTotalParticipationByUser(){
         Long latestId = 0L;
