@@ -288,4 +288,8 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
         user.setFcmToken(token);
     }
+
+    public List<AppUser> findTop100ByIdIsGreaterThanEqualOrderById(Long id) {
+        return userRepository.findTop100ByIdIsGreaterThanEqualOrderById(id);
+    }
 }

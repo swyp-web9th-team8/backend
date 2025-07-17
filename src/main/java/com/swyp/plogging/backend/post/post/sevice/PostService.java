@@ -5,12 +5,12 @@ import com.swyp.plogging.backend.common.exception.UnauthorizedUserException;
 import com.swyp.plogging.backend.common.service.LocationService;
 import com.swyp.plogging.backend.common.util.RoadAddressUtil;
 import com.swyp.plogging.backend.common.util.dto.Address;
-import com.swyp.plogging.backend.region.domain.Region;
 import com.swyp.plogging.backend.post.post.controller.dto.CreatePostRequest;
 import com.swyp.plogging.backend.post.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.post.domain.Post;
 import com.swyp.plogging.backend.post.post.repository.PostRepository;
+import com.swyp.plogging.backend.region.domain.Region;
 import com.swyp.plogging.backend.region.service.RegionService;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
 import jakarta.annotation.Nullable;
@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +40,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final LocationService locationService;
     private final RegionService regionService;
+    protected List<PostInfoResponse> cachedCompletedPostInfo = new ArrayList<>();
 
     /**
      * 기존 모임 생성 메서드
@@ -298,6 +300,12 @@ public class PostService {
             polygon = null;
         } else {
             polygon = getMultiPolygon(position);
+        }
+
+        // 완료 목록 캐싱 0~29(30개)
+        if(!cachedCompletedPostInfo.isEmpty() && !recruitmentCompleted && completed && pageable.getOffset() + pageable.getPageSize() <= 29){
+            // 페이지네이션을 버튼으로 하는 것이 아니기 때문에 토탈은 중요하지 않음.
+            return new PageImpl<>(cachedCompletedPostInfo, pageable, 500);
         }
 
         // 모집만 완료한 모임 또는 모임을 완료한 모임 조회

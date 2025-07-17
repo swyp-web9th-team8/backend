@@ -1,14 +1,20 @@
 package com.swyp.plogging.backend.post.post.repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.swyp.plogging.backend.post.certificate.domain.QCertification;
 import com.swyp.plogging.backend.post.participation.domain.QParticipation;
+import com.swyp.plogging.backend.post.post.controller.dto.PostAggregationDto;
 import com.swyp.plogging.backend.post.post.domain.Post;
 import com.swyp.plogging.backend.post.post.domain.QPost;
+import com.swyp.plogging.backend.post.post.domain.QPostAggregation;
 import com.swyp.plogging.backend.region.domain.QRegion;
+import com.swyp.plogging.backend.user.user.domain.AppUser;
+import com.swyp.plogging.backend.user.user.domain.QAppUser;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -195,5 +201,33 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return query.where(builder)
                 .limit(10)
                 .fetch();
+    }
+
+    public List<PostAggregationDto> getTotalPostCountAndTotalParticipationCountByUsersOrderById(List<AppUser> appUsers) {
+        QPostAggregation postAggregation = QPostAggregation.postAggregation;
+        QPost post = QPost.post;
+        QAppUser user = QAppUser.appUser;
+        QParticipation participation = QParticipation.participation;
+
+        List<Long> userIds = appUsers.stream().mapToLong(AppUser::getId).boxed().toList();
+        SubQueryExpression<Long> postSub = new JPAQuery<>(em)
+                .select(post.countDistinct().coalesce(0L))
+                .from(post)
+                .where(post.writer.eq(user));
+        SubQueryExpression<Long> participationSub = new JPAQuery<>(em)
+                .select(participation.countDistinct().coalesce(0L))
+                .from(participation)
+                .where(participation.user.eq(user));
+
+        JPAQuery<PostAggregationDto> query = new JPAQuery<>(em);
+        query.select(
+                        Projections.constructor(PostAggregationDto.class,
+                                user.id.castToNum(Long.class), postSub, participationSub)
+                )
+                .from(user)
+                .where(user.id.in(userIds))
+                .orderBy(user.id.asc());
+
+        return query.fetch();
     }
 }
