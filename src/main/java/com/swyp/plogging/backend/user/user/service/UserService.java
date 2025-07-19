@@ -4,9 +4,10 @@ import com.swyp.plogging.backend.common.exception.UnsupportedUpdateRequestExcept
 import com.swyp.plogging.backend.common.exception.UserNotFoundException;
 import com.swyp.plogging.backend.common.service.FileService;
 import com.swyp.plogging.backend.common.util.DateUtils;
-import com.swyp.plogging.backend.region.domain.Region;
 import com.swyp.plogging.backend.post.post.repository.RegionRepository;
+import com.swyp.plogging.backend.post.post.sevice.PostService;
 import com.swyp.plogging.backend.rank.controller.dto.RankingResponse;
+import com.swyp.plogging.backend.region.domain.Region;
 import com.swyp.plogging.backend.user.user.controller.dto.*;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
 import com.swyp.plogging.backend.user.user.domain.UserBadge;
@@ -37,6 +38,7 @@ public class UserService {
     private final UserRegionRepository userRegionRepository;
     private final FileService fileService;
     private final UserBadgeRepository userBadgeRepository;
+    private final PostService postService;
 
     public ProfileResponse getProfile(Long userId) {
         return userRepository.findProfileByUserId(userId);
@@ -200,6 +202,8 @@ public class UserService {
 
     public List<RankingResponse> getAllTimeRankings() {
         List<RankingResponse> rankingResponses = userRepository.findAllTimeRankings();
+        // todo aggregation테이블 생성시 totalcount누락으로 새로운 데이터가 생긴 후 적용 필요
+        //        List<RankingResponse> rankingResponses = postService.findTop10AllTimeRankings();
         assignRanks(rankingResponses);
 
         return rankingResponses;

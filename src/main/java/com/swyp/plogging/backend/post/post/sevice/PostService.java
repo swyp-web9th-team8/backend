@@ -9,7 +9,10 @@ import com.swyp.plogging.backend.post.post.controller.dto.CreatePostRequest;
 import com.swyp.plogging.backend.post.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.post.domain.Post;
+import com.swyp.plogging.backend.post.post.domain.PostAggregation;
+import com.swyp.plogging.backend.post.post.repository.PostAggregationRepository;
 import com.swyp.plogging.backend.post.post.repository.PostRepository;
+import com.swyp.plogging.backend.rank.controller.dto.RankingResponse;
 import com.swyp.plogging.backend.region.domain.Region;
 import com.swyp.plogging.backend.region.service.RegionService;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
@@ -38,6 +41,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final LocationService locationService;
     private final RegionService regionService;
+    private final PostAggregationRepository aggregationRepository;
     protected List<PostInfoResponse> cachedCompletedPostInfo = new ArrayList<>();
 
     public void initCachedCompletedPostInfo(){
@@ -307,7 +311,7 @@ public class PostService {
 
         // 완료 목록 캐싱 0~29(30개)
         log.info("캐싱 조건 확인 : {} / {} / {} / {}",!cachedCompletedPostInfo.isEmpty(),!recruitmentCompleted,completed, pageable.getOffset() + pageable.getPageSize() <= 29);
-        if(!cachedCompletedPostInfo.isEmpty() && !recruitmentCompleted && completed && pageable.getOffset() + pageable.getPageSize() <= 29){
+        if(!cachedCompletedPostInfo.isEmpty() && !recruitmentCompleted && completed && pageable.getOffset() + pageable.getPageSize() <= 30){
             // 페이지네이션을 버튼으로 하는 것이 아니기 때문에 토탈은 중요하지 않음.
             log.info("캐싱데이터 응답");
             List<PostInfoResponse> content = cachedCompletedPostInfo.subList((int) pageable.getOffset(),(int) pageable.getOffset() + pageable.getPageSize());
@@ -397,5 +401,10 @@ public class PostService {
 
     public List<Post> findTop100ByRegionIdIsNull() {
         return postRepository.findTop100ByRegionIdIsNull();
+    }
+
+    public List<RankingResponse> findTop10AllTimeRankings() {
+        List<PostAggregation> top10 =  aggregationRepository.findTop10ByTotalCount();
+        return null;
     }
 }
