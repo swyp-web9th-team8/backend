@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+//@Table(indexes = {@Index(name = "total_count", columnList = "total_count")})
 public class PostAggregation extends BaseTimeEntity {
     @Id
     private Long id;
@@ -24,9 +25,11 @@ public class PostAggregation extends BaseTimeEntity {
     private AppUser user;
     private Long totalPostCount;
     private Long totalParticipationCount;
+    private Long totalCount;
 
     public void updateCounts(Long totalPostCount, Long totalParticipationCount){
         this.totalPostCount = totalPostCount;
         this.totalParticipationCount = totalParticipationCount;
+        this.totalCount = this.totalParticipationCount + this.totalPostCount;
     }
 }

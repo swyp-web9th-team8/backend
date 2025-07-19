@@ -8,7 +8,7 @@ import com.swyp.plogging.backend.post.post.domain.Post;
 import com.swyp.plogging.backend.post.post.domain.PostAggregation;
 import com.swyp.plogging.backend.post.post.repository.PostRepository;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
-import com.swyp.plogging.backend.user.user.repository.PostAggregationRepository;
+import com.swyp.plogging.backend.post.post.repository.PostAggregationRepository;
 import com.swyp.plogging.backend.user.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -97,7 +97,12 @@ public class PostScheduler {
                         aggregation.updateCounts(dto.getTotalPostCount(), dto.getTotalParticipationCount());
                     }else{
                         System.out.println("새로 생성");
-                        aggregation = new PostAggregation(user.getId(), user, dto.getTotalPostCount(), dto.getTotalParticipationCount());
+                        aggregation = new PostAggregation(
+                                user.getId(),
+                                user,
+                                dto.getTotalPostCount(),
+                                dto.getTotalParticipationCount(),
+                                dto.getTotalPostCount() + dto.getTotalParticipationCount());
                     }
                     aggregationRepository.save(aggregation);
                 }

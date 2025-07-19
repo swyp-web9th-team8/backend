@@ -9,7 +9,10 @@ import com.swyp.plogging.backend.post.post.controller.dto.CreatePostRequest;
 import com.swyp.plogging.backend.post.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.post.domain.Post;
+import com.swyp.plogging.backend.post.post.domain.PostAggregation;
+import com.swyp.plogging.backend.post.post.repository.PostAggregationRepository;
 import com.swyp.plogging.backend.post.post.repository.PostRepository;
+import com.swyp.plogging.backend.rank.controller.dto.RankingResponse;
 import com.swyp.plogging.backend.region.domain.Region;
 import com.swyp.plogging.backend.region.service.RegionService;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
@@ -38,6 +41,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final LocationService locationService;
     private final RegionService regionService;
+    private final PostAggregationRepository aggregationRepository;
     protected List<PostInfoResponse> cachedCompletedPostInfo = new ArrayList<>();
 
     public void initCachedCompletedPostInfo(){
@@ -397,5 +401,10 @@ public class PostService {
 
     public List<Post> findTop100ByRegionIdIsNull() {
         return postRepository.findTop100ByRegionIdIsNull();
+    }
+
+    public List<RankingResponse> findTop10AllTimeRankings() {
+        List<PostAggregation> top10 =  aggregationRepository.findTop10ByTotalCount();
+        return null;
     }
 }
