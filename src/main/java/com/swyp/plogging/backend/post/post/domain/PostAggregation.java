@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-//@Table(indexes = {@Index(name = "total_count", columnList = "total_count")})
+//@Table(indexes = {@Index(name = "total_count", columnList = "total_count")}) // todo 인덱스 자동생성으로는 역순으로 생성불가, 수동으로 생성 필요
 public class PostAggregation extends BaseTimeEntity {
     @Id
     private Long id;

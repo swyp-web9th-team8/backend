@@ -404,7 +404,7 @@ public class PostService {
     }
 
     public List<RankingResponse> findTop10AllTimeRankings() {
-        List<PostAggregation> top10 =  aggregationRepository.findTop10ByTotalCount();
+        List<PostAggregation> top10 =  aggregationRepository.findTop10ByOrderByTotalCountDesc();
         return null;
     }
 }
