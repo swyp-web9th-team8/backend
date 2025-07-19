@@ -201,9 +201,7 @@ public class UserService {
     }
 
     public List<RankingResponse> getAllTimeRankings() {
-        List<RankingResponse> rankingResponses = userRepository.findAllTimeRankings();
-        // todo aggregation테이블 생성시 totalcount누락으로 새로운 데이터가 생긴 후 적용 필요
-        //        List<RankingResponse> rankingResponses = postService.findTop10AllTimeRankings();
+        List<RankingResponse> rankingResponses = postService.findTop10AllTimeRankings();
         assignRanks(rankingResponses);
 
         return rankingResponses;
