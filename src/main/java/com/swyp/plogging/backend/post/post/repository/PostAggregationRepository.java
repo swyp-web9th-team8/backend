@@ -9,6 +9,5 @@ import java.util.List;
 
 @Repository
 public interface PostAggregationRepository extends JpaRepository<PostAggregation, Long> {
-    @Query("SELET pa FROM post_aggregation pa ORDER BY pa.total_count desc LIMIT 10")
-    List<PostAggregation> findTop10ByTotalCount();
+    List<PostAggregation> findTop10ByOrderByTotalCountDesc();
 }
