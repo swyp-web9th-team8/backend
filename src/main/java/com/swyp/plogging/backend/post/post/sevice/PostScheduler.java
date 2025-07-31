@@ -52,7 +52,7 @@ public class PostScheduler {
         log.info("------------> End of a scheduled task meetingCompleteProcess.");
     }
 
-    @Scheduled(cron = "0 0/5 * * * *")
+    @Scheduled(cron = "0 */5 * * * *")
     public void fillRegionOfPost(){
         List<Post> posts = postRepository.findTop100ByRegionIdIsNull();
         if(!posts.isEmpty()) {
