@@ -405,6 +405,6 @@ public class PostService {
 
     public List<RankingResponse> findTop10AllTimeRankings() {
         List<PostAggregation> top10 =  aggregationRepository.findTop10ByOrderByTotalCountDesc();
-        return null;
+        return top10.stream().map(PostAggregation::toRankingResponseDto).collect(Collectors.toList());
     }
 }

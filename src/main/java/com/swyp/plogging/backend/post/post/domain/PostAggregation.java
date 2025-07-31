@@ -1,6 +1,7 @@
 package com.swyp.plogging.backend.post.post.domain;
 
 import com.swyp.plogging.backend.common.domain.base.BaseTimeEntity;
+import com.swyp.plogging.backend.rank.controller.dto.RankingResponse;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -31,5 +32,10 @@ public class PostAggregation extends BaseTimeEntity {
         this.totalPostCount = totalPostCount;
         this.totalParticipationCount = totalParticipationCount;
         this.totalCount = this.totalParticipationCount + this.totalPostCount;
+    }
+
+    public RankingResponse toRankingResponseDto(){
+        return new RankingResponse(this.id, this.user.getNickname(),this.user.getProfileImageUrl(),
+                this.totalPostCount, this.totalParticipationCount);
     }
 }

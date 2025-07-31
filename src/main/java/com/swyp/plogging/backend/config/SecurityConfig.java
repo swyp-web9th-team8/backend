@@ -27,7 +27,7 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 @Configuration
-public class SecurityConfig {
+public class  SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
