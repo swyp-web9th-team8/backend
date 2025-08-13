@@ -37,9 +37,9 @@ spring:
       on-profile: local
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/plogging
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://localhost:5432/plggo
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     properties:
