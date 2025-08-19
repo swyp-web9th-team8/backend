@@ -280,12 +280,11 @@ public class PostService {
     }
 
     public PostDetailResponse getPostDetails(Long postId, Long userId) {
-        Post post = findById(postId);
+        Post post = postRepository.findByIdWithGraph(postId).orElseThrow();
         PostDetailResponse postDetailResponse = post.toDetailResponse();
 
         boolean isWriter = post.isWriterId(userId);
-        boolean isParticipant = post.getParticipations().stream()
-                .anyMatch(p -> p.getUser().getId().equals(userId));
+        boolean isParticipant = post.isParticipating(userId);
 
         postDetailResponse.setIIn(isWriter || isParticipant);
 

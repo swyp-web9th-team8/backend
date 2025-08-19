@@ -212,9 +212,17 @@ public class Post extends BaseEntity {
         }
         return null;
     }
+    public boolean isParticipating(Long userId) {
+        for (Participation participation : participations) {
+            if (participation.getUser().getId() != null && participation.getUser().getId().equals(userId)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public boolean isMax() {
-        return participations.size() == maxParticipants;
+        return participations.size() >= maxParticipants;
     }
 
     public boolean isWriter(AppUser user) {
