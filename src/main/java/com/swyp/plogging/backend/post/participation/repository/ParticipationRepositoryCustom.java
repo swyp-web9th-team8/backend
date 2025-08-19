@@ -9,4 +9,6 @@ public interface ParticipationRepositoryCustom {
     Page<MyPostResponse> findParticipatedPostsByUserId(Long userId, Pageable pageable);
 
     Page<MyPostResponse> findCreatedPostsByUserId(Long userId, Pageable pageable);
+
+    int countWithPostAndUser(Long postId, Long userId);
 }

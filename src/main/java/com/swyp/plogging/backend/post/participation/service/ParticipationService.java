@@ -61,12 +61,12 @@ public class ParticipationService {
         }
 
         // 남은 자리 없음
-        if (target.isMax()) {
+        if (target.isMaxUseCurParticipants()) {
             throw new NotParticipatingPostException();
         }
 
         // 이미 참가중
-        if (target.isParticipating(user) != null) {
+        if (isParticipating(postId, user.getId())) {
             throw new NotParticipatingPostException(user);
         }
 
@@ -77,6 +77,10 @@ public class ParticipationService {
         target.addParticipation(participation);
         // todo 이부분은 책임 분리 개선 필요
         postRepository.save(target);
+    }
+
+    public boolean isParticipating(Long postId, Long userId){
+        return participationRepository.countWithPostAndUser(postId, userId) > 0;
     }
 
 
