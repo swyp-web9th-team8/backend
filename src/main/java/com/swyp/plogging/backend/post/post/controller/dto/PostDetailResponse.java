@@ -1,10 +1,11 @@
 package com.swyp.plogging.backend.post.post.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,6 +25,7 @@ public class PostDetailResponse {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime deadLine;
     private List<NicknameAndImageResponse> participants;
+    private int curParticipants;
     private List<String> imageUrls;
 
     // 위치 정보 추가

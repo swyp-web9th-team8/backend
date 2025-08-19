@@ -48,69 +48,56 @@ public class ImprovedPostServiceTest {
     }
 
     @Test
-    @DisplayName("비관적락 테스트 - 1회")
-    public void test_pessimisticLockWithOneTime(){
-        log.info("비관적락 테스트 - 락 획득 테스트");
-        log.info("현재 참여자: " + post.getCurParticipants());
-        AppUser user1 = TestFactory.newUser("유저1", "유저1@gmail.com");
-        participationService.participateToPost(post.getId(), user1);
-        post = postService.findById(post.getId());
-        log.info("최종 참여자: " + post.getCurParticipants());
-    }
-
-    @Test
-    @DisplayName("100회 동시 참여 - 실패")
-    public void test_nonPessimisticLockWith20Times(TestInfo testInfo) throws InterruptedException {
+    @DisplayName("기존 테스트 - 100회")
+    public void test_pessimisticLockWithOneTime(TestInfo testInfo) throws InterruptedException {
+        log.info("=== ({}) 테스트 시작 ===", testInfo.getDisplayName());
         // given
-        log.info("=== ({}) 테스트 시작 ===",testInfo.getDisplayName());
-        long startTime = System.currentTimeMillis();
-        List<AppUser> users  = new ArrayList<>();
-        for(int i = 0; i < 100; i++){
-            users.add(TestFactory.newUser("유저" + i, "유저" +i +"@gmail.com"));
+        List<AppUser> users = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            users.add(TestFactory.newUser("유저" + i, "유저" + i + "@gmail.com"));
         }
+        long startTime = System.currentTimeMillis();
 
         // when
-        post = TestFactory.newPostWithUser(user);
         ConcurrencyUtil.executeConflictingParticipate(
                 post.getId(),
                 users,
-                users.size(),
-                (postId, user) ->  participationService.participateToPost(postId, user)
-                );
+                32,
+                (postId, user) -> participationService.participateToPost(postId, user)
+        );
         long endTime = System.currentTimeMillis();
+
         // then
-        post = postService.findById(post.getId());
         PostDetailResponse dto = postService.getPostDetails(post.getId(), user.getId());
         log.info("=== 테스트 결과 ===");
-        log.info("테스트 시간: {}ms",endTime - startTime);
-        log.info("모임의 참여자 수: {}, 실제 참여자 수: {}",post.getCurParticipants(), dto.getParticipants().size());
+        log.info("테스트 시간: {}ms", endTime - startTime);
+        log.info("현재 참여자 == 실제 참여자: {}", dto.getParticipants().size());
     }
 
     @Test
     @DisplayName("비관적락 테스트 100회 동시 참여")
-    public void test_pessimisticLockWith20Times(TestInfo testInfo) throws InterruptedException {
+    public void test_pessimisticLockWith100Times(TestInfo testInfo) throws InterruptedException {
         // given
         log.info("=== ({}) 테스트 시작 ===",testInfo.getDisplayName());
-        long startTime = System.currentTimeMillis();
         List<AppUser> users  = new ArrayList<>();
         for(int i = 0; i < 100; i++){
             users.add(TestFactory.newUser("유저" + i, "유저" +i +"@gmail.com"));
         }
         post = TestFactory.newPostWithUser(user);
+        long startTime = System.currentTimeMillis();
 
         // when
         ConcurrencyUtil.executeConflictingParticipate(
                 post.getId(),
                 users,
-                users.size(),
+                32,
                 (postId, user) ->  participationService.participateToPostWithLock(postId, user)
                 );
         long endTime = System.currentTimeMillis();
         // then
-        post = postService.findById(post.getId());
         PostDetailResponse dto = postService.getPostDetails(post.getId(), user.getId());
         log.info("=== 테스트 결과");
         log.info("테스트 시간: {}ms",endTime - startTime);
-        log.info("모임의 참여자 수: {}, 실제 참여자 수: {}",post.getCurParticipants(), dto.getParticipants().size());
+        log.info("모임의 참여자 수: {}, 실제 참여자 수: {}",dto.getCurParticipants(), dto.getParticipants().size());
     }
 }
