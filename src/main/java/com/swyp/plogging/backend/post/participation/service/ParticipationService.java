@@ -52,6 +52,38 @@ public class ParticipationService {
     }
 
     @Transactional
+    public void participateToPostWithLock(Long postId, AppUser user) {
+        Post target = postService.findById(postId);
+
+        // 작성자 제외
+        if (target.isWriter(user)) {
+            throw new NotParticipatingPostException(user);
+        }
+
+        // 남은 자리 없음
+        if (target.isMaxUseCurParticipants()) {
+            throw new NotParticipatingPostException();
+        }
+
+        // 이미 참가중
+        if (isParticipating(postId, user.getId())) {
+            throw new NotParticipatingPostException(user);
+        }
+
+        // 참여 생성 및 Post 연결
+        Participation participation = Participation.newInstance(target, user);
+        participation = participationRepository.save(participation);
+
+        target.addParticipation(participation);
+        // todo 이부분은 책임 분리 개선 필요
+        postRepository.save(target);
+    }
+
+    public boolean isParticipating(Long postId, Long userId){
+        return participationRepository.countWithPostAndUser(postId, userId) > 0;
+    }
+
+    @Transactional
     public void leaveFromPost(Long postId, AppUser user) {
         Post target = postService.findById(postId);
 
