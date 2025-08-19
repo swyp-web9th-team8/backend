@@ -66,6 +66,7 @@ public class Post extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "post")
     private List<Participation> participations = new ArrayList<>();
+    private int curParticipants;
 
     private int maxParticipants;
 
@@ -95,6 +96,7 @@ public class Post extends BaseEntity {
         response.setMeetingTime(meetingDt);
         response.setDeadLine(deadLine);
         response.setOpenChatUrl(openChatUrl);
+        response.setCurParticipants(curParticipants);
         response.setParticipants(
             participations.stream()
                 .map(participation -> new NicknameAndImageResponse(participation.getUser()))
@@ -223,6 +225,9 @@ public class Post extends BaseEntity {
 
     public boolean isMax() {
         return participations.size() >= maxParticipants;
+    }
+    public boolean isMaxUseCurParticipants() {
+        return curParticipants >= maxParticipants;
     }
 
     public boolean isWriter(AppUser user) {
