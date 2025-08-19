@@ -81,7 +81,7 @@ public class TestFactory {
                 .longitude(longitude)
                 .location(location)
                 .completed(false)
-                .maxParticipants(5)
+                .maxParticipants(50)
                 .openChatUrl("openChatUrl")
                 .build();
 

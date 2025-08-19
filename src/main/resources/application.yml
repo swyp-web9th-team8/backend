@@ -8,9 +8,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+#    properties:
+#      hibernate:
+#        format_sql: true
 
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
@@ -151,6 +151,10 @@ spring:
   config:
     activate:
       on-profile: test
+
+  jpa:
+    properties:
+      default_batch_fetch_size: 100
 
   security:
     oauth2:

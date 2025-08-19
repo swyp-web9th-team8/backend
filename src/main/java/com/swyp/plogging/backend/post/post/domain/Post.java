@@ -68,6 +68,7 @@ public class Post extends BaseEntity {
     private List<Participation> participations = new ArrayList<>();
 
     private int maxParticipants;
+    private int curParticipants;
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private Certification certification;
@@ -190,12 +191,22 @@ public class Post extends BaseEntity {
     // 나머지 메서드는 그대로 유지
     public void addParticipation(Participation participation) {
         this.participations.add(participation);
+        addParticipants();
+    }
+
+
+    public void addParticipants(){
+        curParticipants++;
+    }
+    public void subParticipants(){
+        curParticipants--;
     }
 
     public Participation leave(AppUser user) {
         Participation removed = isParticipating(user);
         if (removed != null) {
             participations.remove(removed);
+            subParticipants();
             return removed;
         }
         return null;
