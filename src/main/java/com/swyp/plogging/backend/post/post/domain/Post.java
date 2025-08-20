@@ -28,6 +28,9 @@ public class Post extends BaseEntity {
     @GeneratedValue
     private Long id;
 
+    @Version
+    private Long version;
+
     @Column(nullable = false)
     private String title;
 
@@ -262,5 +265,9 @@ public class Post extends BaseEntity {
 
     public void updateRegion(Region r) {
         this.regionId = r;
+    }
+
+    public void increaseCurParticipants() {
+        curParticipants++;
     }
 }

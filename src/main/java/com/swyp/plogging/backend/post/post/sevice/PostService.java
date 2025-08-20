@@ -406,4 +406,9 @@ public class PostService {
         List<PostAggregation> top10 =  aggregationRepository.findTop10ByOrderByTotalCountDesc();
         return top10.stream().map(PostAggregation::toRankingResponseDto).collect(Collectors.toList());
     }
+
+    @Transactional
+    public Post findByIdWithOptimisticLock(Long postId) {
+        return postRepository.findByIdWithOptimisticLock(postId).orElseThrow();
+    }
 }

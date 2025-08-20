@@ -199,6 +199,7 @@ file:
 # 로컬 로깅 설정
 logging:
   level:
+#    org.hibernate.orm.jdbc.bind: trace       # 바인드 값
     org.springframework.security: DEBUG
     org.springframework.security.oauth2: DEBUG
     com.swyp.plogging.backend: DEBUG
