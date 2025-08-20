@@ -26,4 +26,7 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     @Query("select p from Post p where p.id = :postId")
     @EntityGraph(attributePaths = {"participations", "participations.user"})
     Optional<Post> findByIdWithGraph(Long postId);
+
+    @Query("select pg_try_advisory_xact_lock(:postId)")
+    boolean getTryAdvisoryXactLock(Long postId); // 트랜잭션레벨 락, 세션 x
 }
