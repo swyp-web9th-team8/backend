@@ -5,6 +5,7 @@ import com.swyp.plogging.backend.common.TestFactory;
 import com.swyp.plogging.backend.post.participation.service.ParticipationService;
 import com.swyp.plogging.backend.post.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.post.domain.Post;
+import com.swyp.plogging.backend.post.post.sevice.PostNamedLockFacade;
 import com.swyp.plogging.backend.post.post.sevice.PostService;
 import com.swyp.plogging.backend.region.service.RegionService;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
@@ -33,6 +34,8 @@ public class ImprovedPostServiceTest {
     private PostService postService;
     @Autowired
     private RegionService regionService;
+    @Autowired
+    private PostNamedLockFacade postNamedLockFacade;
 
     private static AppUser user;
     private static Post post;
@@ -72,5 +75,38 @@ public class ImprovedPostServiceTest {
         log.info("=== 테스트 결과 ===");
         log.info("테스트 시간: {}ms", endTime - startTime);
         log.info("현재 참여자 == 실제 참여자: {}",dto.getParticipants().size());
+    }
+
+    @Test
+    @DisplayName("네임드락 테스트 - 100회")
+    public void test_namedLockWith100Times(TestInfo testInfo) throws InterruptedException {
+        log.info("=== ({}) 테스트 시작 ===", testInfo.getDisplayName());
+        // given
+        List<AppUser> users = new ArrayList<>();
+        for(int i = 0; i < 100; i++){
+            users.add(TestFactory.newUser("유저"+i,"유저"+i+"@gmail.com"));
+        }
+        long startTime = System.currentTimeMillis();
+
+        // when
+        ConcurrencyUtil.executeConflictingParticipate(
+                post.getId(),
+                users,
+                32,
+                (postId, user) -> {
+                    try {
+                        postNamedLockFacade.participateWithNamedLock(postId, user);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        );
+        long endTime = System.currentTimeMillis();
+
+        // then
+        PostDetailResponse dto = postService.getPostDetails(post.getId(), user.getId());
+        log.info("=== 테스트 결과 ===");
+        log.info("테스트 시간: {}ms", endTime - startTime);
+        log.info("현재 참여자: {}, 실제 참여자: {}",dto.getCurParticipants(), dto.getParticipants().size());
     }
 }
