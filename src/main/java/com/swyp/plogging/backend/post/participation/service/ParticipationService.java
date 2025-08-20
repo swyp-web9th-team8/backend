@@ -47,6 +47,7 @@ public class ParticipationService {
         participation = participationRepository.save(participation);
 
         target.addParticipation(participation);
+        target.increaseCurParticipants();
         // todo 이부분은 책임 분리 개선 필요
         postRepository.save(target);
     }
@@ -69,6 +70,9 @@ public class ParticipationService {
         if (isParticipating(postId, user.getId())) {
             throw new NotParticipatingPostException(user);
         }
+
+        target.increaseCurParticipants();
+        postRepository.saveAndFlush(target);
 
         // 참여 생성 및 Post 연결
         Participation participation = Participation.newInstance(target, user);

@@ -193,6 +193,9 @@ public class Post extends BaseEntity {
     public void addParticipation(Participation participation) {
         this.participations.add(participation);
     }
+    public void increaseCurParticipants(){
+        curParticipants++;
+    }
 
     public Participation leave(AppUser user) {
         Participation removed = isParticipating(user);
