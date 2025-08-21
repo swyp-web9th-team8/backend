@@ -6,10 +6,12 @@ import com.swyp.plogging.backend.post.post.repository.PostRepository;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
+@Profile("!redis")
 @Service
 @RequiredArgsConstructor
 public class PostNamedLockFacade {

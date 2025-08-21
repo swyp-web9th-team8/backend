@@ -5,8 +5,8 @@ import com.swyp.plogging.backend.common.TestFactory;
 import com.swyp.plogging.backend.post.participation.service.ParticipationService;
 import com.swyp.plogging.backend.post.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.post.domain.Post;
-import com.swyp.plogging.backend.post.post.sevice.PostNamedLockFacade;
 import com.swyp.plogging.backend.post.post.sevice.PostService;
+import com.swyp.plogging.backend.post.post.sevice.PostWithRedisNamedLockFacade;
 import com.swyp.plogging.backend.region.service.RegionService;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ import java.util.List;
 
 @Slf4j
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "redis"})
 @Sql(scripts = "/sql/insert_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 public class ImprovedPostServiceTest {
 
@@ -35,7 +35,7 @@ public class ImprovedPostServiceTest {
     @Autowired
     private RegionService regionService;
     @Autowired
-    private PostNamedLockFacade postNamedLockFacade;
+    private PostWithRedisNamedLockFacade postNamedLockFacade;
 
     private static AppUser user;
     private static Post post;
@@ -94,11 +94,7 @@ public class ImprovedPostServiceTest {
                 users,
                 32,
                 (postId, user) -> {
-                    try {
-                        postNamedLockFacade.participateWithNamedLock(postId, user);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+                    postNamedLockFacade.participateWithNamedLock(postId, user);
                 }
         );
         long endTime = System.currentTimeMillis();
