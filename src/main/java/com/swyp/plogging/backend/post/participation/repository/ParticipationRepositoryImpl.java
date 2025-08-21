@@ -69,6 +69,20 @@ public class ParticipationRepositoryImpl implements ParticipationRepositoryCusto
         return new PageImpl<>(content, pageable, total);
     }
 
+    @Override
+    public int countWithPostAndUser(Long postId, Long userId){
+        QParticipation participation = QParticipation.participation;
+
+        BooleanExpression isParticipated = participation.user.id.eq(userId)
+                .and(participation.post.id.eq(postId));
+
+        return queryFactory
+                .select(participation.count())
+                .from(participation)
+                .where(isParticipated)
+                .fetchOne().intValue();
+    }
+
     private long countPostsByUserId(QPost post, BooleanExpression isCreatedByUser) {
         Long total = queryFactory
             .select(post.count())

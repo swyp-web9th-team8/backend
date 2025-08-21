@@ -8,9 +8,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+#    properties:
+#      hibernate:
+#        format_sql: true
 
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
@@ -37,9 +37,9 @@ spring:
       on-profile: local
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/plogging
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://localhost:5432/plggo
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     properties:
@@ -151,6 +151,9 @@ spring:
   config:
     activate:
       on-profile: test
+  jpa:
+    properties:
+      default_batch_fetch_size: 100
 
   security:
     oauth2:
