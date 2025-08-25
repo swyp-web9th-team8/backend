@@ -85,7 +85,7 @@ jobs:
           
           RDS_HOST=$(echo "${{ secrets.RDS_ENDPOINT }}" | cut -d':' -f1)
           RDS_PORT=$(echo "${{ secrets.RDS_ENDPOINT }}" | cut -d':' -f2)
-          PGPASSWORD=${{ secrets.RDS_PASSWORD }}
+          export PGPASSWORD=${{ secrets.RDS_PASSWORD }}
 
           psql \
             -h $RDS_HOST \
