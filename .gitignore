@@ -154,3 +154,13 @@ gradlew.bat
 
 # 기타
 .DS_Store
+
+# terraform
+.terraform
+.terraform.lock.hcl
+terraform.**
+variables.tf
+portfolio-key
+portfolio-key.pem
+portfolio-key.pub
+environment
