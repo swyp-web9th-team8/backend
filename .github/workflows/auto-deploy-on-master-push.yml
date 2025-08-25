@@ -87,6 +87,6 @@ jobs:
 
           psql \
             -h ${{ secrets.RDS_ENDPOINT }} \
-            -U ${{ secrets.RDS_USERNAME }} \
-            -d ${{ secrets.RDS_DB_NAME }} \
+            -U portfolio_user \
+            -d portfolio \
             -c "CREATE EXTENSION IF NOT EXISTS postgis;"
