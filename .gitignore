@@ -164,3 +164,8 @@ portfolio-key
 portfolio-key.pem
 portfolio-key.pub
 environment
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+.env
