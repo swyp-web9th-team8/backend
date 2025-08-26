@@ -67,7 +67,7 @@ jobs:
             }
           }
           JSON
-    
+
           sed -i '' "s|__IMAGE_URI__|$IMAGE_URI|g" ssm.json
           sed -i '' "s|__RDS_HOST__|${{ secrets.RDS_ENDPOINT }}|g" ssm.json
           sed -i '' "s|__RDS_PASSWORD__|${{ secrets.RDS_PASSWORD }}|g" ssm.json
