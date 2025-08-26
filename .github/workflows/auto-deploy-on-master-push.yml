@@ -61,7 +61,7 @@ jobs:
             "Parameters": {
               "commands": [
                 "echo '__ENV_B64__' | base64 -d | sudo tee /etc/environment > /dev/null",
-                "echo 'DB_URL=jdbc:postgresql://__RDS_HOST__/portfolio?useSSL=false\&serverTimezone=Asia/Seoul\&allowPublicKeyRetrieval=true' | sudo tee -a /etc/environment > /dev/null",
+                "echo 'DB_URL=jdbc:postgresql://__RDS_HOST__/portfolio?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true' | sudo tee -a /etc/environment > /dev/null",
                 "echo 'DB_PASSWORD=__RDS_PASSWORD__' | sudo tee -a /etc/environment > /dev/null",
                 "docker stop portfolio-app || true",
                 "docker rm portfolio-app || true",
@@ -73,12 +73,12 @@ jobs:
           }
           JSON
     
-          sed -i "s|__ENV_B64__|$ENV_B64|g" ssm.json
-          sed -i "s|__IMAGE_URI__|$IMAGE_URI|g" ssm.json
-          sed -i "s|__RDS_HOST__|${{ secrets.RDS_ENDPOINT }}|g" ssm.json
-          sed -i "s|__RDS_PASSWORD__|${{ secrets.RDS_PASSWORD }}|g" ssm.json
-          sed -i "s|__ECR_REGISTRY__|$REGISTRY|g" ssm.json
-          sed -i "s|__INSTANCE_ID__|${{ secrets.EC2_INSTANCE_ID }}|g" ssm.json
+          sed -i '' "s|__ENV_B64__|$ENV_B64|g" ssm.json
+          sed -i '' "s|__IMAGE_URI__|$IMAGE_URI|g" ssm.json
+          sed -i '' "s|__RDS_HOST__|${{ secrets.RDS_ENDPOINT }}|g" ssm.json
+          sed -i '' "s|__RDS_PASSWORD__|${{ secrets.RDS_PASSWORD }}|g" ssm.json
+          sed -i '' "s|__ECR_REGISTRY__|$REGISTRY|g" ssm.json
+          sed -i '' "s|__INSTANCE_ID__|${{ secrets.EC2_INSTANCE_ID }}|g" ssm.json
           
           cat ssm.json | jq .
           
