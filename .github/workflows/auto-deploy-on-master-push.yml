@@ -60,9 +60,9 @@ jobs:
             "DocumentName": "AWS-RunShellScript",
             "Parameters": {
               "commands": [
-                "bash -lc 'echo \"__ENV_B64__\" | base64 -d | sudo tee /etc/environment > /dev/null'",
-                "bash -lc 'echo \"DB_URL=jdbc:postgresql://__RDS_HOST__/portfolio?useSSL=false\\&serverTimezone=Asia/Seoul\\&allowPublicKeyRetrieval=true\" | sudo tee -a /etc/environment > /dev/null'",
-                "bash -lc 'echo \"DB_PASSWORD=__RDS_PASSWORD__\" | sudo tee -a /etc/environment > /dev/null'",
+                "bash -lc 'echo "__ENV_B64__" | base64 -d | sudo tee /etc/environment > /dev/null'",
+                "bash -lc 'echo "DB_URL=jdbc:postgresql://__RDS_HOST__/portfolio?useSSL=false\\&serverTimezone=Asia/Seoul\\&allowPublicKeyRetrieval=true" | sudo tee -a /etc/environment > /dev/null'",
+                "bash -lc 'echo "DB_PASSWORD=__RDS_PASSWORD__" | sudo tee -a /etc/environment > /dev/null'",
                 "docker stop portfolio-app || true",
                 "docker rm portfolio-app || true",
                 "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin __ECR_REGISTRY__",
