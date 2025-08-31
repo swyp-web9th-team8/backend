@@ -154,6 +154,8 @@ gradlew.bat
 
 # 기타
 .DS_Store
+docker-compose.yml
+nginx.conf
 
 # terraform
 .terraform

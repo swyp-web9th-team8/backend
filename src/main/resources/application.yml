@@ -23,11 +23,27 @@ spring:
       max-file-size: 5MB
       max-request-size: 25MB
 
+# 서버 설정
+server:
+  tomcat:
+    connection-timeout: 5000
+
 # 공통 로깅 설정
 logging:
   level:
     root: INFO
     com.swyp.plogging.backend: INFO
+
+management:
+  server:
+    port: 9080
+  endpoints:
+    web:
+      exposure:
+        include: "health,metrics,info,prometheus"
+  endpoint:
+    health:
+      show-details: always  # 상세한 헬스 정보 표시
 
 ---
 # 로컬 환경 설정
@@ -37,7 +53,7 @@ spring:
       on-profile: local
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/plggo
+    url: jdbc:postgresql://postgis-container:5432/plggo?allowPublicKeyRetrieval=true&useSSL=false&rewriteBatchedStatements=true
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -99,6 +115,8 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 4500
 
   security:
     oauth2:

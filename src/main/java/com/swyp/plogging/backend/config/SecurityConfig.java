@@ -62,6 +62,8 @@ public class  SecurityConfig {
                                 .requestMatchers("/api/**").permitAll()
                                 // OAuth 관련 경로 허용
                                 .requestMatchers("/oauth2/**", "/login/**", "/api/auth/**").permitAll()
+                                // actuator
+                                .requestMatchers("/actuator/**").permitAll()
                                 // 나머지 요청은 인증 필요 (개발 완료 후 활성화)
                                 //.anyRequest().authenticated()
                                 .anyRequest().permitAll()

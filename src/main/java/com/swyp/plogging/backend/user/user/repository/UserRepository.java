@@ -10,4 +10,6 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<AppUser, Long>, UserRepositoryCustom {
 
     List<AppUser> findTop100ByIdIsGreaterThanEqualOrderById(Long id);
+
+    List<AppUser> findDistinctByRegionContaining(String neighborhood);
 }

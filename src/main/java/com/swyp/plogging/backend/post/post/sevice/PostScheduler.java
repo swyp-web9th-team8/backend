@@ -35,7 +35,7 @@ public class PostScheduler {
     private final UserService userService;
     private final ApplicationEventPublisher eventPublisher;
 
-    @Scheduled(cron = "0 */10 * * * *")
+//    @Scheduled(cron = "0 */10 * * * *")
     public void meetingCompleteProcess() {
         log.info("------------> Start of a scheduled task - meetingCompleteProcess.");
         List<Post> targetPosts = postRepository.findAllByMeetingDtBeforeAndCompletedFalse(LocalDateTime.now());
@@ -45,7 +45,7 @@ public class PostScheduler {
             event.setStrategy(NotiStrategy.FCM);
             event.setType(NotiType.REVIEW);
             event.setPostId(post.getId());
-            event.setUser(post.getWriter());
+            event.setReceiver(post.getWriter());
             log.info("-----{}에게 독촉 알림 보내기", post.getWriter().getNickname());
             eventPublisher.publishEvent(event);
         });

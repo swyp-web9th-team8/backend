@@ -294,4 +294,8 @@ public class UserService {
     public List<AppUser> findTop100ByIdIsGreaterThanEqualOrderById(Long id) {
         return userRepository.findTop100ByIdIsGreaterThanEqualOrderById(id);
     }
+
+    public List<AppUser> findAllByNeighborhood(String neighborhood) {
+        return userRepository.findDistinctByRegionContaining(neighborhood);
+    }
 }
