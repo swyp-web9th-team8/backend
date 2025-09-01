@@ -5,13 +5,17 @@ import com.swyp.plogging.backend.notification.event.NotificationEvent;
 import com.swyp.plogging.backend.notification.repository.AppNotificationRepository;
 import com.swyp.plogging.backend.post.post.domain.Post;
 import com.swyp.plogging.backend.post.post.sevice.PostService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class FCMPushNotificationService extends NotificationService{
     private final AppNotificationRepository repository;
-    private final PostService postService;
+    @Autowired
+    @Lazy
+    private PostService postService;
 
     FCMPushNotificationService(Sender FCMSender, AppNotificationRepository appNotificationRepository, PostService postService){
         super(FCMSender);
@@ -22,7 +26,7 @@ public class FCMPushNotificationService extends NotificationService{
     @Transactional
     public AppNotification newNotification(NotificationEvent event){
         Post post = postService.findById(event.getPostId());
-        AppNotification noti = AppNotification.newInstance(event.getType(),event.getUser(), post);
+        AppNotification noti = AppNotification.newInstance(event.getType(),event.getReceiver(), post);
         return repository.save(noti);
     }
 

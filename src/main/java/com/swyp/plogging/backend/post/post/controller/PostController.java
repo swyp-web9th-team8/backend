@@ -49,7 +49,7 @@ public class PostController {
         summary = "모임을 생성하기 위한 API",
         description = "모임 생성을 위한 API. 인증이 필요함."
     )
-    @PostMapping("create")
+    @PostMapping("/create")
     public ApiResponse<PostDetailResponse> createPost(@RequestBody CreatePostRequest request,
                                                       @AuthenticationPrincipal OAuth2User user) {
         // 회원 확인용

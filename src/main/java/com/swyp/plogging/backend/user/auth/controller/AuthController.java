@@ -1,12 +1,13 @@
 package com.swyp.plogging.backend.user.auth.controller;
 
+import com.swyp.plogging.backend.common.util.SecurityUtils;
+import com.swyp.plogging.backend.post.post.repository.RegionRepository;
+import com.swyp.plogging.backend.region.domain.Region;
 import com.swyp.plogging.backend.user.auth.controller.dto.*;
 import com.swyp.plogging.backend.user.auth.domain.CustomOAuth2User;
 import com.swyp.plogging.backend.user.auth.service.AuthService;
-import com.swyp.plogging.backend.common.util.SecurityUtils;
-import com.swyp.plogging.backend.region.domain.Region;
-import com.swyp.plogging.backend.post.post.repository.RegionRepository;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
+import com.swyp.plogging.backend.user.user.domain.AuthProvider;
 import com.swyp.plogging.backend.user.user.domain.UserRegion;
 import com.swyp.plogging.backend.user.user.repository.AppUserRepository;
 import com.swyp.plogging.backend.user.user.repository.UserRegionRepository;
@@ -28,8 +29,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -380,6 +388,22 @@ public class AuthController {
             return ResponseEntity.badRequest().body("fail to withdraw account");
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/__dummy")
+    public ResponseEntity<?> testLogin(String email,HttpServletRequest request, HttpServletResponse response){
+        try {
+            AppUser user = appUserRepository.findByEmail(email).orElseThrow();
+            Map<String, Object> attr = Map.<String, Object>of("email", email);
+            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+            Authentication auth = new OAuth2AuthenticationToken(new CustomOAuth2User(user, attr), authorities, AuthProvider.GOOGLE.toString());
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(auth);
+            new HttpSessionSecurityContextRepository().saveContext(context, request, response);
+            return ResponseEntity.ok().body(String.format("%s로 로그인", email));
+        }catch(Exception e){
+            return ResponseEntity.badRequest().body("fail");
         }
     }
 }

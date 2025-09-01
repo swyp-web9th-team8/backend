@@ -5,6 +5,10 @@ import com.swyp.plogging.backend.common.exception.UnauthorizedUserException;
 import com.swyp.plogging.backend.common.service.LocationService;
 import com.swyp.plogging.backend.common.util.RoadAddressUtil;
 import com.swyp.plogging.backend.common.util.dto.Address;
+import com.swyp.plogging.backend.notification.event.NotiType;
+import com.swyp.plogging.backend.notification.event.NotificationEvent;
+import com.swyp.plogging.backend.notification.service.NotificationService;
+import com.swyp.plogging.backend.notification.strategy.NotiStrategy;
 import com.swyp.plogging.backend.post.post.controller.dto.CreatePostRequest;
 import com.swyp.plogging.backend.post.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.post.controller.dto.PostInfoResponse;
@@ -16,12 +20,15 @@ import com.swyp.plogging.backend.rank.controller.dto.RankingResponse;
 import com.swyp.plogging.backend.region.domain.Region;
 import com.swyp.plogging.backend.region.service.RegionService;
 import com.swyp.plogging.backend.user.user.domain.AppUser;
+import com.swyp.plogging.backend.user.user.service.UserService;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +49,13 @@ public class PostService {
     private final LocationService locationService;
     private final RegionService regionService;
     private final PostAggregationRepository aggregationRepository;
+    @Autowired
+    @Lazy
+    private NotificationService notificationService;
+    @Autowired
+    @Lazy
+    private UserService userService;
+
     protected List<PostInfoResponse> cachedCompletedPostInfo = new ArrayList<>();
 
     public void initCachedCompletedPostInfo(){
@@ -108,8 +122,12 @@ public class PostService {
 
         // null일 경우 30분전 세팅
         post.setUpDeadLine(deadLine);
+        post.updateRegion(region);
         post = postRepository.save(post);
-
+        List<AppUser> receivers = userService.findAllByNeighborhood(region.getNeighborhood());
+        for(AppUser receiver : receivers) {
+            notificationService.notify(new NotificationEvent(NotiStrategy.FCM, NotiType.CREATE,receiver,post.getId()));
+        }
 
         return post.toDetailResponse();
     }

@@ -20,9 +20,8 @@ public class FCMSender implements Sender{
     @Override
     @Transactional
     public void send(AppNotification notification) {
-        String token = notification.getUser().getFcmToken();
-
         try {
+            String token = notification.getUser().getFcmToken();
             Message message = Message.builder()
                     .setToken(token)
                     .setNotification(Notification.builder()
@@ -36,7 +35,7 @@ public class FCMSender implements Sender{
             notification.sentNow();
         }catch (FirebaseMessagingException fe){
             log.debug("FCM 알림 보내기 실패");
-            throw new RuntimeException(fe.getMessage());
+//            throw new RuntimeException(fe.getMessage());
         }
     }
 }

@@ -1,10 +1,9 @@
 package com.swyp.plogging.backend.user.user.domain;
 
-import com.swyp.plogging.backend.common.exception.UserFCMTokenNotFoundException;
-import com.swyp.plogging.backend.region.domain.Region;
 import com.swyp.plogging.backend.common.domain.base.BaseEntity;
 import com.swyp.plogging.backend.post.participation.domain.Participation;
 import com.swyp.plogging.backend.post.post.domain.Post;
+import com.swyp.plogging.backend.region.domain.Region;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -235,7 +234,8 @@ public class AppUser extends BaseEntity {
 
     public String getFcmToken(){
         if(this.fcmToken == null || this.fcmToken.isBlank()){
-            throw new UserFCMTokenNotFoundException();
+//            throw new UserFCMTokenNotFoundException();
+            return "this is dummy";
         }
         return this.fcmToken;
     }
