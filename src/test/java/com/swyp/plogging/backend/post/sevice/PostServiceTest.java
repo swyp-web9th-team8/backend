@@ -1,7 +1,7 @@
 package com.swyp.plogging.backend.post.sevice;
 
 
-import com.swyp.plogging.backend.common.service.LocationService;
+import com.swyp.plogging.backend.region.service.LocationService;
 import com.swyp.plogging.backend.common.util.RoadAddressUtil;
 import com.swyp.plogging.backend.post.post.sevice.PostService;
 import com.swyp.plogging.backend.region.domain.Region;

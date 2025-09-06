@@ -6,7 +6,7 @@ import com.swyp.plogging.backend.notification.event.NotificationEvent;
 public abstract class NotificationService {
     protected Sender sender;
 
-    NotificationService(Sender sender){
+    protected NotificationService(Sender sender){
         this.sender = sender;
     }
 
