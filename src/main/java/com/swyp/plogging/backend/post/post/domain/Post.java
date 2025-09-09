@@ -266,4 +266,10 @@ public class Post extends BaseEntity {
     public void updateRegion(Region r) {
         this.regionId = r;
     }
+
+    public void updatePoint(Double latitude, Double longitude, Point point) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.location = point;
+    }
 }

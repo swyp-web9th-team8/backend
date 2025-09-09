@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-@Profile("redis")
+@Profile("redisTest")
 @Service
 @RequiredArgsConstructor
 public class PostWithRedisNamedLockFacade {

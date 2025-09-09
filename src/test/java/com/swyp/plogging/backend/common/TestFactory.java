@@ -1,6 +1,6 @@
 package com.swyp.plogging.backend.common;
 
-import com.swyp.plogging.backend.common.service.LocationService;
+import com.swyp.plogging.backend.region.service.LocationService;
 import com.swyp.plogging.backend.post.post.domain.Post;
 import com.swyp.plogging.backend.post.post.repository.PostRepository;
 import com.swyp.plogging.backend.region.domain.Region;
@@ -45,6 +45,16 @@ public class TestFactory {
         // 새 사용자 생성 - 처음에는 등록되지 않은 상태로 생성
         // AppUser.newInstance 메서드는 이미 registered=false로 설정함
         AppUser user = AppUser.newInstanceWithRegion(email, nickname, region, AuthProvider.GOOGLE, "/images/basic.png");
+        // 성별 정보 설정
+        user.setGender("Female");
+        user.completeRegistration();
+        return userRepository.save(user);
+    }
+
+    public static AppUser newUserAdd(String nickname, String email){
+        // 새 사용자 생성 - 처음에는 등록되지 않은 상태로 생성
+        // AppUser.newInstance 메서드는 이미 registered=false로 설정함
+        AppUser user = AppUser.newInstance(email, nickname, "서울시 강남구 역삼동", AuthProvider.GOOGLE, "/images/basic.png");
         // 성별 정보 설정
         user.setGender("Female");
         user.completeRegistration();

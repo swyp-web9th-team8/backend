@@ -1,4 +1,4 @@
-package com.swyp.plogging.backend.common.service;
+package com.swyp.plogging.backend.region.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;

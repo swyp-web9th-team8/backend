@@ -1,7 +1,7 @@
 package com.swyp.plogging.backend.region.controller;
 
 import com.swyp.plogging.backend.common.dto.ApiResponse;
-import com.swyp.plogging.backend.common.service.LocationService;
+import com.swyp.plogging.backend.region.service.LocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;

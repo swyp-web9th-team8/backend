@@ -2,7 +2,7 @@ package com.swyp.plogging.backend.post.post.sevice;
 
 import com.swyp.plogging.backend.common.exception.PostNotFoundException;
 import com.swyp.plogging.backend.common.exception.UnauthorizedUserException;
-import com.swyp.plogging.backend.common.service.LocationService;
+import com.swyp.plogging.backend.region.service.LocationService;
 import com.swyp.plogging.backend.common.util.RoadAddressUtil;
 import com.swyp.plogging.backend.common.util.dto.Address;
 import com.swyp.plogging.backend.notification.event.NotiType;
@@ -14,6 +14,8 @@ import com.swyp.plogging.backend.post.post.controller.dto.PostDetailResponse;
 import com.swyp.plogging.backend.post.post.controller.dto.PostInfoResponse;
 import com.swyp.plogging.backend.post.post.domain.Post;
 import com.swyp.plogging.backend.post.post.domain.PostAggregation;
+import com.swyp.plogging.backend.post.post.event.PostEvent;
+import com.swyp.plogging.backend.post.post.event.PostEventType;
 import com.swyp.plogging.backend.post.post.repository.PostAggregationRepository;
 import com.swyp.plogging.backend.post.post.repository.PostRepository;
 import com.swyp.plogging.backend.rank.controller.dto.RankingResponse;
@@ -28,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -49,6 +52,8 @@ public class PostService {
     private final LocationService locationService;
     private final RegionService regionService;
     private final PostAggregationRepository aggregationRepository;
+    private final ApplicationEventPublisher eventPublisher;
+
     @Autowired
     @Lazy
     private NotificationService notificationService;
@@ -71,16 +76,16 @@ public class PostService {
                                          LocalDateTime meetingTime, String placeId,
                                          String placeName, String address,
                                          @NonNull Integer maxParticipants, String openChatUrl,
-                                         @Nullable Integer deadLine) {
+                                         @Nullable Integer deadLine){
 
         if (maxParticipants <= 0) {
             throw new IllegalArgumentException("최대인원 설정이 잘못되었습니다.");
         }
 
-        if (!RoadAddressUtil.isRoadAddress(address)) {
+        Address a1 = RoadAddressUtil.getAddressObject(address);
+        if (!a1.isRoadAddress()) {
             throw new IllegalArgumentException("'OO구 OO대로(또는 '로' 또는 '길') 0' 형식으로 API 요청바랍니다.");
         }
-        Address a1 = RoadAddressUtil.getAddressObject(address);
 
         // 네이버 지도에서 도로명 주소로 위치를 검색 후 위도경도 입력
         // 검색한 결과중 첫번째 선택
@@ -131,6 +136,69 @@ public class PostService {
 
         return post.toDetailResponse();
     }
+
+    @Transactional
+    public PostDetailResponse improvedCreatePost(AppUser user, String title, String content,
+                                         LocalDateTime meetingTime, String placeId,
+                                         String placeName, String address,
+                                         @NonNull Integer maxParticipants, String openChatUrl,
+                                         @Nullable Integer deadLine){
+
+        if (maxParticipants <= 0) {
+            throw new IllegalArgumentException("최대인원 설정이 잘못되었습니다.");
+        }
+
+        Address a1 = RoadAddressUtil.getAddressObject(address);
+        if (!a1.isRoadAddress()) {
+            throw new IllegalArgumentException("'OO구 OO대로(또는 '로' 또는 '길') 0' 형식으로 API 요청바랍니다.");
+        }
+//        Address a1 = RoadAddressUtil.getAddressObject(address);
+
+        // 외부 API 이벤트로 비동기 처리
+        // 네이버 지도에서 도로명 주소로 위치를 검색 후 위도경도 입력
+        // 검색한 결과중 첫번째 선택
+//        List<Map<String, Object>> list = locationService.searchCoordinatesByAddress(a1.getFullName());
+//        Map<String, Object> location = list.stream().filter(
+//                        map -> {
+//                            Address a2 = RoadAddressUtil.getAddressObject((CharSequence) map.get("roadAddress"));
+//                            // 새로 받아온 데이터가 적절한지 도로명 주소로 비교
+//                            return RoadAddressUtil.compareRoadAddress(a1, a2);
+//                        })
+//                .findFirst()
+//                .orElseThrow(() -> new RuntimeException("찾는 주소가 없습니다."));
+//
+//        // 위경도 추출
+//        Double latitude = (Double) location.get("latitude");
+//        Double longitude = (Double) location.get("longitude");
+//        // 포인트 생성
+//        Point point = locationService.createPoint(longitude, latitude);
+//        if (point == null) {
+//            throw new RuntimeException("해당 주소의 지점을 생성할 수 없습니다.");
+//        }
+//        Region region = regionService.getContainedRegion(point);
+
+        Post post = Post.builder()
+                .writer(user)
+                .title(title)
+                .content(content)
+                .meetingDt(meetingTime)
+                .placeId(placeId)
+                .placeName(placeName)
+                .address(address)
+                .completed(false)
+                .maxParticipants(maxParticipants)
+                .openChatUrl(openChatUrl)
+                .build();
+
+        // null일 경우 30분전 세팅
+        post.setUpDeadLine(deadLine);
+        post = postRepository.save(post);
+
+        eventPublisher.publishEvent(new PostEvent(post, PostEventType.CREATE));
+
+        return post.toDetailResponse();
+    }
+
 
     /**
      * 위치 정보를 포함한 모임 생성 메서드

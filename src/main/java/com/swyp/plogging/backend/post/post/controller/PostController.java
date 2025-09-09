@@ -76,6 +76,36 @@ public class PostController {
     }
 
     @Operation(
+            summary = "모임을 생성하기 위한 API",
+            description = "모임 생성을 위한 API. 인증이 필요함."
+    )
+    @PostMapping("/impCreate")
+    public ApiResponse<PostDetailResponse> improvedCreatePost(@RequestBody CreatePostRequest request,
+                                                      @AuthenticationPrincipal OAuth2User user) {
+        // 회원 확인용
+        SecurityUtils.getUserOrThrow(user);
+
+        try {
+            // 위치 정보가 있는 경우, 새로운 메서드로 호출
+            if (request.getLatitude() != null && request.getLongitude() != null) {
+                PostDetailResponse response = postService.createPost(request, SecurityUtils.getUserOrThrow(user));
+                return ApiResponse.ok(response, "Successfully created the post with location.");
+            } else {
+                // 기존 로직 유지
+                PostDetailResponse response = postService.improvedCreatePost(SecurityUtils.getUserOrThrow(user), request.getTitle(),
+                        request.getContent(),
+                        request.getMeetingTime(), request.getPlaceId(),
+                        request.getPlaceName(), request.getAddress(),
+                        request.getMaxParticipants(), request.getOpenChatUrl(), request.getDeadline());
+
+                return ApiResponse.ok(response, "Successfully fetched the post details.");
+            }
+        } catch (Exception e) {
+            return ApiResponse.error(e.getMessage());
+        }
+    }
+
+    @Operation(
         summary = "모임을 수정하기 위한 API",
         description = "모임 수정을 위한 API. 인증이 필요함."
     )
