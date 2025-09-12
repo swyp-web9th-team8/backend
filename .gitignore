@@ -156,6 +156,7 @@ gradlew.bat
 .DS_Store
 docker-compose.yml
 nginx.conf
+default.conf
 
 # terraform
 .terraform
@@ -171,3 +172,5 @@ environment
 *.tfstate.*
 terraform.tfvars
 .env
+/.apt_generated/
+/.apt_generated_tests/
